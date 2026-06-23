@@ -691,6 +691,368 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   40%     { border-color: #60dd40; box-shadow: 0 0 30px rgba(96,220,64,0.5); }
 }
 .prac-card.shot { animation: pracClearFlash 0.45s ease-out; }
+
+/* ════════════════════════════
+   PHASE 6: WPM・統計ダッシュボード
+════════════════════════════ */
+
+/* WPM リアルタイム表示 */
+#wpm-display {
+  position: absolute;
+  bottom: 28%;
+  right: 200px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--smoke);
+  z-index: 50;
+  text-shadow: 0 1px 3px #000;
+  transition: color 0.4s;
+  white-space: nowrap;
+}
+#wpm-display.wpm-fast  { color: #60dd40; }
+#wpm-display.wpm-mid   { color: var(--gold); }
+#wpm-display.wpm-slow  { color: var(--smoke); }
+
+/* 統計ダッシュボード画面 */
+#screen-stats {
+  background: rgba(8,4,1,0.97);
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #5a3a10 #0d0600;
+}
+#stats-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: rgba(0,0,0,0.6);
+  border-bottom: 1px solid #3a2008;
+  flex-shrink: 0;
+}
+#stats-header-title {
+  font-family: 'Rye', serif;
+  font-size: 1.2rem;
+  color: var(--gold);
+  letter-spacing: 3px;
+}
+#stats-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* サマリーカード群 */
+#stats-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.stat-card {
+  background: #160a02;
+  border: 1.5px solid #3a2008;
+  border-radius: 8px;
+  padding: 14px 12px;
+  text-align: center;
+}
+.stat-card-val {
+  font-family: 'Rye', serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-card-label {
+  font-size: 0.65rem;
+  color: var(--smoke);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* スコア履歴グラフ */
+#stats-graph-wrap {
+  background: #100800;
+  border: 1.5px solid #3a2008;
+  border-radius: 8px;
+  padding: 14px;
+}
+#stats-graph-title {
+  font-family: 'Rye', serif;
+  font-size: 0.85rem;
+  color: var(--gold);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+#stats-canvas {
+  width: 100%;
+  height: 140px;
+  display: block;
+}
+
+/* ベストスコアハイライト */
+#stats-best-wrap {
+  background: #160a02;
+  border: 1.5px solid #5a3a10;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+#stats-best-title {
+  font-family: 'Rye', serif;
+  font-size: 0.85rem;
+  color: var(--gold);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.stats-best-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(90,58,16,0.3);
+  font-size: 0.78rem;
+  color: #c0a070;
+}
+.stats-best-row:last-child { border-bottom: none; }
+.stats-best-val { color: var(--gold); font-weight: 700; font-family: 'Courier Prime', monospace; }
+
+/* タイトルに統計ボタン追加 */
+#btn-stats {
+  font-size: 0.82rem;
+  padding: 9px 16px;
+}
+/* ════ PHASE 6 ここまで ════ */
+
+/* ENDLESSモード: タイム表示を金色に */
+#time-display.endless-time {
+  color: var(--gold);
+  font-size: 1.2rem;
+  text-shadow: 0 0 8px rgba(212,162,39,0.6);
+}
+/* ランキングヘッダー: ENDLESS用 */
+.rk-score-time { flex: 0 0 60px; font-weight:700; font-size:0.82rem; text-align:center; }
+
+/* ════════════════════════════
+   PHASE 8: タイムアタック・中断
+════════════════════════════ */
+
+/* 中断ボタン（全モード共通・HUD右下） */
+#btn-quit-game {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  z-index: 350;
+  font-family: 'Rye', serif;
+  font-size: 0.68rem;
+  color: rgba(160,128,96,0.6);
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(90,58,16,0.5);
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  display: none;
+}
+#btn-quit-game:hover { color: var(--sand); border-color: var(--sand); background: rgba(0,0,0,0.7); }
+#btn-quit-game.visible { display: block; }
+
+/* 確認ダイアログ */
+#quit-dialog {
+  position: fixed; inset: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.75);
+}
+#quit-dialog.hidden { display: none; }
+#quit-dialog-box {
+  background: #1a0d04;
+  border: 2px solid var(--sand);
+  border-radius: 10px;
+  padding: 28px 36px;
+  text-align: center;
+  min-width: min(300px, 85vw);
+  animation: nameBoxPop 0.25s cubic-bezier(0.34,1.5,0.64,1);
+}
+#quit-dialog-msg {
+  font-family: 'Rye', serif;
+  font-size: 1rem;
+  color: var(--sand);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+#quit-dialog-sub {
+  font-size: 0.75rem;
+  color: var(--smoke);
+  margin-bottom: 18px;
+  letter-spacing: 1px;
+}
+.quit-btns { display: flex; gap: 10px; justify-content: center; }
+
+/* タイムアタック画面 */
+#screen-ta {
+  background: rgba(10,5,2,0.97);
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+}
+#ta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(0,0,0,0.65);
+  border-bottom: 1px solid #3a2008;
+  flex-shrink: 0;
+}
+#ta-header-title { font-family:'Rye',serif; font-size:1.1rem; color:var(--gold); letter-spacing:2px; }
+#ta-stats { display:flex; gap:20px; align-items:center; font-size:0.82rem; }
+#ta-timer {
+  font-family: 'Rye', serif;
+  font-size: 2rem;
+  color: var(--gold);
+  letter-spacing: 3px;
+  text-shadow: 0 0 12px rgba(212,162,39,0.5);
+  min-width: 90px;
+  text-align: center;
+}
+#ta-timer.ta-danger { color: #ff4020; text-shadow: 0 0 12px rgba(255,64,32,0.7); animation: comboPulse 0.4s ease-in-out infinite alternate; }
+#ta-progress-bar { width:100%; height:5px; background:#1a0a02; flex-shrink:0; }
+#ta-progress-fill { height:100%; background:var(--gold); transition:width 0.15s linear; }
+#ta-body {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  padding:20px;
+  position:relative;
+}
+#ta-counter { font-family:'Courier Prime',monospace; font-size:0.82rem; color:var(--smoke); letter-spacing:2px; }
+/* TA用カードは prac-card を流用 */
+#ta-card-wrap { width:100%; display:flex; justify-content:center; }
+
+/* TA結果 */
+#screen-ta-result {
+  background: rgba(10,5,2,0.97);
+  display: flex; flex-direction:column;
+  align-items:center; justify-content:center;
+}
+#screen-ta-result.hidden { display:none; }
+#ta-result-time {
+  font-family:'Rye',serif;
+  font-size:clamp(2.5rem,7vw,5rem);
+  color:var(--gold);
+  text-shadow:0 0 30px rgba(212,162,39,0.7), 3px 3px 0 #5a3000;
+  letter-spacing:4px;
+  margin:8px 0;
+}
+#ta-result-detail { color:var(--smoke); font-size:0.82rem; line-height:2.2; margin-bottom:8px; text-align:center; }
+#ta-rank-badge { font-family:'Rye',serif; font-size:1.2rem; min-height:1.8rem; margin:4px 0; letter-spacing:2px; }
+#ta-ranking-wrap {
+  width:min(480px,90vw); margin:6px auto 0;
+  border:1px solid #5a3a10; border-radius:4px; overflow:hidden; font-size:0.72rem;
+}
+#ta-ranking-header {
+  display:flex; background:#2a1608; padding:5px 8px;
+  color:var(--smoke); text-transform:uppercase; border-bottom:1px solid #5a3a10;
+}
+/* ════ PHASE 8 ここまで ════ */
+
+/* ════════════════════════════
+   PHASE 9: ボス的・的バリエーション
+════════════════════════════ */
+/* ボス的: 警告フラッシュ */
+@keyframes bossWarn {
+  0%,100% { box-shadow: none; }
+  50%     { box-shadow: 0 0 40px rgba(255,0,0,0.8); }
+}
+/* ボス到達警告バナー */
+#boss-banner {
+  position: fixed;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  font-family: 'Rye', serif;
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  color: #ff2020;
+  text-shadow: 0 0 20px rgba(255,0,0,0.9), 3px 3px 0 #660000;
+  background: rgba(0,0,0,0.82);
+  border: 2px solid #cc0000;
+  border-radius: 8px;
+  padding: 12px 28px;
+  z-index: 700;
+  pointer-events: none;
+  letter-spacing: 3px;
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.34,1.5,0.64,1), opacity 0.2s;
+  white-space: nowrap;
+}
+#boss-banner.show {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+/* ボスHP バー */
+#boss-hp-bar {
+  position: fixed;
+  top: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(300px, 60vw);
+  z-index: 110;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+#boss-hp-bar.visible { display: flex; }
+#boss-hp-label {
+  font-family: 'Rye', serif;
+  font-size: 0.7rem;
+  color: #ff4040;
+  letter-spacing: 2px;
+}
+#boss-hp-outer {
+  width: 100%;
+  height: 10px;
+  background: #1a0808;
+  border: 1.5px solid #660000;
+  border-radius: 5px;
+  overflow: hidden;
+}
+#boss-hp-inner {
+  height: 100%;
+  background: linear-gradient(to right, #cc0000, #ff4020);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+/* ボス撃破エフェクト */
+@keyframes bossExplosion {
+  0%   { transform: scale(1) rotate(0deg); opacity:1; }
+  25%  { transform: scale(1.3) rotate(-15deg); }
+  50%  { transform: scale(0.8) rotate(20deg); opacity:0.6; }
+  75%  { transform: scale(1.1) rotate(-5deg); opacity:0.3; }
+  100% { transform: scale(0.2) rotate(10deg); opacity:0; }
+}
+.target-wrap.boss-shot .target-svg {
+  animation: bossExplosion 0.7s ease-in forwards !important;
+}
+/* ボス的は赤枠で強調 */
+.target-wrap.is-boss .target-word {
+  border-color: #ff4020;
+  color: #ffcccc;
+  background: rgba(80,0,0,0.85);
+  box-shadow: 0 0 10px rgba(255,40,0,0.5);
+}
+.target-wrap.is-boss .target-kana {
+  color: #ffaaaa;
+}
+/* ════ PHASE 9 ここまで ════ */
 </style>
 </head>
 <body>
@@ -771,12 +1133,31 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 <div id="flame-left"></div>
 <div id="flame-right"></div>
 <div id="acc-display"></div>
+<div id="wpm-display"></div>
 </div>
 
 <div id="flash"></div>
+<!-- 中断ボタン -->
+<button id="btn-quit-game">← やめる</button>
+<!-- 中断確認ダイアログ -->
+<div id="quit-dialog" class="hidden">
+  <div id="quit-dialog-box">
+    <div id="quit-dialog-msg">⚠️ ゲームをやめる？</div>
+    <div id="quit-dialog-sub">現在のスコアは記録されません</div>
+    <div class="quit-btns">
+      <button class="btn" id="quit-yes" style="background:linear-gradient(135deg,#8b1a1a,#5a0a0a);color:#fff;">やめる</button>
+      <button class="btn secondary" id="quit-no">続ける</button>
+    </div>
+  </div>
+</div>
 <div id="countdown"><div id="countdown-num">3</div></div>
 <input id="hidden-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
 <div id="new-record-banner" class="hidden">🏆 NEW RECORD!</div>
+<div id="boss-banner">💀 BOSS INCOMING!</div>
+<div id="boss-hp-bar">
+  <div id="boss-hp-label">BOSS HP</div>
+  <div id="boss-hp-outer"><div id="boss-hp-inner" style="width:100%"></div></div>
+</div>
 <!-- 名前入力モーダル -->
 <div id="name-modal" class="hidden">
   <div id="name-box">
@@ -795,10 +1176,12 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   <p class="sub">— Type fast. Shoot faster. —</p>
   <div class="diff-btns" style="margin-bottom:0.6rem;">
     <button class="diff-btn active" data-mode="survival">🎯 SURVIVAL</button>
+    <button class="diff-btn" data-mode="endless">♾️ ENDLESS</button>
+    <button class="diff-btn" data-mode="timeattack">⚡ TIME ATTACK</button>
     <button class="diff-btn" data-mode="duel">🤠 DUEL</button>
     <button class="diff-btn" data-mode="practice">🎯 PRACTICE</button>
   </div>
-  <div id="mode-desc" style="font-size:0.72rem;color:var(--smoke);letter-spacing:1px;margin-bottom:0.8rem;min-height:1.2rem;">次々来る的を撃て！60秒スコアアタック</div>
+  <div id="mode-desc" style="font-size:0.72rem;color:var(--smoke);letter-spacing:1px;margin-bottom:0.8rem;min-height:1.2rem;">次々来る的を撃て！5分間スコアアタック</div>
   <div class="diff-btns" style="margin-bottom:0.6rem;">
     <button class="diff-btn active" data-lang="en">🔤 ENGLISH</button>
     <button class="diff-btn" data-lang="jp">🇯🇵 日本語</button>
@@ -821,6 +1204,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   <div style="display:flex;gap:8px;justify-content:center;margin-top:2px;">
     <button class="btn" id="btn-start">DRAW!</button>
     <button class="btn secondary" id="btn-manual" style="font-size:0.85rem;padding:11px 18px;">📖 説明書</button>
+    <button class="btn secondary" id="btn-stats" >📊 統計</button>
   </div>
 </div>
 
@@ -893,7 +1277,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
       <span id="prac-miss">MISS: 0</span>
       <span id="prac-acc">ACC: --%</span>
     </div>
-    <button class="btn secondary" id="prac-btn-quit" style="font-size:0.8rem;padding:7px 16px;">✕ 終了</button>
+    <button class="btn secondary" id="prac-btn-quit" style="font-size:0.8rem;padding:7px 16px;letter-spacing:2px;">← もどる</button>
   </div>
 
   <!-- カテゴリ選択バー -->
@@ -930,6 +1314,113 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   </div>
 </div>
 
+
+<!-- 統計ダッシュボード -->
+<div class="screen hidden" id="screen-stats">
+  <div id="stats-header">
+    <div id="stats-header-title">📊 MY STATS</div>
+    <button class="btn secondary" id="stats-btn-close" style="font-size:0.8rem;padding:7px 16px;">✕ 閉じる</button>
+  </div>
+  <div id="stats-body">
+    <!-- サマリーカード -->
+    <div id="stats-summary">
+      <div class="stat-card"><div class="stat-card-val" id="st-plays">0</div><div class="stat-card-label">総プレイ数</div></div>
+      <div class="stat-card"><div class="stat-card-val" id="st-best">0</div><div class="stat-card-label">ベストスコア</div></div>
+      <div class="stat-card"><div class="stat-card-val" id="st-avg">0</div><div class="stat-card-label">平均スコア</div></div>
+      <div class="stat-card"><div class="stat-card-val" id="st-keys">0</div><div class="stat-card-label">総打鍵数</div></div>
+      <div class="stat-card"><div class="stat-card-val" id="st-acc">--%</div><div class="stat-card-label">通算正確率</div></div>
+      <div class="stat-card"><div class="stat-card-val" id="st-combo">0</div><div class="stat-card-label">最高コンボ</div></div>
+      <div class="stat-card"><div class="stat-card-val" id="st-streak">0</div><div class="stat-card-label">最高連勝(DUEL)</div></div>
+      <div class="stat-card"><div class="stat-card-val" id="st-wpm">0</div><div class="stat-card-label">最高WPM</div></div>
+    </div>
+
+    <!-- スコア推移グラフ -->
+    <div id="stats-graph-wrap">
+      <div id="stats-graph-title">📈 直近10ゲームのスコア推移</div>
+      <canvas id="stats-canvas"></canvas>
+    </div>
+
+    <!-- ベスト記録 -->
+    <div id="stats-best-wrap">
+      <div id="stats-best-title">🏆 ランキングTOP5</div>
+      <div id="stats-best-list"></div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- タイムアタック設定画面 -->
+<div class="screen hidden" id="screen-ta-setup">
+  <h1 style="font-size:clamp(1.8rem,5vw,3rem)">⚡ TIME ATTACK</h1>
+  <p class="sub">— 全問最速クリアを目指せ —</p>
+  <div style="margin-bottom:1rem;">
+    <div style="font-family:'Rye',serif;font-size:0.8rem;color:var(--smoke);letter-spacing:2px;margin-bottom:10px;">問題数を選択</div>
+    <div id="ta-count-btns" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="diff-btn" data-count="5">5問<span style="font-family:'Courier Prime',monospace;font-size:0.62rem;display:block;color:#665040">初級</span></button>
+      <button class="diff-btn active" data-count="10">10問<span style="font-family:'Courier Prime',monospace;font-size:0.62rem;display:block;color:#665040">標準</span></button>
+      <button class="diff-btn" data-count="20">20問<span style="font-family:'Courier Prime',monospace;font-size:0.62rem;display:block;color:#665040">上級</span></button>
+      <button class="diff-btn" data-count="30">30問<span style="font-family:'Courier Prime',monospace;font-size:0.62rem;display:block;color:#665040">エキスパート</span></button>
+    </div>
+  </div>
+  <div id="ta-setup-ranking-wrap" style="width:min(480px,90vw);margin:8px auto;">
+    <div style="font-family:'Rye',serif;font-size:0.78rem;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">
+      🏆 このカテゴリのベスト
+    </div>
+    <div id="ta-setup-ranking-header" style="display:flex;background:#2a1608;padding:4px 8px;font-size:0.65rem;color:var(--smoke);border:1px solid #5a3a10;border-bottom:none;border-radius:4px 4px 0 0;">
+      <span class="rk-col rk-no">RANK</span>
+      <span class="rk-name">NAME</span>
+      <span class="rk-col rk-score">TIME</span>
+      <span class="rk-col rk-meta">DIFF / ACC</span>
+    </div>
+    <div id="ta-setup-ranking-list" style="border:1px solid #5a3a10;border-radius:0 0 4px 4px;font-size:0.7rem;min-height:30px;"></div>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+    <button class="btn" id="ta-setup-start">DRAW!</button>
+    <button class="btn secondary" id="ta-setup-back">← もどる</button>
+  </div>
+</div>
+
+<!-- タイムアタック画面 -->
+<div class="screen hidden" id="screen-ta">
+  <div id="ta-header">
+    <div id="ta-header-title">⚡ TIME ATTACK</div>
+    <div id="ta-stats">
+      <span id="ta-hit-disp" style="color:#60dd40">HIT: 0</span>
+      <span id="ta-miss-disp" style="color:#ff6040">MISS: 0</span>
+      <span id="ta-acc-disp" style="color:var(--gold)">ACC: --%</span>
+      <span id="ta-count-disp" style="color:var(--smoke)">30問</span>
+    </div>
+    <div id="ta-timer">0.00</div>
+  </div>
+  <div id="ta-progress-bar"><div id="ta-progress-fill" style="width:0%"></div></div>
+  <div id="ta-body">
+    <div id="ta-counter"></div>
+    <div id="ta-card-wrap"></div>
+  </div>
+</div>
+
+<!-- タイムアタック結果 -->
+<div class="screen hidden" id="screen-ta-result">
+  <h1 id="ta-result-title">CLEAR!</h1>
+  <div id="ta-result-time">0.00s</div>
+  <div id="ta-rank-badge"></div>
+  <div id="ta-result-detail"></div>
+  <div id="ta-ranking-wrap">
+    <div id="ta-ranking-header">
+      <span class="rk-col rk-no">RANK</span>
+      <span class="rk-name">NAME</span>
+      <span class="rk-col rk-score">TIME</span>
+      <span class="rk-col rk-meta">DIFF / ACC</span>
+    </div>
+    <div id="ta-ranking-list"></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:12px;">
+    <button class="btn" id="ta-btn-retry">もう一度</button>
+    <button class="btn secondary" id="ta-btn-title">TITLE</button>
+  </div>
+</div>
+
 <!-- MANUAL -->
 <div id="screen-manual" class="screen hidden">
   <div id="manual-box">
@@ -958,10 +1449,20 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
           </div>
         </div>
         <div class="m-section">
+          <div class="m-section-title">🎮 ゲームモード一覧</div>
+          <div class="m-table">
+            <div class="m-row"><span class="m-key">🎯 SURVIVAL</span><span><span class="m-hl">5分間</span>、奥から来る敵を撃ち抜く。スコア競争。</span></div>
+            <div class="m-row"><span class="m-key">♾️ ENDLESS</span><span>時間制限なし。HPが尽きるまで生き残れ。<span class="m-hl">生存時間</span>を競う。</span></div>
+            <div class="m-row"><span class="m-key">⚡ TIME ATTACK</span><span>固定問題を<span class="m-hl">最速クリア</span>！5/10/20/30問から選択。</span></div>
+            <div class="m-row"><span class="m-key">🤠 DUEL</span><span>1対1の早撃ち対決。<span class="m-hl">何連勝</span>できるか。</span></div>
+            <div class="m-row"><span class="m-key">🎯 PRACTICE</span><span>焦らず練習。五十音・濁音・単語カテゴリを選択。</span></div>
+          </div>
+        </div>
+        <div class="m-section">
           <div class="m-section-title">🌐 言語モード</div>
           <div class="m-cards">
-            <div class="m-card"><div class="m-card-title">🔤 ENGLISH</div><p>英単語をアルファベットで入力。Lv1は1文字からスタート。</p></div>
-            <div class="m-card"><div class="m-card-title">🇯🇵 日本語</div><p>ひらがな表示→<span class="m-hl">ローマ字</span>で入力。例：「ねこ」→ NEKO</p></div>
+            <div class="m-card"><div class="m-card-title">🔤 ENGLISH</div><p>英単語をアルファベットで入力。Lv1は1文字からスタート。Lv4以降は動物・食べ物・西部劇語もミックス。</p></div>
+            <div class="m-card"><div class="m-card-title">🇯🇵 日本語</div><p>ひらがな表示→<span class="m-hl">ローマ字</span>で入力。<br>Lv5でローマ字が薄く、Lv6+で消える（かなのみモード）。</p></div>
           </div>
         </div>
         <div class="m-section">
@@ -976,7 +1477,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
       <div class="m-page" data-page="survival">
         <div class="m-section">
           <div class="m-section-title">🎯 SURVIVALとは</div>
-          <p><span class="m-hl">60秒間</span>、奥から前進してくる敵シルエットをタイピングで撃ち抜くモード。スコアの高さを競います。</p>
+          <p><span class="m-hl">5分間（300秒）</span>、奥から前進してくる敵シルエットをタイピングで撃ち抜くモード。スコアの高さを競います。</p>
         </div>
         <div class="m-section">
           <div class="m-section-title">🕹️ ゲームの流れ</div>
@@ -1002,8 +1503,21 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
             <div class="m-row"><span class="m-key">Lv1</span><span>1文字（A, B…）/ か・き・く…</span></div>
             <div class="m-row"><span class="m-key">Lv2</span><span>2文字（GO, NO…）/ いぬ・ねこ…</span></div>
             <div class="m-row"><span class="m-key">Lv3</span><span>3文字（GUN, ACE…）/ はな・もり…</span></div>
-            <div class="m-row"><span class="m-key">Lv4-5</span><span>4〜5文字</span></div>
-            <div class="m-row"><span class="m-key">Lv9+</span><span>長単語（REVOLVER など）</span></div>
+            <div class="m-row"><span class="m-key">Lv4-5</span><span>4〜5文字＋動物・食べ物・自然語がミックス</span></div>
+            <div class="m-row"><span class="m-key">Lv9+</span><span>長単語（REVOLVER, DESPERADO など）</span></div>
+          </div>
+        </div>
+        <div class="m-section">
+          <div class="m-section-title">💀 ボス的</div>
+          <p>Lv5, 10, 15, 20… ごとに<span class="m-hl">ボス的</span>が出現！<br>
+          通常より大きく、複数の単語を連続で入力して倒す（HP制）。<br>
+          撃破するとスコア<span class="m-hl">×5ボーナス</span>！</p>
+        </div>
+        <div class="m-section">
+          <div class="m-section-title">⏱ WPM・精度表示</div>
+          <div class="m-table">
+            <div class="m-row"><span class="m-key">WPM</span><span>1分間のタイピング速度。60以上で緑・30以上で金。</span></div>
+            <div class="m-row"><span class="m-key">ACC</span><span>打鍵正確率。90%以上で緑・70%以上で金・69%以下で赤。</span></div>
           </div>
         </div>
       </div>
@@ -1029,6 +1543,12 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
             <div class="m-row"><span class="m-badge normal">NORMAL</span><span>5秒スタート → 最短1.8秒</span></div>
             <div class="m-row"><span class="m-badge hard">HARD</span><span>3.5秒スタート → 最短1.2秒 ＋ ミスで即死</span></div>
           </div>
+          <p style="margin-top:8px;">日本語モードではLv5以降ローマ字が消え、<span class="m-hl">かなのみ</span>で判断する力が必要になります。</p>
+        </div>
+        <div class="m-section">
+          <div class="m-section-title">⚡ TIME ATTACKとの違い</div>
+          <p>DUELは<span class="m-hl">連勝数</span>を競い、TIME ATTACKは<span class="m-hl">クリアタイム</span>を競います。<br>
+          TIME ATTACKは5/10/20/30問から問題数を選択でき、問題数ごとに別ランキングが記録されます。</p>
         </div>
       </div>
       <div class="m-page" data-page="tips">
@@ -1452,7 +1972,7 @@ const DIFF={easy:{spawnMs:3500,advanceSec:12,maxT:3,hp:5,lvEvery:4},normal:{spaw
 const LANES=[10,27,45,63,80];
 
 // ═══ STATE ═══
-let G={phase:'title',diff:'easy',lang:'en',score:0,combo:0,maxCombo:0,hp:5,level:1,shotsHit:0,shotsMissed:0,timeLeft:60,activeTargets:[],focused:null,nextId:0,spawnTimer:null,gameTimer:null,rafId:null};
+let G={phase:'title',diff:'easy',lang:'en',endless:false,score:0,combo:0,maxCombo:0,hp:5,level:1,shotsHit:0,shotsMissed:0,timeLeft:60,activeTargets:[],focused:null,nextId:0,spawnTimer:null,gameTimer:null,rafId:null};
 let G_mode='survival';
 
 // ═══ DOM ═══
@@ -1480,11 +2000,18 @@ function checkInGameRecord(){_currentBest=loadRanking()[0]?.score??0;}
 function maybeShowNewRecord(){if(G.score>_currentBest&&_currentBest>0){_currentBest=G.score;const b=document.getElementById('new-record-banner');b.classList.remove('hidden');void b.offsetWidth;b.classList.add('show');sfxLevelUp();setTimeout(()=>{b.classList.remove('show');setTimeout(()=>b.classList.add('hidden'),300);},2200);}}
 
 // ═══ UI EVENTS ═══
-const MODE_DESC={survival:'次々来る的を撃て！60秒スコアアタック',duel:'1対1の早撃ち勝負！何連勝できるか？',practice:'焦らず練習！的を自分のペースで撃ち倒せ'};
+const MODE_DESC={survival:'次々来る的を撃て！5分間スコアアタック',endless:'時間制限なし！HPが尽きるまで生き残れ',timeattack:'⚡ 固定リストを最速クリア！タイムを競え',duel:'1対1の早撃ち勝負！何連勝できるか？',practice:'焦らず練習！的を自分のペースで撃ち倒せ'};
 document.querySelectorAll('[data-mode]').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('[data-mode]').forEach(x=>x.classList.remove('active'));b.classList.add('active');G_mode=b.dataset.mode;document.getElementById('mode-desc').textContent=MODE_DESC[G_mode];});});
 document.querySelectorAll('[data-lang]').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('[data-lang]').forEach(x=>x.classList.remove('active'));b.classList.add('active');G.lang=b.dataset.lang;});});
 document.querySelectorAll('[data-diff]').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('[data-diff]').forEach(x=>x.classList.remove('active'));b.classList.add('active');G.diff=b.dataset.diff;});});
-document.getElementById('btn-start').addEventListener('click',()=>{if(G_mode==='duel')startDuel();else if(G_mode==='practice')startPractice();else startCountdown();});
+document.getElementById('btn-start').addEventListener('click',()=>{
+  G.endless=false;
+  if(G_mode==='duel')startDuel();
+  else if(G_mode==='practice')startPractice();
+  else if(G_mode==='endless'){G.endless=true;startCountdown();}
+  else if(G_mode==='timeattack')openTimeAttackSetup();
+  else startCountdown();
+});
 document.getElementById('btn-retry').addEventListener('click',startCountdown);
 document.getElementById('btn-title').addEventListener('click',()=>{scResult.classList.add('hidden');scTitle.classList.remove('hidden');renderTitleRanking();});
 document.getElementById('btn-manual').addEventListener('click',()=>{scTitle.classList.add('hidden');scManual.classList.remove('hidden');activateManualTab('basic');});
@@ -1509,7 +2036,41 @@ document.addEventListener('click',()=>{if(G.phase==='playing')hiddenInput.focus(
 function startCountdown(){scTitle.classList.add('hidden');scResult.classList.add('hidden');const el=document.getElementById('countdown-num');const seq=['3','2','1','GO!'];let i=0;const tick=()=>{el.textContent=seq[i];el.classList.remove('fade');void el.offsetWidth;el.classList.add('show');sfxCountBeep(seq[i]==='GO!');setTimeout(()=>{el.classList.remove('show');el.classList.add('fade');i++;if(i<seq.length)setTimeout(tick,320);else setTimeout(startGame,300);},680);};tick();}
 
 // ═══ START GAME ═══
-function startGame(){const cfg=DIFF[G.diff];Object.assign(G,{phase:'playing',score:0,combo:0,maxCombo:0,hp:cfg.hp,level:1,shotsHit:0,shotsMissed:0,timeLeft:60,activeTargets:[],focused:null,nextId:0});lane.innerHTML='';resetFlame();resetAccDisplay();updateHUD();renderHP();hiddenInput.focus();startBGM();checkInGameRecord();spawnTarget();G.spawnTimer=setInterval(()=>{const c=DIFF[G.diff];if(G.activeTargets.length<c.maxT+Math.floor(G.level/4))spawnTarget();},Math.max(900,cfg.spawnMs-(G.level-1)*150));G.gameTimer=setInterval(()=>{G.timeLeft--;timeDisplay.textContent='⏱ '+G.timeLeft;if(G.timeLeft<=0)endGame();},1000);G.rafId=requestAnimationFrame(rafLoop);}
+function startGame(){
+  const cfg=DIFF[G.diff];
+  const isEndless=G.endless;
+  Object.assign(G,{phase:'playing',score:0,combo:0,maxCombo:0,
+    hp:cfg.hp,level:1,shotsHit:0,shotsMissed:0,
+    timeLeft: isEndless ? -1 : 300,
+    activeTargets:[],focused:null,nextId:0,
+    surviveStart: Date.now(), // 生存開始時刻
+  });
+  lane.innerHTML='';resetFlame();resetAccDisplay();resetWPM();
+  updateHUD();renderHP();hiddenInput.focus();startBGM();checkInGameRecord();
+  spawnTarget();
+  G.spawnTimer=setInterval(()=>{
+    const c=DIFF[G.diff];
+    if(G.activeTargets.length<c.maxT+Math.floor(G.level/4))spawnTarget();
+  },Math.max(900,cfg.spawnMs-(G.level-1)*150));
+  if(isEndless){
+    // ENDLESSは経過時間を表示（カウントアップ）
+    timeDisplay.textContent='⏱ 0:00';
+    G.gameTimer=setInterval(()=>{
+      const sec=Math.floor((Date.now()-G.surviveStart)/1000);
+      const m=Math.floor(sec/60), s=sec%60;
+      timeDisplay.textContent=`⏱ ${m}:${String(s).padStart(2,'0')}`;
+    timeDisplay.classList.add('endless-time');
+    },500);
+  } else {
+    timeDisplay.classList.remove('endless-time');
+    G.gameTimer=setInterval(()=>{
+      G.timeLeft--;timeDisplay.textContent='⏱ '+G.timeLeft;
+      if(G.timeLeft<=0)endGame();
+    },1000);
+  }
+  G.rafId=requestAnimationFrame(rafLoop);
+  showQuitBtn('ゲームを中断します（スコアは記録されません）');
+}
 
 // ═══ RAF LOOP ═══
 function rafLoop(){if(G.phase!=='playing')return;const now=Date.now();const W=lane.offsetWidth||window.innerWidth;const H=lane.offsetHeight||window.innerHeight;G.activeTargets.forEach(t=>{if(t.expired)return;const elapsed=now-t.startTime;const pct=Math.min(1,elapsed/t.advanceMs);
@@ -1541,16 +2102,16 @@ const t={id,word,typed:'',el,advanceMs,startTime:Date.now(),expired:false,laneX,
 function onTargetExpired(t){if(G.phase!=='playing')return;G.combo=0;G.shotsMissed++;t.el.classList.add('miss-shake');setTimeout(()=>t.el.remove(),320);removeTarget(t.id);damageHP();updateHUD();updateAccDisplay();}
 
 // ═══ INPUT ═══
-hiddenInput.addEventListener('input',e=>{const ch=(e.data||'').toUpperCase();hiddenInput.value='';if(!ch||!/[A-Z]/.test(ch))return;if(D.phase==='typing'){handleDuelChar(ch);return;}if(scPrac&&!scPrac.classList.contains('hidden')){handlePracChar(ch);return;}if(G.phase!=='playing')return;handleChar(ch);});
+hiddenInput.addEventListener('input',e=>{const ch=(e.data||'').toUpperCase();hiddenInput.value='';if(!ch||!/[A-Z]/.test(ch))return;if(D.phase==='typing'){handleDuelChar(ch);return;}if(TA.phase==='playing'){handleTAChar(ch);return;}if(scPrac&&!scPrac.classList.contains('hidden')){handlePracChar(ch);return;}if(G.phase!=='playing')return;handleChar(ch);});
 document.addEventListener('keydown',e=>{if(D.phase==='typing'){hiddenInput.focus();return;}if(G.phase!=='playing')return;hiddenInput.focus();if(e.key==='Tab'){e.preventDefault();cycleFocus();}});
 function cycleFocus(){if(!G.activeTargets.length)return;const idx=G.activeTargets.findIndex(t=>t.id===G.focused);G.focused=G.activeTargets[(idx+1)%G.activeTargets.length].id;updateFocusClass();}
-function handleChar(ch){let t=G.activeTargets.find(x=>x.id===G.focused&&!x.expired);if(!t||t.typed.length===0){const h=G.activeTargets.find(x=>!x.expired&&x.word[0]===ch&&x.typed.length===0);if(h){t=h;G.focused=t.id;updateFocusClass();}}if(!t){sfxMiss();flashScreen();return;}const exp=t.word[t.typed.length];if(ch===exp){t.typed+=ch;updateWordDisplay(t);if(t.typed===t.word)onWordComplete(t);}else{G.shotsMissed++;sfxMiss();flashScreen();updateAccDisplay();}}
+function handleChar(ch){let t=G.activeTargets.find(x=>x.id===G.focused&&!x.expired);if(!t||t.typed.length===0){const h=G.activeTargets.find(x=>!x.expired&&x.word[0]===ch&&x.typed.length===0);if(h){t=h;G.focused=t.id;updateFocusClass();}}if(!t){sfxMiss();flashScreen();return;}const exp=t.word[t.typed.length];if(ch===exp){t.typed+=ch;addWPMKey();updateWordDisplay(t);if(t.typed===t.word)onWordComplete(t);}else{G.shotsMissed++;sfxMiss();flashScreen();updateAccDisplay();}}
 function updateWordDisplay(t){const w=t.el.querySelector('.target-word');if(!w)return;const r=t.word.slice(t.typed.length);w.innerHTML=`<span class="typed">${t.typed}</span><span class="cursor"></span><span class="remain">${r}</span>`;// JP: ローマ字表示クラスを維持（innerHTML更新でclassがリセットされないよう再適用）
 if(G.lang==='jp') applyRomaVisibility(t.el, G.level);}
 function updateFocusClass(){G.activeTargets.forEach(t=>t.el.classList.toggle('focused',t.id===G.focused));}
 
 // ═══ WORD COMPLETE ═══
-function onWordComplete(t){t.expired=true;G.shotsHit++;G.combo++;if(G.combo>G.maxCombo)G.maxCombo=G.combo;const bonus=G.combo>=5?3:G.combo>=3?2:1;const pts=(t.word.length*10+G.level*5)*bonus;G.score+=pts;const cfg=DIFF[G.diff];if(G.shotsHit>0&&G.shotsHit%cfg.lvEvery===0){G.level++;sfxLevelUp();showPop(t.el,`LV.${G.level} UP! ⭐`,'#ffd040');if(G.lang==='jp')showKanaNotify(G.level);clearInterval(G.spawnTimer);G.spawnTimer=setInterval(()=>{const c=DIFF[G.diff];if(G.activeTargets.length<c.maxT+Math.floor(G.level/4))spawnTarget();},Math.max(900,cfg.spawnMs-(G.level-1)*150));}updateHUD();maybeShowNewRecord();sfxGunshot(G.combo);shootEffect(t,pts);player.classList.remove('player-shoot');void player.offsetWidth;player.classList.add('player-shoot');setTimeout(()=>player.classList.remove('player-shoot'),250);t.el.classList.remove('walking');t.el.classList.add('shot');setTimeout(()=>{t.el.remove();removeTarget(t.id);},580);}
+function onWordComplete(t){t.expired=true;G.shotsHit++;G.combo++;_wpmKeyCount+=t.word.length;if(G.combo>G.maxCombo)G.maxCombo=G.combo;const bonus=G.combo>=5?3:G.combo>=3?2:1;const pts=(t.word.length*10+G.level*5)*bonus;G.score+=pts;const cfg=DIFF[G.diff];if(G.shotsHit>0&&G.shotsHit%cfg.lvEvery===0){G.level++;sfxLevelUp();showPop(t.el,`LV.${G.level} UP! ⭐`,'#ffd040');if(G.lang==='jp')showKanaNotify(G.level);clearInterval(G.spawnTimer);G.spawnTimer=setInterval(()=>{const c=DIFF[G.diff];if(G.activeTargets.length<c.maxT+Math.floor(G.level/4))spawnTarget();},Math.max(900,cfg.spawnMs-(G.level-1)*150));}updateHUD();maybeShowNewRecord();sfxGunshot(G.combo);shootEffect(t,pts);player.classList.remove('player-shoot');void player.offsetWidth;player.classList.add('player-shoot');setTimeout(()=>player.classList.remove('player-shoot'),250);t.el.classList.remove('walking');t.el.classList.add('shot');setTimeout(()=>{t.el.remove();removeTarget(t.id);},580);}
 
 // ═══ SHOOT EFFECT ═══
 function shootEffect(t,pts){const rect=t.el.getBoundingClientRect();const lr=lane.getBoundingClientRect();const cx=rect.left-lr.left+rect.width*0.5;const cy=rect.top-lr.top+rect.height*0.32;const hole=document.createElement('div');hole.className='bullet-hole';hole.style.cssText=`left:${cx-9}px;top:${cy-9}px;`;hole.innerHTML=`<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="#000" opacity="0.9"/><circle cx="9" cy="9" r="6" fill="#111"/><circle cx="9" cy="9" r="3" fill="#000"/><line x1="9" y1="1" x2="9" y2="5" stroke="#333" stroke-width="1"/><line x1="9" y1="13" x2="9" y2="17" stroke="#333" stroke-width="1"/><line x1="1" y1="9" x2="5" y2="9" stroke="#333" stroke-width="1"/><line x1="13" y1="9" x2="17" y2="9" stroke="#333" stroke-width="1"/></svg>`;lane.appendChild(hole);setTimeout(()=>hole.remove(),2500);const smoke=document.createElement('div');smoke.style.cssText=`position:absolute;left:${cx-16}px;top:${cy-20}px;font-size:1.6rem;pointer-events:none;z-index:200;animation:scorePop 0.7s ease-out forwards;`;smoke.textContent='💨';lane.appendChild(smoke);setTimeout(()=>smoke.remove(),800);showPop(t.el,`+${pts}${G.combo>=3?' 🔥×'+G.combo:''}`,G.combo>=5?'#ff6020':'#fff');}
@@ -1583,20 +2144,56 @@ function removeTarget(id){G.activeTargets=G.activeTargets.filter(x=>x.id!==id);i
 function endGame(){
   G.phase='result';
   clearInterval(G.spawnTimer);clearInterval(G.gameTimer);cancelAnimationFrame(G.rafId);
-  lane.innerHTML='';G.activeTargets=[];resetFlame();stopBGM();sfxGameOver();
+  lane.innerHTML='';G.activeTargets=[];resetFlame();resetBoss();stopBGM();sfxGameOver();hideQuitBtn();
   const total=G.shotsHit+G.shotsMissed;
   const acc=total>0?Math.round(G.shotsHit/total*100):0;
+  const finalWPM=getCurrentWPM();
+  const surviveMs=G.surviveStart ? Date.now()-G.surviveStart : 0;
+  const surviveSec=Math.floor(surviveMs/1000);
+  // 統計更新
+  updateStats({score:G.score,hit:G.shotsHit,miss:G.shotsMissed,
+               keys:_wpmKeyCount,wpm:finalWPM,combo:G.maxCombo});
+  const wpmEl=document.getElementById('wpm-display');
+  if(wpmEl) wpmEl.textContent='';
 
+  // ENDLESSモードは専用リザルト
+  if(G.endless){
+    hideQuitBtn();
+    showNameModal(G.score, (playerName)=>{
+      const entry={score:G.score,level:G.level,acc,maxCombo:G.maxCombo,
+                   diff:G.diff,lang:G.lang,name:playerName,wpm:finalWPM,
+                   surviveSec,shotsHit:G.shotsHit,ts:Date.now()};
+      const{rank,list}=addEndlessScore(entry);
+
+      // リザルト画面流用
+      document.getElementById('result-title').textContent='⏱ ENDLESS OVER';
+      document.getElementById('result-score').textContent=G.score.toLocaleString()+' pts';
+      const m=Math.floor(surviveSec/60),s=surviveSec%60;
+      document.getElementById('result-detail').innerHTML=
+        `生存時間: <span style="color:var(--gold);font-weight:700">${m}:${String(s).padStart(2,'0')}</span>`+
+        ` &nbsp; 撃破: ${G.shotsHit} &nbsp; Lv${G.level} &nbsp; ACC ${acc}% &nbsp; WPM ${finalWPM}`;
+      const badge=document.getElementById('result-rank-badge');
+      const md=['🥇 1ST','🥈 2ND','🥉 3RD'];
+      if(rank>=1&&rank<=3){badge.textContent=md[rank-1]+' PLACE!';badge.style.color=['#ffd700','#c0c0c0','#cd7f32'][rank-1];}
+      else if(rank>0){badge.textContent='#'+rank+' PLACE';badge.style.color='var(--sand)';}
+      else{badge.textContent='OUT OF TOP 10';badge.style.color='var(--smoke)';}
+      renderEndlessRanking(list,entry,'ranking-list');
+      scResult.classList.remove('hidden');
+    });
+    return;
+  }
+
+  // 通常SURVIVALは従来通り
   // 名前入力 → スコア登録 → 結果表示
   showNameModal(G.score, (playerName) => {
     const entry={score:G.score,level:G.level,acc,maxCombo:G.maxCombo,
-                 diff:G.diff,lang:G.lang,name:playerName,ts:Date.now()};
+                 diff:G.diff,lang:G.lang,name:playerName,wpm:finalWPM,ts:Date.now()};
     const{rank,isNew,list}=addScoreWithName(entry);
 
     document.getElementById('result-score').textContent=G.score.toLocaleString()+' pts';
     document.getElementById('result-detail').innerHTML=
       `${G.lang==='jp'?'🇯🇵':'🔤'} ${G.diff.toUpperCase()} | `+
-      `LEVEL ${G.level} &nbsp; HIT ${G.shotsHit} &nbsp; ACC ${acc}% &nbsp; COMBO ×${G.maxCombo}`;
+      `LEVEL ${G.level} &nbsp; HIT ${G.shotsHit} &nbsp; ACC ${acc}% &nbsp; COMBO ×${G.maxCombo} &nbsp; WPM ${finalWPM}`;
 
     const badge=document.getElementById('result-rank-badge');
     const md=['🥇 1ST','🥈 2ND','🥉 3RD'];
@@ -1630,7 +2227,7 @@ function saveDuelRanking(l){try{localStorage.setItem(LS_DUEL,JSON.stringify(l));
 function addDuelScore(entry){const l=loadDuelRanking();l.push(entry);l.sort((a,b)=>b.streak-a.streak);const t=l.slice(0,10);const rank=t.findIndex(e=>e===entry)+1;saveDuelRanking(t);return{rank,list:t};}
 function renderDuelRanking(list,my){const el=document.getElementById('duel-ranking-list');if(!list.length){el.innerHTML='<div style="padding:8px;text-align:center;color:#555">NO DATA YET</div>';return;}const md=['🥇','🥈','🥉'];el.innerHTML=list.map((e,i)=>{const me=e===my;const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${me?' rk-new':''}`;const d=new Date(e.ts);const dt=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return`<div class="${cls}"><span class="rk-col rk-no">${md[i]||('#'+(i+1))}${me?' ◀':''}</span><span class="rk-col rk-score">${e.streak}連勝</span><span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} LV${e.level||1}</span><span class="rk-col rk-date">${dt}</span></div>`;}).join('');}
 function getDuelWord(){const lv=D.level-1;if(D.lang==='jp'){const p=getJPPool(D.level);const e=p[Math.floor(Math.random()*p.length)];return{word:e.r,kana:e.k};}const p=DUEL_WORDS_BY_LV[Math.min(lv,DUEL_WORDS_BY_LV.length-1)];return{word:p[Math.floor(Math.random()*p.length)],kana:''};}
-function startDuel(){D.diff=G.diff;D.lang=G.lang;D.streak=0;D.level=1;scTitle.classList.add('hidden');scResult.classList.add('hidden');scDuel.classList.remove('hidden');duelEnemyFig.style.animation='';duelPlayerFig.style.animation='';duelEnemyFig.style.opacity=duelPlayerFig.style.opacity='1';duelEnemyFig.textContent=['🕵️','🤖','👹','💀','🧟'][Math.floor(Math.random()*5)];duelStreakDisp.textContent='';startDuelCountdown();}
+function startDuel(){D.diff=G.diff;D.lang=G.lang;D.streak=0;D.level=1;scTitle.classList.add('hidden');scResult.classList.add('hidden');scDuel.classList.remove('hidden');duelEnemyFig.style.animation='';duelPlayerFig.style.animation='';duelEnemyFig.style.opacity=duelPlayerFig.style.opacity='1';duelEnemyFig.textContent=['🕵️','🤖','👹','💀','🧟'][Math.floor(Math.random()*5)];duelStreakDisp.textContent='';showQuitBtn('DUELを中断します');startDuelCountdown();}
 function startDuelCountdown(){D.phase='countdown';duelWordBox.classList.add('hidden');duelStatusMsg.style.color='#fff';let n=3;const tick=()=>{duelStatusMsg.textContent=n;sfxCountBeep(false);if(--n>=0)setTimeout(tick,700);else{sfxCountBeep(true);setTimeout(startStaredown,500);}};tick();}
 function startStaredown(){D.phase='staredown';duelStatusMsg.textContent='…';duelWordBox.classList.add('hidden');D.rafId=setTimeout(startDraw,800+Math.random()*1400);}
 function startDraw(){D.phase='typing';const{word,kana}=getDuelWord();D.word=word;D.kana=kana;D.typed='';D.startTs=Date.now();const cfg=DUEL_DIFF[D.diff];D.limitMs=Math.max(cfg.minMs,cfg.initMs-(D.level-1)*cfg.decPerLv);duelStatusMsg.textContent='DRAW!';duelStatusMsg.style.color='#ff4020';sfxCountBeep(true);duelKana.textContent=kana||'';
@@ -1647,7 +2244,7 @@ function renderDuelWord(){duelWordDisp.innerHTML=`<span class="typed">${D.typed}
 function onDuelWin(){if(D.phase!=='typing')return;D.phase='result';clearTimeout(D.rafId);duelWordBox.classList.add('hidden');D.streak++;const cfg=DUEL_DIFF[D.diff];if(D.streak%cfg.lvEvery===0){D.level++;sfxLevelUp();}duelStatusMsg.style.color='#ffd700';duelStatusMsg.textContent=D.streak===1?'NICE SHOT!':D.streak<5?'WIN!':D.streak<10?`${D.streak} WINS! 🔥`:`${D.streak} WINS!! 🌟`;sfxGunshot(D.streak);duelPlayerFig.classList.remove('shoot');void duelPlayerFig.offsetWidth;duelPlayerFig.classList.add('shoot');setTimeout(()=>{duelEnemyFig.classList.remove('hit');void duelEnemyFig.offsetWidth;duelEnemyFig.classList.add('hit');},180);shootBulletLine(document.getElementById('duel-player').getBoundingClientRect(),document.getElementById('duel-enemy').getBoundingClientRect());duelStreakDisp.textContent=`🔥 ${D.streak} WIN STREAK`;setTimeout(()=>{if(D.phase!=='result')return;duelEnemyFig.style.animation='';duelEnemyFig.style.opacity='1';duelPlayerFig.style.animation='';duelEnemyFig.textContent=['🕵️','🤖','👹','💀','🧟','🦹','🥷'][Math.floor(Math.random()*7)];startDuelCountdown();},1600);}
 function onDuelTimeout(){if(D.phase!=='typing'&&D.phase!=='staredown')return;D.phase='result';clearTimeout(D.rafId);duelWordBox.classList.add('hidden');sfxDamage();flashScreen('#660000');duelStatusMsg.style.color='#cc2020';duelStatusMsg.textContent='TOO SLOW...';duelEnemyFig.classList.remove('shoot');void duelEnemyFig.offsetWidth;duelEnemyFig.classList.add('shoot');setTimeout(()=>{duelPlayerFig.classList.remove('hit');void duelPlayerFig.offsetWidth;duelPlayerFig.classList.add('hit');},180);shootBulletLine(document.getElementById('duel-enemy').getBoundingClientRect(),document.getElementById('duel-player').getBoundingClientRect());setTimeout(showDuelResult,1800);}
 function shootBulletLine(from,to){const fx=from.left+from.width*0.5,fy=from.top+from.height*0.4,tx=to.left+to.width*0.5,ty=to.top+to.height*0.4,dx=tx-fx,dy=ty-fy,len=Math.sqrt(dx*dx+dy*dy),ang=Math.atan2(dy,dx)*180/Math.PI;const l=document.createElement('div');l.className='bullet-line';l.style.cssText=`left:${fx}px;top:${fy}px;width:${len}px;transform:rotate(${ang}deg)`;document.body.appendChild(l);setTimeout(()=>l.remove(),350);const d=document.createElement('div');d.className='dust-puff';d.textContent='💥';d.style.cssText=`left:${tx-20}px;top:${ty-20}px`;document.body.appendChild(d);setTimeout(()=>d.remove(),800);}
-function showDuelResult(){scDuel.classList.add('hidden');scDuelResult.classList.remove('hidden');const entry={streak:D.streak,level:D.level,diff:D.diff,lang:D.lang,ts:Date.now()};const{rank,list}=addDuelScore(entry);document.getElementById('duel-result-title').textContent=D.streak===0?'GAME OVER':`${D.streak} WIN STREAK!`;document.getElementById('duel-result-streak').textContent=D.streak>0?`🔥 ${D.streak} 連勝`:'😵 0勝…';const md=['🥇','🥈','🥉'];document.getElementById('duel-result-detail').innerHTML=`${rank<=3?md[rank-1]+' '+rank+'位！<br>':''}DIFFICULTY: ${D.diff.toUpperCase()} LEVEL: ${D.level}`;renderDuelRanking(list,entry);}
+function showDuelResult(){hideQuitBtn();scDuel.classList.add('hidden');scDuelResult.classList.remove('hidden');const entry={streak:D.streak,level:D.level,diff:D.diff,lang:D.lang,ts:Date.now()};const{rank,list}=addDuelScore(entry);document.getElementById('duel-result-title').textContent=D.streak===0?'GAME OVER':`${D.streak} WIN STREAK!`;document.getElementById('duel-result-streak').textContent=D.streak>0?`🔥 ${D.streak} 連勝`:'😵 0勝…';const md=['🥇','🥈','🥉'];document.getElementById('duel-result-detail').innerHTML=`${rank<=3?md[rank-1]+' '+rank+'位！<br>':''}DIFFICULTY: ${D.diff.toUpperCase()} LEVEL: ${D.level}`;renderDuelRanking(list,entry);}
 document.getElementById('duel-btn-retry').addEventListener('click',()=>{scDuelResult.classList.add('hidden');startDuel();});
 document.getElementById('duel-btn-title').addEventListener('click',()=>{scDuelResult.classList.add('hidden');scTitle.classList.remove('hidden');renderTitleRanking();});
 
@@ -1983,6 +2580,7 @@ document.querySelectorAll('.prac-cat').forEach(b=>{
 
 // ── 終了ボタン ──
 document.getElementById('prac-btn-quit').addEventListener('click',()=>{
+  hideQuitBtn();
   scPrac.classList.add('hidden');
   scTitle.classList.remove('hidden');
   renderTitleRanking();
@@ -2206,6 +2804,7 @@ function startPractice(){
   P.lang = G.lang;
   scTitle.classList.add('hidden');
   scPrac.classList.remove('hidden');
+  showQuitBtn('練習を中断します');
   document.getElementById('prac-complete').classList.add('hidden');
 
   // カテゴリを初期化
@@ -2411,6 +3010,1021 @@ function renderTitleRanking() {
     </div>`;
   }).join('');
 }
+
+
+// ════════════════════════════════════════
+//  PHASE 6: WPM・統計ダッシュボード
+// ════════════════════════════════════════
+
+// ── WPM計算 ──
+// WPM = (打鍵した文字数 / 5) / 経過分
+let _wpmKeyCount = 0;
+let _wpmStartTs  = 0;
+
+function resetWPM() {
+  _wpmKeyCount = 0;
+  _wpmStartTs  = Date.now();
+  const el = document.getElementById('wpm-display');
+  if(el) el.textContent = '';
+}
+
+function addWPMKey() {
+  _wpmKeyCount++;
+  updateWPMDisplay();
+}
+
+function updateWPMDisplay() {
+  const el = document.getElementById('wpm-display');
+  if(!el) return;
+  const elapsed = (Date.now() - _wpmStartTs) / 60000; // 分
+  if(elapsed < 0.05) return; // 3秒未満は表示しない
+  const wpm = Math.round((_wpmKeyCount / 5) / elapsed);
+  el.textContent = `WPM ${wpm}`;
+  el.classList.remove('wpm-fast','wpm-mid','wpm-slow');
+  if(wpm >= 60)      el.classList.add('wpm-fast');
+  else if(wpm >= 30) el.classList.add('wpm-mid');
+  else               el.classList.add('wpm-slow');
+}
+
+function getCurrentWPM() {
+  const elapsed = (Date.now() - _wpmStartTs) / 60000;
+  if(elapsed < 0.01) return 0;
+  return Math.round((_wpmKeyCount / 5) / elapsed);
+}
+
+// ── 統計データ永続化 ──
+const LS_STATS_KEY = 'gunman_stats_v1';
+
+function loadStats() {
+  try {
+    return JSON.parse(localStorage.getItem(LS_STATS_KEY)) || {
+      totalPlays:   0,
+      totalKeys:    0,
+      totalHit:     0,
+      totalMiss:    0,
+      bestWPM:      0,
+      bestCombo:    0,
+      scoreHistory: [],  // 直近20件
+    };
+  } catch(e) {
+    return { totalPlays:0, totalKeys:0, totalHit:0, totalMiss:0, bestWPM:0, bestCombo:0, scoreHistory:[] };
+  }
+}
+
+function saveStats(st) {
+  try { localStorage.setItem(LS_STATS_KEY, JSON.stringify(st)); } catch(e) {}
+}
+
+function updateStats(gameResult) {
+  const st = loadStats();
+  st.totalPlays++;
+  st.totalKeys  += gameResult.keys   || 0;
+  st.totalHit   += gameResult.hit    || 0;
+  st.totalMiss  += gameResult.miss   || 0;
+  if((gameResult.wpm   || 0) > st.bestWPM)   st.bestWPM   = gameResult.wpm;
+  if((gameResult.combo || 0) > st.bestCombo) st.bestCombo = gameResult.combo;
+  st.scoreHistory.push({ score: gameResult.score, ts: Date.now() });
+  if(st.scoreHistory.length > 20) st.scoreHistory = st.scoreHistory.slice(-20);
+  saveStats(st);
+}
+
+// ── 統計画面描画 ──
+const scStats = document.getElementById('screen-stats');
+
+document.getElementById('btn-stats').addEventListener('click', () => {
+  scTitle.classList.add('hidden');
+  scStats.classList.remove('hidden');
+  renderStatsScreen();
+});
+document.getElementById('stats-btn-close').addEventListener('click', () => {
+  scStats.classList.add('hidden');
+  scTitle.classList.remove('hidden');
+});
+
+function renderStatsScreen() {
+  const st   = loadStats();
+  const list = loadRanking();
+  const duel = loadDuelRanking();
+
+  // サマリー
+  const totalGames = st.totalPlays;
+  const avgScore   = totalGames > 0
+    ? Math.round(list.reduce((s,e)=>s+e.score,0) / Math.min(list.length,10))
+    : 0;
+  const totalAcc = (st.totalHit + st.totalMiss) > 0
+    ? Math.round(st.totalHit / (st.totalHit + st.totalMiss) * 100)
+    : 0;
+  const bestStreak = duel.length > 0 ? duel[0].streak : 0;
+
+  document.getElementById('st-plays').textContent  = totalGames.toLocaleString();
+  document.getElementById('st-best').textContent   = (list[0]?.score || 0).toLocaleString();
+  document.getElementById('st-avg').textContent    = avgScore.toLocaleString();
+  document.getElementById('st-keys').textContent   = st.totalKeys.toLocaleString();
+  document.getElementById('st-acc').textContent    = totalAcc + '%';
+  document.getElementById('st-combo').textContent  = st.bestCombo;
+  document.getElementById('st-streak').textContent = bestStreak + '連';
+  document.getElementById('st-wpm').textContent    = st.bestWPM;
+
+  // スコア推移グラフ（Canvas）
+  drawScoreGraph(st.scoreHistory.slice(-10));
+
+  // TOP5
+  const bestEl = document.getElementById('stats-best-list');
+  const md = ['🥇','🥈','🥉','4位','5位'];
+  if(!list.length) {
+    bestEl.innerHTML = '<div style="color:#555;padding:8px;text-align:center">NO DATA</div>';
+  } else {
+    bestEl.innerHTML = list.slice(0,5).map((e,i) => `
+      <div class="stats-best-row">
+        <span>${md[i]} ${(e.name||'ANON').slice(0,8)}</span>
+        <span>${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} Lv${e.level}</span>
+        <span class="stats-best-val">${e.score.toLocaleString()} pts</span>
+      </div>
+    `).join('');
+  }
+}
+
+function drawScoreGraph(history) {
+  const canvas = document.getElementById('stats-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  // HiDPI対応
+  const dpr = window.devicePixelRatio || 1;
+  const W   = canvas.clientWidth  || 400;
+  const H   = canvas.clientHeight || 140;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+
+  ctx.clearRect(0, 0, W, H);
+
+  if(history.length < 2) {
+    ctx.fillStyle = '#5a3a10';
+    ctx.font = '12px Courier Prime, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('2ゲーム以上プレイすると表示されます', W/2, H/2);
+    return;
+  }
+
+  const scores = history.map(h => h.score);
+  const maxS   = Math.max(...scores, 100);
+  const minS   = Math.min(...scores);
+  const padX   = 40, padY = 16;
+  const gW     = W - padX * 2;
+  const gH     = H - padY * 2;
+
+  // グリッド線
+  ctx.strokeStyle = 'rgba(90,58,16,0.4)';
+  ctx.lineWidth   = 0.8;
+  for(let i=0;i<=4;i++){
+    const y = padY + (gH/4)*i;
+    ctx.beginPath(); ctx.moveTo(padX,y); ctx.lineTo(W-padX,y); ctx.stroke();
+  }
+
+  // 折れ線
+  const pts = scores.map((s,i) => ({
+    x: padX + (i/(scores.length-1)) * gW,
+    y: padY + gH - ((s - minS) / Math.max(maxS - minS, 1)) * gH,
+  }));
+
+  // グラデーション塗り
+  const grad = ctx.createLinearGradient(0, padY, 0, H-padY);
+  grad.addColorStop(0,   'rgba(212,162,39,0.3)');
+  grad.addColorStop(1,   'rgba(212,162,39,0)');
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, H-padY);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.lineTo(pts[pts.length-1].x, H-padY);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // 線
+  ctx.beginPath();
+  ctx.strokeStyle = '#d4a227';
+  ctx.lineWidth   = 2.5;
+  ctx.lineJoin    = 'round';
+  pts.forEach((p,i) => i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
+  ctx.stroke();
+
+  // 点
+  pts.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+    ctx.fillStyle   = '#d4a227';
+    ctx.strokeStyle = '#1a0a02';
+    ctx.lineWidth   = 1.5;
+    ctx.fill(); ctx.stroke();
+  });
+
+  // スコアラベル（最高・最低）
+  ctx.fillStyle  = '#d4a227';
+  ctx.font       = '11px Courier Prime, monospace';
+  ctx.textAlign  = 'right';
+  ctx.fillText(maxS.toLocaleString(), padX-4, padY+5);
+  ctx.fillStyle = '#a08060';
+  ctx.fillText(minS.toLocaleString(), padX-4, H-padY+4);
+}
+
+
+// ════════════════════════════════════════
+//  ♾️ ENDLESSモード ランキング
+// ════════════════════════════════════════
+const LS_ENDLESS_KEY = 'gunman_endless_v1';
+
+function loadEndlessRanking(){
+  try{ return JSON.parse(localStorage.getItem(LS_ENDLESS_KEY))||[]; }catch(e){ return []; }
+}
+function saveEndlessRanking(l){
+  try{ localStorage.setItem(LS_ENDLESS_KEY,JSON.stringify(l)); }catch(e){}
+}
+function addEndlessScore(entry){
+  const list=loadEndlessRanking();
+  list.push(entry);
+  // 生存時間順
+  list.sort((a,b)=>b.surviveSec-a.surviveSec);
+  const top10=list.slice(0,10);
+  const rank=top10.findIndex(e=>e===entry)+1;
+  saveEndlessRanking(top10);
+  return{rank,list:top10};
+}
+function renderEndlessRanking(list,myEntry,containerId){
+  const c=document.getElementById(containerId);
+  if(!c)return;
+  if(!list.length){c.innerHTML='<div style="padding:10px;text-align:center;color:#555">NO DATA YET</div>';return;}
+  const md=['🥇','🥈','🥉'];
+  c.innerHTML=list.map((e,i)=>{
+    const isMe=e===myEntry;
+    const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${isMe?' rk-new':''}`;
+    const m2=Math.floor((e.surviveSec||0)/60),s2=(e.surviveSec||0)%60;
+    const time=`${m2}:${String(s2).padStart(2,'0')}`;
+    return`<div class="${cls}">
+      <span class="rk-col rk-no">${md[i]||('#'+(i+1))}${isMe?' ◀':''}</span>
+      <span class="rk-name">${(e.name||'ANON').slice(0,8)}</span>
+      <span class="rk-col rk-score">${time}</span>
+      <span class="rk-col rk-meta">Lv${e.level} ${e.acc}% ${e.shotsHit}撃破</span>
+    </div>`;
+  }).join('');
+}
+
+// ── 統計画面にENDLESSランキングを表示 ──
+// renderStatsScreen を拡張してENDLESSも表示
+const _origRenderStats=renderStatsScreen;
+renderStatsScreen=function(){
+  _origRenderStats();
+  // ENDLESSベスト
+  const elist=loadEndlessRanking();
+  if(elist.length>0){
+    const el=document.getElementById('stats-best-list');
+    if(el){
+      const m2=Math.floor((elist[0].surviveSec||0)/60);
+      const s2=(elist[0].surviveSec||0)%60;
+      el.innerHTML+=`<div class="stats-best-row">
+        <span>♾️ ENDLESSベスト生存</span>
+        <span class="stats-best-val">${m2}:${String(s2).padStart(2,'0')}</span>
+      </div>`;
+    }
+  }
+};
+
+// ── btn-retry ENDLESSも対応 ──
+document.getElementById('btn-retry').addEventListener('click',()=>{
+  if(G.endless){ G.endless=true; startCountdown(); }
+  else startCountdown();
+});
+
+
+// ════════════════════════════════════════
+//  中断ボタン・確認ダイアログ（全モード共通）
+// ════════════════════════════════════════
+const btnQuit     = document.getElementById('btn-quit-game');
+const quitDialog  = document.getElementById('quit-dialog');
+
+function showQuitBtn(msg='') {
+  if(msg) document.getElementById('quit-dialog-sub').textContent = msg;
+  btnQuit.classList.add('visible');
+}
+function hideQuitBtn() {
+  btnQuit.classList.remove('visible');
+  quitDialog.classList.add('hidden');
+}
+
+btnQuit.addEventListener('click', () => {
+  quitDialog.classList.remove('hidden');
+});
+document.getElementById('quit-no').addEventListener('click', () => {
+  quitDialog.classList.add('hidden');
+  // ゲームにフォーカスを戻す
+  hiddenInput.focus();
+});
+document.getElementById('quit-yes').addEventListener('click', () => {
+  hideQuitBtn();
+  quitDialog.classList.add('hidden');
+  // 現在表示中の画面を確認して中断
+  const scDuelEl    = document.getElementById('screen-duel');
+  const scTAEl      = document.getElementById('screen-ta');
+  const scPracEl    = document.getElementById('screen-practice');
+
+  if(TA.phase==='playing' || (scTAEl && !scTAEl.classList.contains('hidden'))){
+    // TIME ATTACK
+    abortTimeAttack(); scTASetup.classList.add('hidden');
+  } else if(scTASetup && !scTASetup.classList.contains('hidden')){
+    scTASetup.classList.add('hidden');
+    scTitle.classList.remove('hidden'); renderTitleRanking();
+  } else if(D.phase !== 'idle' || (scDuelEl && !scDuelEl.classList.contains('hidden'))){
+    // DUEL（countdown/staredown/typing 全フェーズ対応）
+    D.phase = 'idle';
+    clearTimeout(D.rafId);
+    scDuelEl && scDuelEl.classList.add('hidden');
+    document.getElementById('screen-duel-result').classList.add('hidden');
+    stopBGM();
+    scTitle.classList.remove('hidden');
+    renderTitleRanking();
+  } else if(G.phase === 'playing'){
+    // SURVIVAL / ENDLESS
+    G.phase = 'title';
+    clearInterval(G.spawnTimer); clearInterval(G.gameTimer);
+    cancelAnimationFrame(G.rafId);
+    lane.innerHTML=''; G.activeTargets=[];
+    resetFlame(); stopBGM();
+    document.getElementById('screen-result').classList.add('hidden');
+    scTitle.classList.remove('hidden');
+    renderTitleRanking();
+  } else if(scPracEl && !scPracEl.classList.contains('hidden')){
+    // PRACTICE
+    hideQuitBtn();
+    scPracEl.classList.add('hidden');
+    scTitle.classList.remove('hidden');
+    renderTitleRanking();
+  }
+});
+
+// ESCキーでも確認ダイアログを開く（ゲーム中のみ）
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && btnQuit.classList.contains('visible') && quitDialog.classList.contains('hidden')) {
+    quitDialog.classList.remove('hidden');
+  }
+});
+
+// 各モード開始時にshowQuitBtn、終了時にhideQuitBtn を呼ぶ（既存関数を拡張）
+// startGame・startDuel・startTimeAttack・startPractice に組み込む
+
+// ════════════════════════════════════════
+//  ⚡ TIME ATTACK モード
+// ════════════════════════════════════════
+const LS_TA_KEY = 'gunman_timeattack_v1';
+function getTAKey(){ return `${LS_TA_KEY}_${TA.count}_${TA.diff}_${TA.lang}`; }
+
+// タイムアタック用固定単語リスト（難易度別・30語固定）
+const TA_WORDS = {
+  easy: [
+    'CAT','DOG','SUN','GUN','ACE','WIN','HIT','TOP','MAP','KEY',
+    'FIRE','GOLD','DRAW','SHOT','FAST','WILD','DARK','KICK','IRON','GRIT',
+    'HORSE','BADGE','BRAVE','SMOKE','STEEL','FLAME','GHOST','ARROW','SCOUT','TOWER'
+  ],
+  normal: [
+    'SHOOT','QUICK','HORSE','BADGE','SMOKE','STEEL','BRAVE','FLAME','GHOST','KNIFE',
+    'BANDIT','CANYON','DESERT','OUTLAW','COWBOY','SALOON','WANTED','BOUNTY','PATROL','RANGER',
+    'CACTUS','CORRAL','DEPUTY','GUNFIRE','JUSTICE','KINDLE','MAYHEM','ORDEAL','PARDON','QUARRY'
+  ],
+  hard: [
+    'REVOLVER','FRONTIER','STAMPEDE','HOLSTER','SHOWDOWN','WRANGLER','DESPERADO','CROSSFIRE','VIGILANTE','WINCHESTER',
+    'BANDOLIER','BUCKBOARD','STAGECOACH','RATTLESNAKE','PINKERTON','ARMADILLO','SANDSTORM','QUICKDRAW',
+    'ALLEGIANCE','BLACKSMITH','CENTENNIAL','DEMOLITION','ELOQUENCE','FAHRENHEIT','GENERATION','HEMISPHERE',
+    'ILLUMINATE','JUBILATION','LABYRINTH','MAGNIFICENT'
+  ],
+};
+const TA_WORDS_JP = {
+  easy: [
+    {k:'いぬ',r:'INU'},{k:'ねこ',r:'NEKO'},{k:'そら',r:'SORA'},{k:'うみ',r:'UMI'},
+    {k:'やま',r:'YAMA'},{k:'かわ',r:'KAWA'},{k:'はな',r:'HANA'},{k:'みず',r:'MIZU'},
+    {k:'かぜ',r:'KAZE'},{k:'もり',r:'MORI'},{k:'とり',r:'TORI'},{k:'くも',r:'KUMO'},
+    {k:'あめ',r:'AME'},{k:'ゆき',r:'YUKI'},{k:'はる',r:'HARU'},{k:'なつ',r:'NATU'},
+    {k:'さかな',r:'SAKANA'},{k:'うさぎ',r:'USAGI'},{k:'りんご',r:'RINGO'},{k:'みかん',r:'MIKAN'},
+    {k:'にわ',r:'NIWA'},{k:'いわ',r:'IWA'},{k:'まち',r:'MATI'},{k:'ふね',r:'HUNE'},
+    {k:'いろ',r:'IRO'},{k:'かお',r:'KAO'},{k:'てら',r:'TERA'},{k:'ほし',r:'HOSI'},
+    {k:'いし',r:'ISI'},{k:'むし',r:'MUSI'}
+  ],
+  normal: [
+    {k:'かたな',r:'KATANA'},{k:'さむらい',r:'SAMURAI'},{k:'にんじゃ',r:'NINZYA'},
+    {k:'まつり',r:'MATURI'},{k:'さくら',r:'SAKURA'},{k:'こころ',r:'KOKORO'},
+    {k:'ちから',r:'TIKARA'},{k:'ひかり',r:'HIKARI'},{k:'はやて',r:'HAYATE'},
+    {k:'たいよう',r:'TAIYOU'},{k:'かみなり',r:'KAMINARI'},{k:'むらさき',r:'MURASAKI'},
+    {k:'ともだち',r:'TOMODATI'},{k:'がっこう',r:'GAKKOU'},{k:'せんせい',r:'SENSEI'},
+    {k:'たべもの',r:'TABEMONO'},{k:'のみもの',r:'NOMIMONO'},{k:'おまつり',r:'OMATURI'},
+    {k:'はなび',r:'HANABI'},{k:'ふるさと',r:'HURUSATO'},{k:'にじいろ',r:'NIZIIRO'},
+    {k:'おおかみ',r:'OOKAMI'},{k:'かわいい',r:'KAWAII'},{k:'たのしい',r:'TANOSII'},
+    {k:'やさしい',r:'YASASII'},{k:'うつくしい',r:'UTUKUSII'},{k:'おもしろい',r:'OMOSIROI'},
+    {k:'あたらしい',r:'ATARASII'},{k:'すばらしい',r:'SUBARASHII'},{k:'むずかしい',r:'MUZUKASII'}
+  ],
+  hard: [
+    {k:'しんかんせん',r:'SINKANSEN'},{k:'かくめいてき',r:'KAKUMEITEKI'},
+    {k:'でんこうせっか',r:'DENKOSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
+    {k:'さんかくけい',r:'SANKAKUKEI'},{k:'おんがくしつ',r:'ONGAKUSITU'},
+    {k:'としょかん',r:'TOSYOKAN'},{k:'はくぶつかん',r:'HAKUBUTSUKAN'},
+    {k:'びじゅつかん',r:'BIZUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
+    {k:'やきゅうじょう',r:'YAKYUUZYO'},{k:'かんらんしゃ',r:'KANRANSYA'},
+    {k:'ゆうえんち',r:'YUUENTI'},{k:'しんりがく',r:'SINRIGAKU'},
+    {k:'にほんごにゅうりょく',r:'NIHONGONYUURYOKU'},
+    {k:'けんきゅうしつ',r:'KENKYUUSITU'},{k:'さんすうのもんだい',r:'SANSUUNOMONDAI'},
+    {k:'こうきょうほうそう',r:'KOUKYOUHOUNSOU'},{k:'でんきじどうしゃ',r:'DENKIZIDOUSYA'},
+    {k:'きんきゅうじたい',r:'KINKYUUZITAI'},
+    {k:'ちきゅうおんだんか',r:'TIKYUUONDANKA'},{k:'じょうほうしょり',r:'ZYOUHOUTYORI'},
+    {k:'ひこうきのりば',r:'HIKOUKINORIBA'},{k:'でんしゃのていりゅうじょ',r:'DENSYANOTEIRYUUZYO'},
+    {k:'おおさかのなにわ',r:'OOSAKANANANIWA'},{k:'やまとことば',r:'YAMATOKOTOBA'},
+    {k:'たんぽぽのわた',r:'TANPONOWANOWATA'},{k:'さくらのはなびら',r:'SAKURANOHANABIRA'},
+    {k:'ふじさんのちょうじょう',r:'HUZISANNOTYOUZYO'},{k:'にほんいちたかいやま',r:'NIHONITIATAKAIYAMA'}
+  ],
+};
+
+// タイムアタック状態
+const TA = {
+  phase:   'idle',
+  diff:    'easy',
+  lang:    'en',
+  count:   10,    // 問題数 (5/10/20/30)
+  words:   [],
+  current: 0,
+  typed:   '',
+  hit:     0,
+  miss:    0,
+  startTs: 0,
+  elapsed: 0,
+  timerRaf: null,
+};
+
+const scTA       = document.getElementById('screen-ta');
+const scTAResult = document.getElementById('screen-ta-result');
+
+function loadTARanking(){try{return JSON.parse(localStorage.getItem(getTAKey()))||[];}catch(e){return[];}}
+function saveTARanking(l){try{localStorage.setItem(getTAKey(),JSON.stringify(l));}catch(e){}}
+function addTAScore(entry){
+  const list=loadTARanking();
+  list.push(entry);
+  list.sort((a,b)=>a.timeMs-b.timeMs); // 時間が短い順
+  const top10=list.slice(0,10);
+  const rank=top10.findIndex(e=>e===entry)+1;
+  saveTARanking(top10);
+  return{rank,list:top10};
+}
+
+function openTimeAttackSetup(){
+  scTitle.classList.add('hidden');
+  document.getElementById('screen-ta-setup').classList.remove('hidden');
+  renderTASetupRanking();
+}
+function renderTASetupRanking(){
+  const key  = `${LS_TA_KEY}_${TA.count}_${G.diff}_${G.lang}`;
+  let list; try{ list=JSON.parse(localStorage.getItem(key))||[]; }catch(e){ list=[]; }
+  const el = document.getElementById('ta-setup-ranking-list');
+  if(!el) return;
+  if(!list.length){ el.innerHTML='<div style="padding:6px 8px;color:#555;text-align:center">NO DATA YET</div>'; return; }
+  const md=['🥇','🥈','🥉'];
+  el.innerHTML = list.slice(0,5).map((e,i)=>{
+    const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}`;
+    return`<div class="${cls}"><span class="rk-col rk-no">${md[i]||('#'+(i+1))}</span><span class="rk-name">${(e.name||'ANON').slice(0,8)}</span><span class="rk-col rk-score">${(e.timeMs/1000).toFixed(2)}s</span><span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} ${e.acc}%</span></div>`;
+  }).join('');
+}
+function startTimeAttack(){
+  TA.diff  = G.diff;
+  TA.lang  = G.lang;
+  TA.phase = 'playing';
+  TA.hit   = 0; TA.miss = 0; TA.current = 0; TA.typed = '';
+
+  // 単語リスト（言語・難易度に応じて）
+  const fullPool = TA.lang==='jp' ? TA_WORDS_JP[TA.diff] : TA_WORDS[TA.diff].map(w=>({k:null,r:w}));
+  // シャッフルして指定問題数を取得
+  const shuffled = [...fullPool].sort(()=>Math.random()-0.5);
+  TA.words = shuffled.slice(0, Math.min(TA.count, shuffled.length));
+
+  scTitle.classList.add('hidden');
+  scTA.classList.remove('hidden');
+  showQuitBtn('タイムアタックを中断します');
+
+  // カウントダウン（3,2,1）
+  const cdEl = document.getElementById('countdown-num');
+  const seq = ['3','2','1','GO!'];
+  let i = 0;
+  const tick = ()=>{
+    cdEl.textContent=seq[i];
+    cdEl.classList.remove('fade'); void cdEl.offsetWidth; cdEl.classList.add('show');
+    sfxCountBeep(seq[i]==='GO!');
+    setTimeout(()=>{
+      cdEl.classList.remove('show'); cdEl.classList.add('fade');
+      i++;
+      if(i<seq.length) setTimeout(tick,320);
+      else {
+        TA.startTs = Date.now();
+        showTACard(0);
+        startTATimer();
+        hiddenInput.focus();
+      }
+    },680);
+  };
+  tick();
+}
+
+function startTATimer(){
+  const update=()=>{
+    if(TA.phase!=='playing') return;
+    TA.elapsed = Date.now()-TA.startTs;
+    const sec = (TA.elapsed/1000).toFixed(2);
+    const timerEl = document.getElementById('ta-timer');
+    if(timerEl){
+      timerEl.textContent = sec + 's';
+      timerEl.classList.toggle('ta-danger', TA.elapsed > 60000);
+    }
+    TA.timerRaf = requestAnimationFrame(update);
+  };
+  TA.timerRaf = requestAnimationFrame(update);
+}
+
+function showTACard(idx){
+  const wrap = document.getElementById('ta-card-wrap');
+  if(!wrap) return;
+  wrap.innerHTML='';
+
+  const entry = TA.words[idx];
+  const word  = entry.r;
+  const kana  = entry.k;
+
+  const el = document.createElement('div');
+  el.className = 'prac-card appear';
+  el.style.cssText='width:min(480px,90vw);min-height:280px;justify-content:center;';
+  el.innerHTML=`
+    <div class="prac-card-svg">${TARGET_SVGS[idx%TARGET_SVGS.length](200)}</div>
+    ${kana?`<div class="prac-card-kana" style="font-size:clamp(2rem,4vw,3rem)">${kana}</div>`:''}
+    <div class="prac-card-word" style="font-size:clamp(1.8rem,3.5vw,2.8rem)">
+      <span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span>
+    </div>
+  `;
+  wrap.appendChild(el);
+
+  // 進捗バー・カウンター
+  const pct = Math.round(idx/TA.words.length*100);
+  const fill=document.getElementById('ta-progress-fill');
+  if(fill) fill.style.width=pct+'%';
+  const cnt=document.getElementById('ta-counter');
+  if(cnt) cnt.textContent=`${idx+1} / ${TA.words.length}`;
+}
+
+function handleTAChar(ch){
+  if(TA.phase!=='playing') return;
+  const entry = TA.words[TA.current];
+  const word  = entry.r;
+  const expected = word[TA.typed.length];
+
+  if(ch===expected){
+    TA.typed+=ch; TA.hit++;
+    // 表示更新
+    const w=document.getElementById('ta-card-wrap').querySelector('.prac-card-word');
+    if(w) w.innerHTML=`<span class="typed">${TA.typed}</span><span class="cursor"></span><span class="remain">${word.slice(TA.typed.length)}</span>`;
+    updateTAStats();
+
+    if(TA.typed===word){
+      sfxGunshot(0);
+      TA.current++;
+      TA.typed='';
+      if(TA.current>=TA.words.length){
+        finishTimeAttack();
+      } else {
+        setTimeout(()=>showTACard(TA.current), 300);
+      }
+    }
+  } else {
+    TA.miss++;
+    sfxMiss(); flashScreen();
+    updateTAStats();
+    const wrap=document.getElementById('ta-card-wrap').querySelector('.prac-card');
+    if(wrap){ wrap.classList.remove('miss-shake-prac'); void wrap.offsetWidth; wrap.classList.add('miss-shake-prac'); setTimeout(()=>wrap.classList.remove('miss-shake-prac'),280); }
+  }
+}
+
+function updateTAStats(){
+  const total=TA.hit+TA.miss;
+  const acc=total>0?Math.round(TA.hit/total*100):'--';
+  document.getElementById('ta-hit-disp').textContent  = 'HIT: '+TA.hit;
+  document.getElementById('ta-miss-disp').textContent = 'MISS: '+TA.miss;
+  document.getElementById('ta-acc-disp').textContent  = 'ACC: '+acc+'%';
+}
+
+function finishTimeAttack(){
+  TA.phase='done';
+  cancelAnimationFrame(TA.timerRaf);
+  hideQuitBtn();
+  sfxLevelUp();
+  scTA.classList.add('hidden');
+
+  const timeMs = TA.elapsed;
+  const sec    = (timeMs/1000).toFixed(2);
+  const total  = TA.hit+TA.miss;
+  const acc    = total>0?Math.round(TA.hit/total*100):100;
+  const fill=document.getElementById('ta-progress-fill');
+  if(fill) fill.style.width='100%';
+
+  showNameModal(0, (playerName)=>{
+    const entry={timeMs,name:playerName,diff:TA.diff,lang:TA.lang,acc,miss:TA.miss,ts:Date.now()};
+    const{rank,list}=addTAScore(entry);
+
+    document.getElementById('ta-result-title').textContent='⚡ CLEAR!';
+    document.getElementById('ta-result-time').textContent=sec+'s';
+    const badge=document.getElementById('ta-rank-badge');
+    const md=['🥇 1ST','🥈 2ND','🥉 3RD'];
+    if(rank>=1&&rank<=3){badge.textContent=md[rank-1]+' PLACE!';badge.style.color=['#ffd700','#c0c0c0','#cd7f32'][rank-1];}
+    else if(rank>0){badge.textContent='#'+rank+' PLACE';badge.style.color='var(--sand)';}
+    document.getElementById('ta-result-detail').innerHTML=
+      `${TA.lang==='jp'?'🇯🇵':'🔤'} ${TA.diff.toUpperCase()} &nbsp;|&nbsp; `+
+      `${TA.count}問 &nbsp; MISS: ${TA.miss} &nbsp; ACC: ${acc}%`;
+    renderTARanking(list,entry);
+    scTAResult.classList.remove('hidden');
+  });
+}
+
+function renderTARanking(list,myEntry){
+  const c=document.getElementById('ta-ranking-list');
+  if(!c) return;
+  const md=['🥇','🥈','🥉'];
+  if(!list.length){c.innerHTML='<div style="padding:8px;text-align:center;color:#555">NO DATA YET</div>';return;}
+  c.innerHTML=list.map((e,i)=>{
+    const isMe=e===myEntry;
+    const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${isMe?' rk-new':''}`;
+    return`<div class="${cls}">
+      <span class="rk-col rk-no">${md[i]||('#'+(i+1))}${isMe?' ◀':''}</span>
+      <span class="rk-name">${(e.name||'ANON').slice(0,8)}</span>
+      <span class="rk-col rk-score">${(e.timeMs/1000).toFixed(2)}s</span>
+      <span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} ${e.acc}%</span>
+    </div>`;
+  }).join('');
+}
+
+function abortTimeAttack(){
+  TA.phase='idle';
+  cancelAnimationFrame(TA.timerRaf);
+  hideQuitBtn();
+  scTA.classList.add('hidden');
+  scTAResult.classList.add('hidden');
+  scTitle.classList.remove('hidden');
+  renderTitleRanking();
+}
+
+
+// ── タイムアタック設定画面 ──
+const scTASetup = document.getElementById('screen-ta-setup');
+
+// 問題数ボタン
+document.querySelectorAll('[data-count]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('[data-count]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    TA.count = parseInt(b.dataset.count);
+    document.getElementById('ta-count-disp').textContent = TA.count + '問';
+    renderTASetupRanking();
+  });
+});
+
+document.getElementById('ta-setup-start').addEventListener('click',()=>{
+  scTASetup.classList.add('hidden');
+  startTimeAttack();
+});
+document.getElementById('ta-setup-back').addEventListener('click',()=>{
+  scTASetup.classList.add('hidden');
+  scTitle.classList.remove('hidden');
+  renderTitleRanking();
+});
+// 問題数表示を結果画面でも
+
+document.getElementById('ta-btn-retry').addEventListener('click',()=>{
+  scTAResult.classList.add('hidden');
+  scTASetup.classList.remove('hidden');
+  renderTASetupRanking();
+});
+document.getElementById('ta-btn-title').addEventListener('click',()=>{
+  scTAResult.classList.add('hidden');
+  scTitle.classList.remove('hidden');
+  renderTitleRanking();
+});
+
+// ── input ハンドラに TA を追加 ──
+// （既存のinputハンドラを拡張）
+
+
+// ════════════════════════════════════════
+//  PHASE 9: ボス的・的バリエーション
+// ════════════════════════════════════════
+
+// ── ボス的の状態 ──
+const BOSS = {
+  active:    false,   // ボス出現中か
+  hp:        3,       // ボスのHP（複数単語で撃破）
+  maxHp:     3,
+  targetId:  null,    // ボス的のID
+  nextBossAt: 0,      // 次のボスが出るレベル
+};
+
+// ── 拡張SVGシルエット（的バリエーション追加）──
+// 既存4種 + 新2種（帽子あり・ガンベルト装備）
+const TARGET_SVGS_EXTRA = [
+  // TYPE E: 大柄ガンマン（帽子付き）
+  (h) => `<svg width="${Math.round(h*0.65)}" height="${h}" viewBox="0 0 65 110" xmlns="http://www.w3.org/2000/svg">
+    <!-- 帽子 -->
+    <rect x="14" y="2" width="37" height="6" rx="2" fill="#111"/>
+    <rect x="18" y="7" width="29" height="11" rx="3" fill="#111"/>
+    <!-- 頭 -->
+    <ellipse cx="32.5" cy="23" rx="11" ry="11" fill="#111"/>
+    <!-- 胴体 -->
+    <ellipse cx="32.5" cy="52" rx="20" ry="24" fill="#111"/>
+    <!-- 的 -->
+    <ellipse cx="32.5" cy="52" rx="14" ry="18" fill="none" stroke="#fff" stroke-width="1.3"/>
+    <ellipse cx="32.5" cy="52" rx="9"  ry="12" fill="none" stroke="#fff" stroke-width="1"/>
+    <ellipse cx="32.5" cy="52" rx="4"  ry="6"  fill="none" stroke="#fff" stroke-width="0.9"/>
+    <ellipse cx="32.5" cy="52" rx="2"  ry="3"  fill="#cc2020"/>
+    <!-- 腕 -->
+    <rect x="3"  y="36" width="9" height="28" rx="4.5" fill="#111" transform="rotate(-8,7.5,50)"/>
+    <rect x="53" y="36" width="9" height="28" rx="4.5" fill="#111" transform="rotate(8,57.5,50)"/>
+    <!-- 足 -->
+    <rect x="22" y="72" width="9" height="34" rx="4.5" fill="#111" transform="rotate(-5,26.5,89)"/>
+    <rect x="34" y="72" width="9" height="34" rx="4.5" fill="#111" transform="rotate(5,38.5,89)"/>
+  </svg>`,
+
+  // TYPE F: 小柄スナイパー（伏せ撃ちポーズ）
+  (h) => `<svg width="${Math.round(h*0.8)}" height="${h*0.7}" viewBox="0 0 80 70" xmlns="http://www.w3.org/2000/svg">
+    <!-- 頭 -->
+    <ellipse cx="10" cy="15" rx="9" ry="9" fill="#111"/>
+    <!-- 胴体（横向き） -->
+    <ellipse cx="38" cy="28" rx="26" ry="14" fill="#111"/>
+    <!-- 的 -->
+    <ellipse cx="38" cy="28" rx="18" ry="10" fill="none" stroke="#fff" stroke-width="1.2"/>
+    <ellipse cx="38" cy="28" rx="11" ry="7"  fill="none" stroke="#fff" stroke-width="1"/>
+    <ellipse cx="38" cy="28" rx="5"  ry="3"  fill="none" stroke="#fff" stroke-width="0.9"/>
+    <ellipse cx="38" cy="28" rx="2"  ry="1.5" fill="#cc2020"/>
+    <!-- 腕（前方に伸ばして銃を構える） -->
+    <rect x="55" y="23" width="24" height="7" rx="3.5" fill="#111"/>
+    <!-- 銃 -->
+    <rect x="76" y="21" width="4"  height="6" rx="1" fill="#222"/>
+    <!-- 足（折りたたみ） -->
+    <rect x="15" y="36" width="8" height="22" rx="4" fill="#111" transform="rotate(-40,19,47)"/>
+    <rect x="25" y="40" width="8" height="22" rx="4" fill="#111" transform="rotate(-20,29,51)"/>
+  </svg>`,
+];
+
+// 全SVGを結合（6種類）
+const ALL_SVG = [...TARGET_SVGS, ...TARGET_SVGS_EXTRA];
+
+// ── ボス出現チェック（レベルアップ時に呼ぶ）──
+function checkBossSpawn() {
+  if(BOSS.active) return;
+  // Lv5, 10, 15, 20... でボス出現
+  if(G.level >= 5 && G.level % 5 === 0 && G.level > BOSS.nextBossAt) {
+    BOSS.nextBossAt = G.level;
+    spawnBoss();
+  }
+}
+
+// ── ボス的を生成 ──
+function spawnBoss() {
+  if(G.phase !== 'playing') return;
+  BOSS.active   = true;
+  BOSS.maxHp    = Math.min(3 + Math.floor(G.level / 5), 7);
+  BOSS.hp       = BOSS.maxHp;
+  BOSS.targetId = G.nextId++;
+
+  // 警告バナー
+  const banner = document.getElementById('boss-banner');
+  banner.textContent = `💀 BOSS Lv.${G.level}`;
+  banner.classList.add('show');
+  sfxDamage(); // 警告SE
+  setTimeout(() => banner.classList.remove('show'), 2000);
+
+  // ボスHPバー表示
+  const bossBar = document.getElementById('boss-hp-bar');
+  bossBar.classList.add('visible');
+  updateBossHPBar();
+
+  // ボス単語（レベルに応じた長い単語）
+  const bossWords = G.lang === 'jp'
+    ? getJPPool(Math.min(G.level + 2, 5))
+    : getWordPool(Math.min(G.level + 2, 9));
+  const pool = G.lang === 'jp'
+    ? bossWords.map(e => ({word: e.r, kana: e.k}))
+    : bossWords.map(w => ({word: w, kana: null}));
+  const entry = pool[Math.floor(Math.random() * pool.length)];
+  const word = entry.word;
+  const kana = entry.kana;
+
+  // 大きめのボス的（スケール大）
+  const baseH  = 420;
+  const baseW  = Math.round(baseH * 0.65);
+  const laneX  = LANES[Math.floor(LANES.length / 2)]; // 中央レーン
+  const laneW  = lane.offsetWidth || window.innerWidth;
+  const startX = laneW + 20;
+  const advanceMs = Math.max(3500,
+    DIFF[G.diff].advanceSec * 1000 * 1.4 - (G.level - 1) * 200);
+
+  const el = document.createElement('div');
+  el.className    = 'target-wrap walking is-boss';
+  el.dataset.id   = BOSS.targetId;
+  el.style.position      = 'absolute';
+  el.style.top           = '0px';
+  el.style.left          = '0px';
+  el.style.transformOrigin = 'center bottom';
+
+  const wHTML = kana
+    ? `<div class="target-kana">${kana}</div>
+       <div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`
+    : `<div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`;
+
+  el.innerHTML = `
+    <div>${ALL_SVG[4](baseH)}</div>
+    <div class="target-timer"><div class="target-timer-bar"></div></div>
+    ${wHTML}
+  `;
+  lane.appendChild(el);
+
+  const t = {
+    id: BOSS.targetId, word, typed: '', el,
+    advanceMs, startTime: Date.now(), expired: false,
+    laneX, laneIdx: 2, baseH, baseW,
+    isBoss: true,
+  };
+  G.activeTargets.push(t);
+  G.focused = BOSS.targetId;
+  updateFocusClass();
+}
+
+// ── ボスHP更新 ──
+function updateBossHPBar() {
+  const inner = document.getElementById('boss-hp-inner');
+  if(inner) inner.style.width = (BOSS.hp / BOSS.maxHp * 100) + '%';
+}
+
+// ── ボスHPバー非表示 ──
+function hideBossHPBar() {
+  BOSS.active = false;
+  BOSS.targetId = null;
+  const bossBar = document.getElementById('boss-hp-bar');
+  bossBar.classList.remove('visible');
+}
+
+// ── onWordComplete を拡張してボス対応 ──
+// 既存のonWordCompleteをラップ
+const _origOnWordComplete = onWordComplete;
+onWordComplete = function(t) {
+  if(t.isBoss) {
+    // ボス: HP減少
+    BOSS.hp--;
+    updateBossHPBar();
+
+    // ヒットSE（より派手に）
+    sfxGunshot(G.combo + 3);
+    flashScreen('#660000');
+
+    // ポップアップ
+    showPop(t.el, `BOSS HIT! ❤️×${BOSS.hp}`, '#ff4020');
+
+    if(BOSS.hp <= 0) {
+      // ボス撃破！
+      t.expired = true;
+      G.shotsHit++;
+      G.combo++;
+      if(G.combo > G.maxCombo) G.maxCombo = G.combo;
+
+      const pts = (t.word.length * 10 + G.level * 5) * 5; // ×5ボーナス
+      G.score += pts;
+      updateHUD();
+      maybeShowNewRecord();
+
+      sfxLevelUp();
+      showPop(t.el, `BOSS DOWN!! +${pts} 🌟`, '#ffd700');
+
+      // 爆発アニメ
+      t.el.classList.remove('walking');
+      t.el.classList.add('boss-shot');
+      setTimeout(() => {
+        t.el.remove();
+        removeTarget(t.id);
+        hideBossHPBar();
+      }, 750);
+
+      // 画面フラッシュ
+      flashScreen('#ffaa00');
+
+    } else {
+      // ボス耐えた：次の単語を再設定
+      const bossWords = G.lang === 'jp'
+        ? getJPPool(Math.min(G.level + 2, 5))
+        : getWordPool(Math.min(G.level + 2, 9));
+      const pool = G.lang === 'jp'
+        ? bossWords.map(e => ({word: e.r, kana: e.k}))
+        : bossWords.map(w => ({word: w, kana: null}));
+      const entry = pool[Math.floor(Math.random() * pool.length)];
+
+      t.word  = entry.word;
+      t.typed = '';
+      const kana = entry.kana || null;
+
+      const wEl = t.el.querySelector('.target-word');
+      if(wEl) wEl.innerHTML = `<span class="typed"></span><span class="cursor"></span><span class="remain">${t.word}</span>`;
+      const kEl = t.el.querySelector('.target-kana');
+      if(kEl && kana) kEl.textContent = kana;
+
+      // ヒットアニメ（点滅）
+      t.el.style.animation = 'bossWarn 0.3s ease-in-out 2';
+      setTimeout(() => t.el.style.animation = '', 700);
+
+      G.shotsHit++;
+      G.combo++;
+      if(G.combo > G.maxCombo) G.maxCombo = G.combo;
+      updateHUD();
+      maybeShowNewRecord();
+    }
+    return;
+  }
+  // 通常の敵
+  _origOnWordComplete(t);
+};
+
+// ── startGame にボスリセット追加 ──
+const _origStartGame = startGame;
+// BOSS状態をリセットする処理をendGame前に追加
+function resetBoss() {
+  BOSS.active    = false;
+  BOSS.hp        = 3;
+  BOSS.targetId  = null;
+  BOSS.nextBossAt = 0;
+  hideBossHPBar();
+}
+
+// ── onWordComplete の中でcheckBossSpawnを呼ぶ ──
+// （レベルアップ時に呼ばれるsfxLevelUpの後に挿入）
+const _origSfxLevelUp = sfxLevelUp;
+sfxLevelUp = function() {
+  _origSfxLevelUp();
+  // SURVIVALまたはENDLESSのプレイ中のみボスチェック
+  if(G.phase === 'playing') {
+    setTimeout(checkBossSpawn, 500); // 少し遅延させてレベルアップ演出後に
+  }
+};
+
+// ── spawnTargetを拡張SVGに対応 ──
+// 既存のspawnTargetで使うTARGET_SVGSをALL_SVGに置き換え
+const _origSpawnTarget = spawnTarget;
+spawnTarget = function() {
+  if(G.phase !== 'playing') return;
+  const cfg    = DIFF[G.diff];
+  const isJP   = G.lang === 'jp';
+  const id     = G.nextId++;
+  // 全6種類からランダム（ボスは除く）
+  const svgIdx = Math.floor(Math.random() * ALL_SVG.length);
+  let laneIdx;
+  do { laneIdx = Math.floor(Math.random() * LANES.length); }
+  while(G.activeTargets.length > 0 &&
+        G.activeTargets[G.activeTargets.length-1].laneIdx === laneIdx &&
+        Math.random() < 0.6);
+  const laneX = LANES[laneIdx];
+
+  let word, kana = null;
+  if(isJP){
+    const pool = getJPPool(G.level);
+    const e    = pool[Math.floor(Math.random()*pool.length)];
+    word = e.r; kana = e.k;
+  } else {
+    const pool = G.level >= 4 ? getWordPoolMixed(G.level) : getWordPool(G.level);
+    word = pool[Math.floor(Math.random()*pool.length)];
+  }
+
+  const advanceMs = Math.max(2500, cfg.advanceSec*1000-(G.level-1)*300);
+  const baseH = 360;
+  const baseW = Math.round(baseH*0.6);
+
+  const el = document.createElement('div');
+  el.className = 'target-wrap walking';
+  el.dataset.id = id;
+  el.style.position      = 'absolute';
+  el.style.top           = '0px';
+  el.style.left          = '0px';
+  el.style.transformOrigin = 'center bottom';
+
+  const wHTML = isJP
+    ? `<div class="target-kana">${kana}</div>
+       <div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`
+    : `<div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`;
+
+  el.innerHTML = `
+    <div>${ALL_SVG[svgIdx](baseH)}</div>
+    <div class="target-timer"><div class="target-timer-bar"></div></div>
+    ${wHTML}
+  `;
+  lane.appendChild(el);
+
+  const t = {
+    id, word, typed:'', el, advanceMs,
+    startTime: Date.now(), expired: false,
+    laneX, laneIdx, baseH, baseW, isBoss: false,
+  };
+  G.activeTargets.push(t);
+  if(!G.focused) G.focused = id;
+  updateFocusClass();
+};
 
 </script>
 </body>
