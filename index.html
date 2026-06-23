@@ -1690,107 +1690,161 @@ function sfxLevelUp(){const c=getACtx(),t=c.currentTime,g=c.createGain();g.conne
 function sfxGameOver(){const c=getACtx(),t=c.currentTime,g=c.createGain();g.connect(c.destination);g.gain.setValueAtTime(0.5,t);[392,349,311,261].forEach((f,i)=>{const o=c.createOscillator(),og=c.createGain();o.type='sine';o.frequency.value=f;o.connect(og);og.connect(g);og.gain.setValueAtTime(0,t+i*0.18);og.gain.linearRampToValueAtTime(0.7,t+i*0.18+0.02);og.gain.exponentialRampToValueAtTime(0.001,t+i*0.18+0.35);o.start(t+i*0.18);o.stop(t+i*0.18+0.4);});}
 function sfxCountBeep(isGo=false){const c=getACtx(),t=c.currentTime,g=c.createGain();g.connect(c.destination);const o=c.createOscillator();o.type=isGo?'triangle':'sine';o.frequency.value=isGo?880:440;o.connect(g);g.gain.setValueAtTime(isGo?0.5:0.3,t);g.gain.exponentialRampToValueAtTime(0.001,isGo?t+0.5:t+0.12);o.start(t);o.stop(isGo?t+0.55:t+0.15);}
 let _bgmGain=null,_bgmNode=null;
-function startBGM(){
+function startBGM(type='survival'){
   stopBGM();
-  const c=getACtx();
-  const now=c.currentTime;
-
-  // マスターゲイン（メロディが主役になる音量設定）
+  if(_muted) return;
+  const c=getACtx(), now=c.currentTime;
   _bgmGain=c.createGain();
   _bgmGain.gain.setValueAtTime(0,now);
-  _bgmGain.gain.linearRampToValueAtTime(1.0, now+2.0); // マスターは1.0に固定
+  _bgmGain.gain.linearRampToValueAtTime(1.0,now+1.8);
   _bgmGain.connect(c.destination);
-
-  // 環境ノイズ: 完全削除（ザー音の原因）
   _bgmNode={};
 
-  // ── 低音ベース: リズムのキックのみ ──
+  // ── 共通ユーティリティ ──
+  let _noiseBuf2=null;
+  function nb(){
+    if(_noiseBuf2) return _noiseBuf2;
+    const b=c.createBuffer(1,c.sampleRate,c.sampleRate),d=b.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+    return _noiseBuf2=b;
+  }
+  function o(type,freq,t,dur,vol,vr=0,vd=0){
+    const osc=c.createOscillator(),og=c.createGain();
+    osc.type=type; osc.frequency.value=freq;
+    if(vr>0){const lfo=c.createOscillator(),lg=c.createGain();lfo.frequency.value=vr;lg.gain.value=vd;lfo.connect(lg);lg.connect(osc.frequency);lfo.start(t);lfo.stop(t+dur);}
+    osc.connect(og); og.connect(_bgmGain);
+    og.gain.setValueAtTime(0,t);
+    og.gain.linearRampToValueAtTime(vol,t+Math.min(0.05,dur*0.1));
+    og.gain.setValueAtTime(vol*0.75,t+dur*0.6);
+    og.gain.exponentialRampToValueAtTime(0.001,t+dur*0.92);
+    osc.start(t); osc.stop(t+dur);
+  }
+  function sq(notes,t0,vol,wave,vr=0,vd=0){let t=t0;notes.forEach(([f,d])=>{if(f>0)o(wave,f,t,d,vol,vr,vd);t+=d;});return t;}
+  function kick(t,v=0.5){const osc=c.createOscillator(),g=c.createGain();osc.type='sine';osc.frequency.setValueAtTime(100,t);osc.frequency.exponentialRampToValueAtTime(25,t+0.18);osc.connect(g);g.connect(_bgmGain);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.22);osc.start(t);osc.stop(t+0.25);}
+  function snare(t,v=0.15){const ns=c.createBufferSource(),nf=c.createBiquadFilter(),ng=c.createGain();ns.buffer=nb();nf.type='bandpass';nf.frequency.value=1200;nf.Q.value=1.2;ns.connect(nf);nf.connect(ng);ng.connect(_bgmGain);ng.gain.setValueAtTime(v,t);ng.gain.exponentialRampToValueAtTime(0.001,t+0.1);ns.start(t);ns.stop(t+0.12);}
+  function hihat(t,v=0.04){const ns=c.createBufferSource(),nf=c.createBiquadFilter(),ng=c.createGain();ns.buffer=nb();nf.type='highpass';nf.frequency.value=8000;ns.connect(nf);nf.connect(ng);ng.connect(_bgmGain);ng.gain.setValueAtTime(v,t);ng.gain.exponentialRampToValueAtTime(0.001,t+0.04);ns.start(t);ns.stop(t+0.05);}
+  function loop(fn,dur,margin=200){function run(){if(!_bgmGain)return;fn(c.currentTime+0.05);_bgmGain._loopTimer=setTimeout(run,dur*1000-margin);}run();}
 
-  // ── 西部劇メロディー（音量大幅アップ） ──
-  // A: メインテーマ
-  const melodyA=[
-    [392,0.5],[0,0.2],[392,0.25],[440,0.5],[392,0.5],[349,0.35],[0,0.4],
-    [392,0.5],[0,0.2],[440,0.35],[494,0.4],[440,0.35],[392,0.8],[0,0.6],
-    [330,0.4],[349,0.35],[392,0.45],[0,0.25],[440,0.5],[392,0.4],[349,0.6],[0,1.0],
-  ];
-  // B: 緊張感パート（高めのピッチで明瞭に）
-  const melodyB=[
-    [523,0.25],[0,0.1],[523,0.25],[0,0.1],[587,0.4],[523,0.35],[0,0.35],
-    [523,0.25],[0,0.1],[587,0.25],[0,0.1],[659,0.5],[0,0.25],[587,0.35],[523,0.45],[0,0.7],
-    [440,0.35],[0,0.15],[440,0.25],[494,0.35],[440,0.25],[392,0.55],[0,0.9],
-  ];
-  // C: ハーモニーパート（メロディを引き立てる）
-  const melodyC=[
-    [262,0.5],[0,0.2],[262,0.25],[294,0.5],[262,0.5],[247,0.35],[0,0.4],
-    [262,0.5],[0,0.2],[294,0.35],[330,0.4],[294,0.35],[262,0.8],[0,0.6],
-    [220,0.4],[247,0.35],[262,0.45],[0,0.25],[294,0.5],[262,0.4],[247,0.6],[0,1.0],
-  ];
-
-  function playPhrase(phrase, startT, vol, waveType){
-    let t=startT;
-    phrase.forEach(([freq,dur])=>{
-      if(freq>0){
-        const o=c.createOscillator(),og=c.createGain();
-        o.type=waveType; o.frequency.value=freq;
-        // ビブラートで音を豊かに
-        const lfo=c.createOscillator(),lg=c.createGain();
-        lfo.frequency.value=5.5; lg.gain.value=3;
-        lfo.connect(lg); lg.connect(o.frequency);
-        lfo.start(t); lfo.stop(t+dur);
-        o.connect(og); og.connect(_bgmGain);
-        og.gain.setValueAtTime(0,t);
-        og.gain.linearRampToValueAtTime(vol,t+0.04);
-        og.gain.setValueAtTime(vol*0.75,t+dur*0.55);
-        og.gain.exponentialRampToValueAtTime(0.001,t+dur*0.92);
-        o.start(t); o.stop(t+dur);
+  // ════════════════════════════════════════
+  //  B: カントリーライド (SURVIVAL通常・PRACTICE)
+  // ════════════════════════════════════════
+  if(type==='B'||type==='survival'||type==='practice'){
+    const T=0.22;
+    const mel=[[523,T],[0,T*.5],[523,T*.5],[659,T],[587,T],[523,T],[0,T],[494,T],[0,T*.5],[494,T*.5],[587,T],[523,T],[494,T],[0,T*2],[440,T],[0,T*.5],[440,T*.5],[523,T],[494,T],[440,T],[0,T],[392,T*2],[0,T],[523,T*2],[0,T*2]];
+    const bass=[[131,T*2],[0,T*2],[147,T*2],[0,T*2],[131,T*2],[0,T*2],[110,T*4]];
+    const dur=mel.reduce((s,[,d])=>s+d,0);
+    loop(t0=>{
+      sq(mel,t0,0.28,'square');
+      sq(bass,t0,0.18,'triangle');
+      const steps=Math.round(dur/T);
+      for(let i=0;i<steps;i++){
+        kick(t0+i*T, i%4===0?0.45:0.12);
+        if(i%4===2) snare(t0+i*T,0.14);
+        if(i%2===1) hihat(t0+i*T,0.035);
       }
-      t+=dur;
-    });
-    return t;
+    },dur);
   }
 
-  // ── リズム（キックのみ・スネアとハイハットのノイズを削除） ──
-  function playBeat(startT, tempo=0.42){
-    // キック（低音ドン）のみ残す
-    [0, tempo*4, tempo*7].forEach(offset=>{
-      const o=c.createOscillator(),g=c.createGain();
-      o.type='sine';
-      o.frequency.setValueAtTime(100,startT+offset);
-      o.frequency.exponentialRampToValueAtTime(25,startT+offset+0.2);
-      o.connect(g); g.connect(_bgmGain);
-      g.gain.setValueAtTime(0.45,startT+offset);
-      g.gain.exponentialRampToValueAtTime(0.001,startT+offset+0.28);
-      o.start(startT+offset); o.stop(startT+offset+0.3);
-    });
-    // クリックのみのハイハット（ノイズなし）
-    [tempo,tempo*2,tempo*3,tempo*4,tempo*5,tempo*6,tempo*7,tempo*8].forEach(offset=>{
-      const o=c.createOscillator(),g=c.createGain();
-      o.type='square'; o.frequency.value=3200;
-      o.connect(g); g.connect(_bgmGain);
-      g.gain.setValueAtTime(0.03,startT+offset);
-      g.gain.exponentialRampToValueAtTime(0.001,startT+offset+0.04);
-      o.start(startT+offset); o.stop(startT+offset+0.045);
-    });
+  // ════════════════════════════════════════
+  //  E: 砂嵐の猛特急 (ENDLESS)
+  // ════════════════════════════════════════
+  else if(type==='E'||type==='endless'){
+    const T=0.15;
+    const mel=[[784,T],[659,T],[784,T*2],[0,T],[698,T],[659,T],[698,T*2],[0,T],[784,T],[880,T],[784,T*2],[0,T],[698,T],[659,T*3],[0,T],[587,T],[659,T],[698,T],[659,T],[587,T*2],[0,T],[523,T*3],[0,T]];
+    const bass=[[196,T*4],[220,T*4],[196,T*4],[165,T*4],[196,T*4],[220,T*4],[175,T*4],[165,T*4]];
+    const dur=mel.reduce((s,[,d])=>s+d,0);
+    loop(t0=>{
+      sq(mel,t0,0.28,'square');
+      sq(bass,t0,0.18,'triangle');
+      const steps=16;
+      for(let i=0;i<steps;i++){
+        kick(t0+i*T, i%2===0?0.5:0.18);
+        if(i%2===1) hihat(t0+i*T,0.05);
+      }
+    },dur,150);
   }
 
-  // ── ループ再生 ──
-  function scheduleLoop(){
-    if(!_bgmGain) return;
-    const t0=c.currentTime+0.05;
-    // メロディA（主旋律）
-    const tA=playPhrase(melodyA, t0, 0.38, 'triangle');
-    // メロディB（緊張感）
-    const tB=playPhrase(melodyB, tA, 0.32, 'triangle');
-    // メロディC（ハーモニー・小さめ）
-    playPhrase(melodyC, t0, 0.14, 'sine');
-    // リズム
-    playBeat(t0, 0.42);
-    const totalDur=(melodyA.reduce((s,[,d])=>s+d,0)+melodyB.reduce((s,[,d])=>s+d,0));
-    _bgmGain._loopTimer=setTimeout(scheduleLoop, totalDur*1000-200);
+  // ════════════════════════════════════════
+  //  G: デッドウォーターロック (SURVIVAL高レベル・ボス)
+  // ════════════════════════════════════════
+  else if(type==='G'||type==='boss'){
+    const T=0.18;
+    const riff=[[220,T*2],[0,T],[220,T],[247,T],[0,T],[261,T*2],[0,T],[220,T*2],[0,T],[220,T],[196,T],[0,T],[175,T*3],[0,T],[220,T*2],[0,T],[247,T],[261,T],[0,T],[294,T*2],[0,T],[261,T],[247,T],[220,T*2],[0,T],[175,T*4]];
+    const lead=[[440,T*2],[0,T],[494,T],[523,T],[0,T],[587,T*2],[0,T],[523,T*2],[0,T],[494,T],[440,T],[0,T],[392,T*3],[0,T],[440,T*2],[0,T],[494,T],[523,T],[0,T],[659,T*2],[0,T],[587,T],[523,T],[494,T*2],[0,T],[440,T*4]];
+    const dur=riff.reduce((s,[,d])=>s+d,0);
+    loop(t0=>{
+      sq(riff,t0,0.3,'sawtooth');
+      sq(lead,t0,0.22,'triangle',5,4);
+      const steps=Math.round(dur/T);
+      for(let i=0;i<steps;i++){
+        if(i%4===0) kick(t0+i*T,0.5);
+        if(i%4===2) snare(t0+i*T,0.18);
+        if(i%2===1) hihat(t0+i*T,0.04);
+      }
+    },dur);
   }
-  scheduleLoop();
+
+  // ════════════════════════════════════════
+  //  H: サルーンのスウィング (DUEL)
+  // ════════════════════════════════════════
+  else if(type==='H'||type==='duel'){
+    const T=0.2, S=T*0.66, L=T*1.33;
+    const mel=[[523,L],[392,S],[440,L],[329,S],[392,L],[329,S],[294,L*2],[523,L],[392,S],[440,L],[494,S],[523,L],[587,S],[523,L*2],[494,L],[370,S],[415,L],[370,S],[329,L],[294,S],[261,L*2],[294,L],[349,S],[392,L],[370,S],[349,L],[329,S],[261,L*2]];
+    const walk=[[131,T],[147,T],[165,T],[175,T],[196,T],[175,T],[165,T],[147,T],[131,T],[147,T],[165,T],[196,T],[220,T],[196,T],[175,T],[165,T],[131,T],[147,T],[155,T],[165,T],[185,T],[196,T],[185,T],[165,T],[131,T],[147,T],[165,T],[175,T],[196,T],[175,T],[165,T],[131,T]];
+    const dur=mel.reduce((s,[,d])=>s+d,0);
+    loop(t0=>{
+      sq(mel,t0,0.3,'triangle',5,3);
+      sq(walk,t0,0.22,'sine');
+      [T*2,T*6,T*10,T*14].forEach(off=>snare(t0+off,0.12));
+      const steps=Math.round(dur/T);
+      for(let i=0;i<steps;i++) hihat(t0+i*T,0.025);
+    },dur);
+  }
+
+  // ════════════════════════════════════════
+  //  I: ピクセルガンファイト (TIME ATTACK)
+  // ════════════════════════════════════════
+  else if(type==='I'||type==='timeattack'){
+    const T=0.125;
+    const mel=[[784,T],[784,T],[880,T*2],[784,T],[0,T],[698,T],[784,T],[0,T],[659,T*2],[0,T],[523,T],[587,T],[659,T*2],[523,T],[523,T],[587,T*2],[523,T],[0,T],[392,T],[440,T],[494,T*2],[0,T],[392,T*2],[0,T*2],[784,T],[784,T],[880,T*2],[784,T],[0,T],[698,T],[784,T],[0,T],[880,T*2],[988,T*2],[880,T*2],[784,T],[698,T],[784,T],[659,T],[698,T],[659,T],[587,T],[659,T],[523,T*4],[0,T*4]];
+    const cnt=[[523,T*2],[587,T*2],[659,T*2],[698,T*2],[523,T*2],[494,T*2],[523,T*4],[523,T*2],[587,T*2],[659,T*2],[698,T*2],[784,T*4],[880,T*4],[784,T*2],[698,T*2],[659,T*2],[587,T*2],[523,T*8]];
+    const bass=[[131,T*4],[165,T*4],[131,T*4],[110,T*4],[131,T*4],[165,T*4],[131,T*8]];
+    const dur=mel.reduce((s,[,d])=>s+d,0);
+    loop(t0=>{
+      sq(mel,t0,0.25,'square');
+      sq(cnt,t0,0.14,'square');
+      sq(bass,t0,0.2,'triangle');
+      const steps=Math.round(dur/T);
+      for(let i=0;i<steps;i++){
+        if(i%8===0||i%8===4) kick(t0+i*T,0.38);
+        if(i%8===2||i%8===6) snare(t0+i*T,0.1);
+        hihat(t0+i*T,0.028);
+      }
+    },dur,250);
+  }
+
+  // ════════════════════════════════════════
+  //  J: サンセット・ボサノバ (PRACTICE)
+  // ════════════════════════════════════════
+  else if(type==='J'){
+    const T=0.25, SH=T*0.66, LO=T*1.33;
+    const chords=[[[220,277,330,415],T*4],[[147,185,220,294],T*4],[[196,247,294,370],T*4],[[131,165,196,261],T*4]];
+    const mel=[[659,LO],[0,SH],[698,T],[659,T],[587,LO],[0,SH],[523,T*2],[494,LO],[0,SH],[523,T],[494,T],[440,LO],[0,SH],[392,T*2],[440,LO],[0,SH],[494,T],[523,T],[587,LO],[0,SH],[659,T*2],[523,LO],[0,SH],[494,T],[440,T],[392,LO],[0,SH],[261,T*2]];
+    const dur=mel.reduce((s,[,d])=>s+d,0);
+    loop(t0=>{
+      let ct=t0; chords.forEach(([notes,d])=>{ notes.forEach(f=>o('sine',f,ct,d*0.85,0.12,0.2,0.5)); ct+=d; });
+      sq(mel,t0,0.28,'triangle',4.5,3);
+      const pat=[1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0];
+      const sk= [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0];
+      for(let i=0;i<16;i++){
+        if(pat[i]) kick(t0+i*T*.5,0.28);
+        if(sk[i])  snare(t0+i*T*.5,0.09);
+        hihat(t0+i*T*.5,0.022);
+      }
+    },dur);
+  }
 }
-function stopBGM(){if(_bgmNode){try{_bgmNode.ns.stop();}catch(e){} try{if(_bgmNode.drone)_bgmNode.drone.stop();}catch(e){}}_bgmNode=null;if(_bgmGain){clearTimeout(_bgmGain._loopTimer);clearInterval(_bgmGain._t);try{_bgmGain.disconnect();}catch(e){}  _bgmGain=null;}}
+function stopBGM(){if(_bgmNode){try{if(_bgmNode.ns)_bgmNode.ns.stop();}catch(e){}try{if(_bgmNode.drone)_bgmNode.drone.stop();}catch(e){}}_bgmNode=null;if(_bgmGain){clearTimeout(_bgmGain._loopTimer);clearInterval(_bgmGain._t);try{_bgmGain.gain.linearRampToValueAtTime(0,getACtx().currentTime+0.3);}catch(e){}setTimeout(()=>{try{if(_bgmGain)_bgmGain.disconnect();}catch(e){}  _bgmGain=null;},400);}}
 let _muted=false;
 function toggleMute(){_muted=!_muted;if(_actx&&_muted)_actx.suspend();if(_actx&&!_muted)_actx.resume();document.getElementById('btn-mute').textContent=_muted?'🔇':'🔊';}
 function unlockAudio(){if(!_actx)getACtx();if(_actx.state==='suspended')_actx.resume();}
@@ -2046,7 +2100,7 @@ function startGame(){
     surviveStart: Date.now(), // 生存開始時刻
   });
   lane.innerHTML='';resetFlame();resetAccDisplay();resetWPM();
-  updateHUD();renderHP();hiddenInput.focus();startBGM();checkInGameRecord();
+  updateHUD();renderHP();hiddenInput.focus();startBGM(G.endless?'E':'B');checkInGameRecord();
   spawnTarget();
   G.spawnTimer=setInterval(()=>{
     const c=DIFF[G.diff];
@@ -2111,7 +2165,8 @@ if(G.lang==='jp') applyRomaVisibility(t.el, G.level);}
 function updateFocusClass(){G.activeTargets.forEach(t=>t.el.classList.toggle('focused',t.id===G.focused));}
 
 // ═══ WORD COMPLETE ═══
-function onWordComplete(t){t.expired=true;G.shotsHit++;G.combo++;_wpmKeyCount+=t.word.length;if(G.combo>G.maxCombo)G.maxCombo=G.combo;const bonus=G.combo>=5?3:G.combo>=3?2:1;const pts=(t.word.length*10+G.level*5)*bonus;G.score+=pts;const cfg=DIFF[G.diff];if(G.shotsHit>0&&G.shotsHit%cfg.lvEvery===0){G.level++;sfxLevelUp();showPop(t.el,`LV.${G.level} UP! ⭐`,'#ffd040');if(G.lang==='jp')showKanaNotify(G.level);clearInterval(G.spawnTimer);G.spawnTimer=setInterval(()=>{const c=DIFF[G.diff];if(G.activeTargets.length<c.maxT+Math.floor(G.level/4))spawnTarget();},Math.max(900,cfg.spawnMs-(G.level-1)*150));}updateHUD();maybeShowNewRecord();sfxGunshot(G.combo);shootEffect(t,pts);player.classList.remove('player-shoot');void player.offsetWidth;player.classList.add('player-shoot');setTimeout(()=>player.classList.remove('player-shoot'),250);t.el.classList.remove('walking');t.el.classList.add('shot');setTimeout(()=>{t.el.remove();removeTarget(t.id);},580);}
+function onWordComplete(t){t.expired=true;G.shotsHit++;G.combo++;_wpmKeyCount+=t.word.length;if(G.combo>G.maxCombo)G.maxCombo=G.combo;const bonus=G.combo>=5?3:G.combo>=3?2:1;const pts=(t.word.length*10+G.level*5)*bonus;G.score+=pts;const cfg=DIFF[G.diff];if(G.shotsHit>0&&G.shotsHit%cfg.lvEvery===0){G.level++;sfxLevelUp();showPop(t.el,`LV.${G.level} UP! ⭐`,'#ffd040');if(G.lang==='jp')showKanaNotify(G.level);
+    if(G.level>=5&&!BOSS.active&&!G.endless){startBGM('G');}clearInterval(G.spawnTimer);G.spawnTimer=setInterval(()=>{const c=DIFF[G.diff];if(G.activeTargets.length<c.maxT+Math.floor(G.level/4))spawnTarget();},Math.max(900,cfg.spawnMs-(G.level-1)*150));}updateHUD();maybeShowNewRecord();sfxGunshot(G.combo);shootEffect(t,pts);player.classList.remove('player-shoot');void player.offsetWidth;player.classList.add('player-shoot');setTimeout(()=>player.classList.remove('player-shoot'),250);t.el.classList.remove('walking');t.el.classList.add('shot');setTimeout(()=>{t.el.remove();removeTarget(t.id);},580);}
 
 // ═══ SHOOT EFFECT ═══
 function shootEffect(t,pts){const rect=t.el.getBoundingClientRect();const lr=lane.getBoundingClientRect();const cx=rect.left-lr.left+rect.width*0.5;const cy=rect.top-lr.top+rect.height*0.32;const hole=document.createElement('div');hole.className='bullet-hole';hole.style.cssText=`left:${cx-9}px;top:${cy-9}px;`;hole.innerHTML=`<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="#000" opacity="0.9"/><circle cx="9" cy="9" r="6" fill="#111"/><circle cx="9" cy="9" r="3" fill="#000"/><line x1="9" y1="1" x2="9" y2="5" stroke="#333" stroke-width="1"/><line x1="9" y1="13" x2="9" y2="17" stroke="#333" stroke-width="1"/><line x1="1" y1="9" x2="5" y2="9" stroke="#333" stroke-width="1"/><line x1="13" y1="9" x2="17" y2="9" stroke="#333" stroke-width="1"/></svg>`;lane.appendChild(hole);setTimeout(()=>hole.remove(),2500);const smoke=document.createElement('div');smoke.style.cssText=`position:absolute;left:${cx-16}px;top:${cy-20}px;font-size:1.6rem;pointer-events:none;z-index:200;animation:scorePop 0.7s ease-out forwards;`;smoke.textContent='💨';lane.appendChild(smoke);setTimeout(()=>smoke.remove(),800);showPop(t.el,`+${pts}${G.combo>=3?' 🔥×'+G.combo:''}`,G.combo>=5?'#ff6020':'#fff');}
@@ -2227,7 +2282,7 @@ function saveDuelRanking(l){try{localStorage.setItem(LS_DUEL,JSON.stringify(l));
 function addDuelScore(entry){const l=loadDuelRanking();l.push(entry);l.sort((a,b)=>b.streak-a.streak);const t=l.slice(0,10);const rank=t.findIndex(e=>e===entry)+1;saveDuelRanking(t);return{rank,list:t};}
 function renderDuelRanking(list,my){const el=document.getElementById('duel-ranking-list');if(!list.length){el.innerHTML='<div style="padding:8px;text-align:center;color:#555">NO DATA YET</div>';return;}const md=['🥇','🥈','🥉'];el.innerHTML=list.map((e,i)=>{const me=e===my;const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${me?' rk-new':''}`;const d=new Date(e.ts);const dt=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return`<div class="${cls}"><span class="rk-col rk-no">${md[i]||('#'+(i+1))}${me?' ◀':''}</span><span class="rk-col rk-score">${e.streak}連勝</span><span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} LV${e.level||1}</span><span class="rk-col rk-date">${dt}</span></div>`;}).join('');}
 function getDuelWord(){const lv=D.level-1;if(D.lang==='jp'){const p=getJPPool(D.level);const e=p[Math.floor(Math.random()*p.length)];return{word:e.r,kana:e.k};}const p=DUEL_WORDS_BY_LV[Math.min(lv,DUEL_WORDS_BY_LV.length-1)];return{word:p[Math.floor(Math.random()*p.length)],kana:''};}
-function startDuel(){D.diff=G.diff;D.lang=G.lang;D.streak=0;D.level=1;scTitle.classList.add('hidden');scResult.classList.add('hidden');scDuel.classList.remove('hidden');duelEnemyFig.style.animation='';duelPlayerFig.style.animation='';duelEnemyFig.style.opacity=duelPlayerFig.style.opacity='1';duelEnemyFig.textContent=['🕵️','🤖','👹','💀','🧟'][Math.floor(Math.random()*5)];duelStreakDisp.textContent='';showQuitBtn('DUELを中断します');startDuelCountdown();}
+function startDuel(){D.diff=G.diff;D.lang=G.lang;D.streak=0;D.level=1;scTitle.classList.add('hidden');scResult.classList.add('hidden');scDuel.classList.remove('hidden');duelEnemyFig.style.animation='';duelPlayerFig.style.animation='';duelEnemyFig.style.opacity=duelPlayerFig.style.opacity='1';duelEnemyFig.textContent=['🕵️','🤖','👹','💀','🧟'][Math.floor(Math.random()*5)];duelStreakDisp.textContent='';showQuitBtn('DUELを中断します');startBGM('G');startDuelCountdown();}
 function startDuelCountdown(){D.phase='countdown';duelWordBox.classList.add('hidden');duelStatusMsg.style.color='#fff';let n=3;const tick=()=>{duelStatusMsg.textContent=n;sfxCountBeep(false);if(--n>=0)setTimeout(tick,700);else{sfxCountBeep(true);setTimeout(startStaredown,500);}};tick();}
 function startStaredown(){D.phase='staredown';duelStatusMsg.textContent='…';duelWordBox.classList.add('hidden');D.rafId=setTimeout(startDraw,800+Math.random()*1400);}
 function startDraw(){D.phase='typing';const{word,kana}=getDuelWord();D.word=word;D.kana=kana;D.typed='';D.startTs=Date.now();const cfg=DUEL_DIFF[D.diff];D.limitMs=Math.max(cfg.minMs,cfg.initMs-(D.level-1)*cfg.decPerLv);duelStatusMsg.textContent='DRAW!';duelStatusMsg.style.color='#ff4020';sfxCountBeep(true);duelKana.textContent=kana||'';
@@ -2244,7 +2299,7 @@ function renderDuelWord(){duelWordDisp.innerHTML=`<span class="typed">${D.typed}
 function onDuelWin(){if(D.phase!=='typing')return;D.phase='result';clearTimeout(D.rafId);duelWordBox.classList.add('hidden');D.streak++;const cfg=DUEL_DIFF[D.diff];if(D.streak%cfg.lvEvery===0){D.level++;sfxLevelUp();}duelStatusMsg.style.color='#ffd700';duelStatusMsg.textContent=D.streak===1?'NICE SHOT!':D.streak<5?'WIN!':D.streak<10?`${D.streak} WINS! 🔥`:`${D.streak} WINS!! 🌟`;sfxGunshot(D.streak);duelPlayerFig.classList.remove('shoot');void duelPlayerFig.offsetWidth;duelPlayerFig.classList.add('shoot');setTimeout(()=>{duelEnemyFig.classList.remove('hit');void duelEnemyFig.offsetWidth;duelEnemyFig.classList.add('hit');},180);shootBulletLine(document.getElementById('duel-player').getBoundingClientRect(),document.getElementById('duel-enemy').getBoundingClientRect());duelStreakDisp.textContent=`🔥 ${D.streak} WIN STREAK`;setTimeout(()=>{if(D.phase!=='result')return;duelEnemyFig.style.animation='';duelEnemyFig.style.opacity='1';duelPlayerFig.style.animation='';duelEnemyFig.textContent=['🕵️','🤖','👹','💀','🧟','🦹','🥷'][Math.floor(Math.random()*7)];startDuelCountdown();},1600);}
 function onDuelTimeout(){if(D.phase!=='typing'&&D.phase!=='staredown')return;D.phase='result';clearTimeout(D.rafId);duelWordBox.classList.add('hidden');sfxDamage();flashScreen('#660000');duelStatusMsg.style.color='#cc2020';duelStatusMsg.textContent='TOO SLOW...';duelEnemyFig.classList.remove('shoot');void duelEnemyFig.offsetWidth;duelEnemyFig.classList.add('shoot');setTimeout(()=>{duelPlayerFig.classList.remove('hit');void duelPlayerFig.offsetWidth;duelPlayerFig.classList.add('hit');},180);shootBulletLine(document.getElementById('duel-enemy').getBoundingClientRect(),document.getElementById('duel-player').getBoundingClientRect());setTimeout(showDuelResult,1800);}
 function shootBulletLine(from,to){const fx=from.left+from.width*0.5,fy=from.top+from.height*0.4,tx=to.left+to.width*0.5,ty=to.top+to.height*0.4,dx=tx-fx,dy=ty-fy,len=Math.sqrt(dx*dx+dy*dy),ang=Math.atan2(dy,dx)*180/Math.PI;const l=document.createElement('div');l.className='bullet-line';l.style.cssText=`left:${fx}px;top:${fy}px;width:${len}px;transform:rotate(${ang}deg)`;document.body.appendChild(l);setTimeout(()=>l.remove(),350);const d=document.createElement('div');d.className='dust-puff';d.textContent='💥';d.style.cssText=`left:${tx-20}px;top:${ty-20}px`;document.body.appendChild(d);setTimeout(()=>d.remove(),800);}
-function showDuelResult(){hideQuitBtn();scDuel.classList.add('hidden');scDuelResult.classList.remove('hidden');const entry={streak:D.streak,level:D.level,diff:D.diff,lang:D.lang,ts:Date.now()};const{rank,list}=addDuelScore(entry);document.getElementById('duel-result-title').textContent=D.streak===0?'GAME OVER':`${D.streak} WIN STREAK!`;document.getElementById('duel-result-streak').textContent=D.streak>0?`🔥 ${D.streak} 連勝`:'😵 0勝…';const md=['🥇','🥈','🥉'];document.getElementById('duel-result-detail').innerHTML=`${rank<=3?md[rank-1]+' '+rank+'位！<br>':''}DIFFICULTY: ${D.diff.toUpperCase()} LEVEL: ${D.level}`;renderDuelRanking(list,entry);}
+function showDuelResult(){hideQuitBtn();stopBGM();scDuel.classList.add('hidden');scDuelResult.classList.remove('hidden');const entry={streak:D.streak,level:D.level,diff:D.diff,lang:D.lang,ts:Date.now()};const{rank,list}=addDuelScore(entry);document.getElementById('duel-result-title').textContent=D.streak===0?'GAME OVER':`${D.streak} WIN STREAK!`;document.getElementById('duel-result-streak').textContent=D.streak>0?`🔥 ${D.streak} 連勝`:'😵 0勝…';const md=['🥇','🥈','🥉'];document.getElementById('duel-result-detail').innerHTML=`${rank<=3?md[rank-1]+' '+rank+'位！<br>':''}DIFFICULTY: ${D.diff.toUpperCase()} LEVEL: ${D.level}`;renderDuelRanking(list,entry);}
 document.getElementById('duel-btn-retry').addEventListener('click',()=>{scDuelResult.classList.add('hidden');startDuel();});
 document.getElementById('duel-btn-title').addEventListener('click',()=>{scDuelResult.classList.add('hidden');scTitle.classList.remove('hidden');renderTitleRanking();});
 
@@ -2351,46 +2406,82 @@ window.addEventListener('DOMContentLoaded', function() {
   }catch(e){}};
 
   // ── イントロBGM（緊張感のある西部劇テーマ） ──
+  // ④ 荒野のロック入場（イントロBGM）
   let _introBgmGain=null;
   const startIntroBGM=()=>{
     try{
-      const c=getACtx(),now=c.currentTime;
-      _introBgmGain=c.createGain(); _introBgmGain.gain.value=0; _introBgmGain.connect(c.destination);
-      _introBgmGain.gain.linearRampToValueAtTime(0.12, now+1.5);
+      const c=getACtx(), T0=c.currentTime+0.1;
+      _introBgmGain=c.createGain();
+      _introBgmGain.gain.value=0;
+      _introBgmGain.connect(c.destination);
+      _introBgmGain.gain.linearRampToValueAtTime(0.55, T0+0.6);
 
-      // 不気味なドローン
-      const dr=c.createOscillator(),dg=c.createGain();
-      dr.type='sine'; dr.frequency.value=49;
-      dr.connect(dg); dg.connect(_introBgmGain); dg.gain.value=0.5; dr.start();
+      const mg=_introBgmGain;
+      function tn(type,freq,t,dur,vol,vr=0,vd=0){
+        const o=c.createOscillator(),og=c.createGain();
+        o.type=type; o.frequency.value=freq;
+        if(vr){const l=c.createOscillator(),lg=c.createGain();l.frequency.value=vr;lg.gain.value=vd;l.connect(lg);lg.connect(o.frequency);l.start(t);l.stop(t+dur);}
+        o.connect(og); og.connect(mg);
+        og.gain.setValueAtTime(0,t);
+        og.gain.linearRampToValueAtTime(vol,t+Math.min(0.05,dur*.12));
+        og.gain.setValueAtTime(vol*.7,t+dur*.6);
+        og.gain.exponentialRampToValueAtTime(0.001,t+dur*.95);
+        o.start(t); o.stop(t+dur);
+      }
+      function kk(t,v=0.45){
+        const o=c.createOscillator(),g=c.createGain();o.type='sine';
+        o.frequency.setValueAtTime(100,t);o.frequency.exponentialRampToValueAtTime(25,t+0.2);
+        o.connect(g);g.connect(mg);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.25);o.start(t);o.stop(t+0.28);
+      }
+      function sn(t,v=0.14){
+        const nb=getNoiseBuffer(),ns=c.createBufferSource(),nf=c.createBiquadFilter(),ng=c.createGain();
+        ns.buffer=nb;nf.type='bandpass';nf.frequency.value=1200;nf.Q.value=1.2;
+        ns.connect(nf);nf.connect(ng);ng.connect(mg);
+        ng.gain.setValueAtTime(v,t);ng.gain.exponentialRampToValueAtTime(0.001,t+0.1);ns.start(t);ns.stop(t+0.12);
+      }
 
-      // 風
-      const nb=getNoiseBuffer(),ns=c.createBufferSource(),nf=c.createBiquadFilter(),ng=c.createGain();
-      ns.buffer=nb; ns.loop=true; nf.type='bandpass'; nf.frequency.value=250; nf.Q.value=0.3;
-      ns.connect(nf); nf.connect(ng); ng.connect(_introBgmGain); ng.gain.value=0.4; ns.start();
+      const T=0.18;
+      // ── メインリフ（0〜3.6s・1ループ）──
+      const riff=[[220,T*2],[0,T],[220,T],[247,T],[0,T],[261,T*2],[0,T],
+                   [220,T*2],[0,T],[220,T],[196,T],[0,T],[175,T*3],[0,T]];
+      const lead=[[440,T*2],[0,T],[494,T],[523,T],[0,T],[587,T*2],[0,T],
+                   [523,T*2],[0,T],[494,T],[440,T],[0,T],[392,T*3],[0,T]];
+      let rt=T0; riff.forEach(([f,d])=>{if(f>0)tn('sawtooth',f,rt,d,0.25);rt+=d;});
+      let lt=T0; lead.forEach(([f,d])=>{if(f>0)tn('triangle',f,lt,d,0.2,5,4);lt+=d;});
+      const loopDur=riff.reduce((s,[,d])=>s+d,0);
+      const steps=Math.round(loopDur/T);
+      for(let i=0;i<steps;i++){
+        if(i%4===0) kk(T0+i*T,0.45);
+        if(i%4===2) sn(T0+i*T,0.14);
+      }
 
-      // 緊張感メロディー（にらみ合い）
-      const tense=[[196,0.8],[0,0.4],[175,0.6],[0,0.4],[165,1.2],[0,0.6],[175,0.5],[196,0.5],[0,1.0]];
-      let t2=now+1.8;
-      tense.forEach(([f,d])=>{
-        if(f>0){
-          const o=c.createOscillator(),og=c.createGain();
-          o.type='triangle'; o.frequency.value=f;
-          o.connect(og); og.connect(_introBgmGain);
-          og.gain.setValueAtTime(0,t2); og.gain.linearRampToValueAtTime(0.6,t2+0.05);
-          og.gain.exponentialRampToValueAtTime(0.001,t2+d*0.9);
-          o.start(t2); o.stop(t2+d);
-        }
-        t2+=d;
-      });
-      _introBgmGain._dr=dr; _introBgmGain._ns=ns;
+      // ── 2ループ目（3.6〜7.2s）──
+      const T1=T0+loopDur;
+      let r2=T1; riff.forEach(([f,d])=>{if(f>0)tn('sawtooth',f,r2,d,0.28);r2+=d;});
+      let l2=T1; lead.forEach(([f,d])=>{if(f>0)tn('triangle',f,l2,d,0.22,5,4);l2+=d;});
+      for(let i=0;i<steps;i++){
+        if(i%4===0) kk(T1+i*T,0.48);
+        if(i%4===2) sn(T1+i*T,0.16);
+      }
+
+      // ── 盛り上がり（5.0〜6.0s）──
+      [[220,.2],[247,.15],[277,.15],[311,.15],[349,.15],[392,.15],[440,.15],[494,.15],[523,.2]]
+        .forEach(([f,d],i)=>tn('sawtooth',f,T0+5.0+i*.18,d,0.2+i*.025));
+
+      // ── DRAW! ファンファーレ（6.0〜）──
+      [[392,.12],[523,.12],[659,.12],[784,.4]]
+        .forEach(([f,d],i)=>tn('sawtooth',f,T0+6.0+i*.15,d,0.35));
+
+      // ── フェードアウト（7.2〜）──
+      mg.gain.setValueAtTime(0.55,T0+7.0);
+      mg.gain.linearRampToValueAtTime(0,T0+8.5);
+
     }catch(e){}
   };
   const stopIntroBGM=()=>{
     if(!_introBgmGain)return;
-    try{_introBgmGain._dr.stop();}catch(e){}
-    try{_introBgmGain._ns.stop();}catch(e){}
-    try{_introBgmGain.disconnect();}catch(e){}
-    _introBgmGain=null;
+    try{_introBgmGain.gain.linearRampToValueAtTime(0,getACtx().currentTime+0.3);}catch(e){}
+    setTimeout(()=>{try{_introBgmGain&&_introBgmGain.disconnect();}catch(e){} _introBgmGain=null;},400);
   };
 
   // タイムライン
@@ -2581,6 +2672,7 @@ document.querySelectorAll('.prac-cat').forEach(b=>{
 // ── 終了ボタン ──
 document.getElementById('prac-btn-quit').addEventListener('click',()=>{
   hideQuitBtn();
+  stopBGM();
   scPrac.classList.add('hidden');
   scTitle.classList.remove('hidden');
   renderTitleRanking();
@@ -2805,6 +2897,7 @@ function startPractice(){
   scTitle.classList.add('hidden');
   scPrac.classList.remove('hidden');
   showQuitBtn('練習を中断します');
+  startBGM('J');
   document.getElementById('prac-complete').classList.add('hidden');
 
   // カテゴリを初期化
@@ -3500,6 +3593,7 @@ function startTimeAttack(){
   scTitle.classList.add('hidden');
   scTA.classList.remove('hidden');
   showQuitBtn('タイムアタックを中断します');
+  startBGM('I');
 
   // カウントダウン（3,2,1）
   const cdEl = document.getElementById('countdown-num');
@@ -3661,6 +3755,7 @@ function abortTimeAttack(){
   TA.phase='idle';
   cancelAnimationFrame(TA.timerRaf);
   hideQuitBtn();
+  stopBGM();
   scTA.classList.add('hidden');
   scTAResult.classList.add('hidden');
   scTitle.classList.remove('hidden');
@@ -3788,6 +3883,8 @@ function spawnBoss() {
   BOSS.hp       = BOSS.maxHp;
   BOSS.targetId = G.nextId++;
 
+  // ボス出現でBGMをロックサウンドに切替
+  startBGM('G');
   // 警告バナー
   const banner = document.getElementById('boss-banner');
   banner.textContent = `💀 BOSS Lv.${G.level}`;
