@@ -54,9 +54,9 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 .target-word .typed{color:var(--gold)}
 .target-word .cursor{display:inline-block;width:0;border-left:2px solid #fff;animation:blink 0.6s steps(1) infinite;height:0.85em;vertical-align:middle}
 @keyframes blink{50%{opacity:0}}
-.target-kana{font-size:clamp(1.8rem,3.8vw,2.8rem);color:#ffe080;text-align:center;letter-spacing:3px;text-shadow:0 2px 4px #000;background:rgba(0,0,0,0.7);padding:3px 10px;border-radius:4px;white-space:nowrap;transition:font-size 0.4s ease}
+.target-kana{font-size:clamp(1.8rem,3.8vw,2.8rem);color:#ffffff;text-align:center;letter-spacing:3px;text-shadow:0 2px 4px #000;background:rgba(0,0,0,0.7);padding:3px 10px;border-radius:4px;white-space:nowrap;transition:font-size 0.4s ease}
 /* かなのみモード: かなを大きく・目立たせる */
-.kana-only-mode .target-kana{font-size:clamp(2.2rem,4.8vw,3.8rem);color:#fff080;text-shadow:0 0 12px rgba(255,220,0,0.8),0 2px 4px #000;border:2px solid rgba(255,220,0,0.5)}
+.kana-only-mode .target-kana{font-size:clamp(2.2rem,4.8vw,3.8rem);color:#ffffff;text-shadow:0 0 12px rgba(255,220,0,0.8),0 2px 4px #000;border:2px solid rgba(255,220,0,0.5)}
 /* ローマ字エリアの非表示（アニメ付き） */
 .target-word.roma-hidden{opacity:0;transform:scaleY(0);height:0;padding:0;border-width:0;margin:0;overflow:hidden;transition:opacity 0.4s ease,transform 0.4s ease,height 0.4s ease}
 /* 段階フェード（Lv3〜4）*/
@@ -76,22 +76,22 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 @keyframes scorePop{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.4)}}
 
 /* HUD */
-#hud{position:absolute;top:0;left:0;right:0;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:100;background:linear-gradient(to bottom,rgba(0,0,0,0.75) 0%,transparent 100%)}
-#title-hud{font-family:'Rye',serif;font-size:1.3rem;color:var(--gold);text-shadow:2px 2px 4px #000;letter-spacing:2px}
+#hud{position:absolute;top:0;left:0;right:0;padding:12px 22px;display:flex;justify-content:space-between;align-items:center;z-index:100;background:linear-gradient(to bottom,rgba(0,0,0,0.75) 0%,transparent 100%)}
+#title-hud{font-family:'Rye',serif;font-size:1.7rem;color:var(--gold);text-shadow:3px 3px 6px #000;letter-spacing:3px}
 #score-box{text-align:right}
-#score-label{font-size:0.6rem;color:var(--smoke);letter-spacing:2px;text-transform:uppercase}
-#score-val{font-size:1.8rem;font-weight:700;color:var(--gold);line-height:1}
-#combo-val{font-size:0.78rem;color:#ff9940;min-height:1rem}
+#score-label{font-size:0.72rem;color:var(--smoke);letter-spacing:2px;text-transform:uppercase}
+#score-val{font-size:2.4rem;font-weight:700;color:var(--gold);line-height:1}
+#combo-val{font-size:0.92rem;color:#ff9940;min-height:1.1rem}
 
 /* HP */
 @keyframes hpBlink{0%,100%{opacity:1}50%{opacity:0.2}}
-#hp-wrap{position:absolute;bottom:28.5%;left:18px;z-index:50;display:flex;align-items:center;gap:6px}
-#hp-label{font-family:'Rye',serif;font-size:1.05rem;color:#44dd22;text-shadow:0 0 6px #22aa00,1px 1px 0 #000,-1px -1px 0 #000;background:#2a2a2a;border:1.5px solid #555;border-radius:3px 0 0 3px;padding:3px 6px}
-#hp-bar-outer{width:160px;height:18px;background:#2a2a2a;border:1.5px solid #555;border-radius:0 3px 3px 0;overflow:hidden}
+#hp-wrap{position:absolute;top:58px;left:14px;z-index:110;display:flex;align-items:center;gap:8px}
+#hp-label{font-family:'Rye',serif;font-size:1.1rem;color:#44dd22;text-shadow:0 0 8px #22aa00,1px 1px 0 #000,-1px -1px 0 #000;background:#2a2a2a;border:2px solid #555;border-radius:4px 0 0 4px;padding:4px 10px}
+#hp-bar-outer{width:180px;height:20px;background:#2a2a2a;border:2px solid #555;border-radius:0 4px 4px 0;overflow:hidden}
 #hp-bar-inner{height:100%;width:100%;background:#33ee11;border-radius:0 2px 2px 0;transition:width 0.3s ease,background 0.4s ease}
-#status-bar{position:absolute;bottom:28%;right:28px;display:flex;align-items:flex-end;gap:16px;z-index:50}
-#level-badge{font-family:'Rye',serif;font-size:0.85rem;color:var(--sand)}
-#time-display{font-size:1rem;font-weight:700;color:var(--sand)}
+#status-bar{position:absolute;top:58px;right:20px;display:flex;align-items:center;gap:16px;z-index:110}
+#level-badge{font-family:'Rye',serif;font-size:1.15rem;color:#ffd080;text-shadow:0 0 8px rgba(255,200,80,0.6),2px 2px 0 #000}
+#time-display{font-size:1.3rem;font-weight:700;color:#ffd080;text-shadow:0 0 6px rgba(255,200,80,0.4),2px 2px 0 #000}
 #player{position:absolute;bottom:27%;right:50px;font-size:2.8rem;z-index:30;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.9));transform-origin:center bottom}
 @keyframes playerShoot{0%{transform:rotate(-4deg) scale(1)}30%{transform:rotate(6deg) scale(0.94)}100%{transform:rotate(0deg) scale(1)}}
 .player-shoot{animation:playerShoot 0.22s ease-out forwards}
@@ -534,7 +534,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 /* ACC表示 */
 #acc-display {
   position: absolute;
-  bottom: 28%;
+  bottom: calc(27% + 8px);
   left: 50%;
   transform: translateX(-50%);
   font-family: 'Courier Prime', monospace;
@@ -699,8 +699,8 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 /* WPM リアルタイム表示 */
 #wpm-display {
   position: absolute;
-  bottom: 28%;
-  right: 200px;
+  bottom: calc(27% + 8px);
+  right: 20px;
   font-family: 'Courier Prime', monospace;
   font-size: 0.78rem;
   font-weight: 700;
@@ -1181,7 +1181,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
     <button class="diff-btn" data-mode="duel">🤠 DUEL</button>
     <button class="diff-btn" data-mode="practice">🎯 PRACTICE</button>
   </div>
-  <div id="mode-desc" style="font-size:0.72rem;color:var(--smoke);letter-spacing:1px;margin-bottom:0.8rem;min-height:1.2rem;">次々来る的を撃て！5分間スコアアタック</div>
+  <div id="mode-desc" style="font-size:0.72rem;color:var(--smoke);letter-spacing:1px;margin-bottom:0.8rem;min-height:1.2rem;">次々来う的を撃て！10分間スコアアタック</div>
   <div class="diff-btns" style="margin-bottom:0.6rem;">
     <button class="diff-btn active" data-lang="en">🔤 ENGLISH</button>
     <button class="diff-btn" data-lang="jp">🇯🇵 日本語</button>
@@ -1451,7 +1451,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
         <div class="m-section">
           <div class="m-section-title">🎮 ゲームモード一覧</div>
           <div class="m-table">
-            <div class="m-row"><span class="m-key">🎯 SURVIVAL</span><span><span class="m-hl">5分間</span>、奥から来る敵を撃ち抜く。スコア競争。</span></div>
+            <div class="m-row"><span class="m-key">🎯 SURVIVAL</span><span><span class="m-hl">10分間</span>、奥から来る敵を撃ち抜く。スコア競争。</span></div>
             <div class="m-row"><span class="m-key">♾️ ENDLESS</span><span>時間制限なし。HPが尽きるまで生き残れ。<span class="m-hl">生存時間</span>を競う。</span></div>
             <div class="m-row"><span class="m-key">⚡ TIME ATTACK</span><span>固定問題を<span class="m-hl">最速クリア</span>！5/10/20/30問から選択。</span></div>
             <div class="m-row"><span class="m-key">🤠 DUEL</span><span>1対1の早撃ち対決。<span class="m-hl">何連勝</span>できるか。</span></div>
@@ -1462,7 +1462,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
           <div class="m-section-title">🌐 言語モード</div>
           <div class="m-cards">
             <div class="m-card"><div class="m-card-title">🔤 ENGLISH</div><p>英単語をアルファベットで入力。Lv1は1文字からスタート。Lv4以降は動物・食べ物・西部劇語もミックス。</p></div>
-            <div class="m-card"><div class="m-card-title">🇯🇵 日本語</div><p>ひらがな表示→<span class="m-hl">ローマ字</span>で入力。<br>Lv5でローマ字が薄く、Lv6+で消える（かなのみモード）。</p></div>
+            <div class="m-card"><div class="m-card-title">🇯🇵 日本語</div><p>ひらがな表示→<span class="m-hl">ローマ字</span>で入力。<br>Lv10でローマ字が薄く、Lv11+で消える（かなのみモード）。</p></div>
           </div>
         </div>
         <div class="m-section">
@@ -1477,7 +1477,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
       <div class="m-page" data-page="survival">
         <div class="m-section">
           <div class="m-section-title">🎯 SURVIVALとは</div>
-          <p><span class="m-hl">5分間（300秒）</span>、奥から前進してくる敵シルエットをタイピングで撃ち抜くモード。スコアの高さを競います。</p>
+          <p><span class="m-hl">10分間（600秒）</span>、奥から前進してくる敵シルエットをタイピングで撃ち抜くモード。スコアの高さを競います。</p>
         </div>
         <div class="m-section">
           <div class="m-section-title">🕹️ ゲームの流れ</div>
@@ -1543,7 +1543,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
             <div class="m-row"><span class="m-badge normal">NORMAL</span><span>5秒スタート → 最短1.8秒</span></div>
             <div class="m-row"><span class="m-badge hard">HARD</span><span>3.5秒スタート → 最短1.2秒 ＋ ミスで即死</span></div>
           </div>
-          <p style="margin-top:8px;">日本語モードではLv5以降ローマ字が消え、<span class="m-hl">かなのみ</span>で判断する力が必要になります。</p>
+          <p style="margin-top:8px;">日本語モードではLv10でローマ字が薄くなり、Lv11以降は<span class="m-hl">かなのみ</span>で判断する力が必要になります。</p>
         </div>
         <div class="m-section">
           <div class="m-section-title">⚡ TIME ATTACKとの違い</div>
@@ -1649,27 +1649,26 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 // ═══ 日本語かな表示レベル制御 ═══
 // 0=通常表示, 1=薄表示(fading), 2=非表示(hidden)
 function romaVisibility(level){
-  if(level<=4) return 0;
-  if(level===5) return 1;
-  return 2;
+  if(level<=9)  return 0;   // Lv1〜9: ローマ字あり
+  if(level===10) return 1;  // Lv10: うっすら
+  return 2;                 // Lv11+: かなのみ
 }
 function applyRomaVisibility(el, level){
   const w=el.querySelector('.target-word');
   if(!w) return;
   w.classList.remove('roma-fading','roma-hidden');
-  if(level===5) w.classList.add('roma-fading');
-  else if(level>=6) w.classList.add('roma-hidden');
-  // かなのみ時はターゲット全体にクラス付与（かなを大きくする）
-  el.classList.toggle('kana-only-mode', level>=6);
+  if(level===10) w.classList.add('roma-fading');
+  else if(level>=11) w.classList.add('roma-hidden');
+  el.classList.toggle('kana-only-mode', level>=11);
 }
 // レベルアップ時の通知表示
 function showKanaNotify(level){
   const el=document.getElementById('kana-notify');
   if(!el) return;
-  if(level===5){
-    el.innerHTML='🇯🇵 Lv5 ローマ字がうっすら…';
-  } else if(level===6){
-    el.innerHTML='🇯🇵 Lv6 かなのみモード！<br><span style="font-size:0.75em;color:#c4935a">ローマ字を思い出せ！</span>';
+  if(level===10){
+    el.innerHTML='🇯🇵 Lv10 ローマ字がうっすら…';
+  } else if(level===11){
+    el.innerHTML='🇯🇵 Lv11 かなのみモード！<br><span style="font-size:0.75em;color:#c4935a">ローマ字を思い出せ！</span>';
   } else {
     return; // Lv7以降は通知なし
   }
@@ -2022,7 +2021,11 @@ const JP_BY_LEVEL=[
 function getJPPool(lv){return JP_BY_LEVEL[Math.min(lv<=1?0:lv<=2?1:lv<=3?2:lv<=5?3:lv<=8?4:5,JP_BY_LEVEL.length-1)];}
 
 // ═══ CONFIG ═══
-const DIFF={easy:{spawnMs:3500,advanceSec:12,maxT:3,hp:5,lvEvery:4},normal:{spawnMs:2600,advanceSec:9,maxT:4,hp:3,lvEvery:6},hard:{spawnMs:1800,advanceSec:6,maxT:5,hp:2,lvEvery:8}};
+const DIFF={
+  easy:  {spawnMs:5000,advanceSec:18,maxT:2,hp:7,lvEvery:6},   // 大幅緩和
+  normal:{spawnMs:3200,advanceSec:12,maxT:3,hp:4,lvEvery:6},   // 少し緩和
+  hard:  {spawnMs:1800,advanceSec:6, maxT:5,hp:2,lvEvery:8},   // 据え置き
+};
 const LANES=[10,27,45,63,80];
 
 // ═══ STATE ═══
@@ -2054,7 +2057,7 @@ function checkInGameRecord(){_currentBest=loadRanking()[0]?.score??0;}
 function maybeShowNewRecord(){if(G.score>_currentBest&&_currentBest>0){_currentBest=G.score;const b=document.getElementById('new-record-banner');b.classList.remove('hidden');void b.offsetWidth;b.classList.add('show');sfxLevelUp();setTimeout(()=>{b.classList.remove('show');setTimeout(()=>b.classList.add('hidden'),300);},2200);}}
 
 // ═══ UI EVENTS ═══
-const MODE_DESC={survival:'次々来る的を撃て！5分間スコアアタック',endless:'時間制限なし！HPが尽きるまで生き残れ',timeattack:'⚡ 固定リストを最速クリア！タイムを競え',duel:'1対1の早撃ち勝負！何連勝できるか？',practice:'焦らず練習！的を自分のペースで撃ち倒せ'};
+const MODE_DESC={survival:'次々来う的を撃て！10分間スコアアタック',endless:'時間制限なし！HPが尽きるまで生き残れ',timeattack:'⚡ 固定リストを最速クリア！タイムを競え',duel:'1対1の早撃ち勝負！何連勝できるか？',practice:'焦らず練習！的を自分のペースで撃ち倒せ'};
 document.querySelectorAll('[data-mode]').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('[data-mode]').forEach(x=>x.classList.remove('active'));b.classList.add('active');G_mode=b.dataset.mode;document.getElementById('mode-desc').textContent=MODE_DESC[G_mode];});});
 document.querySelectorAll('[data-lang]').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('[data-lang]').forEach(x=>x.classList.remove('active'));b.classList.add('active');G.lang=b.dataset.lang;});});
 document.querySelectorAll('[data-diff]').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('[data-diff]').forEach(x=>x.classList.remove('active'));b.classList.add('active');G.diff=b.dataset.diff;});});
@@ -2095,7 +2098,7 @@ function startGame(){
   const isEndless=G.endless;
   Object.assign(G,{phase:'playing',score:0,combo:0,maxCombo:0,
     hp:cfg.hp,level:1,shotsHit:0,shotsMissed:0,
-    timeLeft: isEndless ? -1 : 300,
+    timeLeft: isEndless ? -1 : 600,
     activeTargets:[],focused:null,nextId:0,
     surviveStart: Date.now(), // 生存開始時刻
   });
@@ -2104,8 +2107,9 @@ function startGame(){
   spawnTarget();
   G.spawnTimer=setInterval(()=>{
     const c=DIFF[G.diff];
-    if(G.activeTargets.length<c.maxT+Math.floor(G.level/4))spawnTarget();
-  },Math.max(900,cfg.spawnMs-(G.level-1)*150));
+    // ボス出現中は通常的をスポーンしない
+    if(!BOSS.active&&G.activeTargets.length<c.maxT+Math.floor(G.level/4))spawnTarget();
+  },Math.max(G.diff==='easy'?2500:G.diff==='normal'?1500:900,cfg.spawnMs-(G.level-1)*(G.diff==='easy'?80:G.diff==='normal'?100:150)));
   if(isEndless){
     // ENDLESSは経過時間を表示（カウントアップ）
     timeDisplay.textContent='⏱ 0:00';
@@ -2148,9 +2152,14 @@ function rafLoop(){if(G.phase!=='playing')return;const now=Date.now();const W=la
   if(pct>=1&&!t.expired){t.expired=true;onTargetExpired(t);}});G.rafId=requestAnimationFrame(rafLoop);}
 
 // ═══ SPAWN ═══
-function spawnTarget(){if(G.phase!=='playing')return;const cfg=DIFF[G.diff];const isJP=G.lang==='jp';const id=G.nextId++;const svgIdx=Math.floor(Math.random()*TARGET_SVGS.length);let laneIdx;do{laneIdx=Math.floor(Math.random()*LANES.length);}while(G.activeTargets.length>0&&G.activeTargets[G.activeTargets.length-1].laneIdx===laneIdx&&Math.random()<0.6);const laneX=LANES[laneIdx];let word,kana=null;if(isJP){const p=getJPPool(G.level);const e=p[Math.floor(Math.random()*p.length)];word=e.r;kana=e.k;}else{const p=getWordPool(G.level);word=p[Math.floor(Math.random()*p.length)];}const advanceMs=Math.max(2500,cfg.advanceSec*1000-(G.level-1)*300);const baseH=360;const baseW=Math.round(baseH*0.6);const el=document.createElement('div');el.className='target-wrap walking';el.dataset.id=id;el.style.position='absolute';el.style.top='0px';el.style.left='0px';el.style.transformOrigin='center bottom';const wHTML=isJP?`<div class="target-kana">${kana}</div><div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`:`<div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`;el.innerHTML=`<div>${TARGET_SVGS[svgIdx](baseH)}</div><div class="target-timer"><div class="target-timer-bar"></div></div>${wHTML}`;lane.appendChild(el);// JP: ローマ字表示レベル適用
+function spawnTarget(){if(G.phase!=='playing')return;const cfg=DIFF[G.diff];const isJP=G.lang==='jp';const id=G.nextId++;const svgIdx=Math.floor(Math.random()*TARGET_SVGS.length);let laneIdx;do{laneIdx=Math.floor(Math.random()*LANES.length);}while(G.activeTargets.length>0&&G.activeTargets[G.activeTargets.length-1].laneIdx===laneIdx&&Math.random()<0.6);const laneX=LANES[laneIdx];let word,kana=null;if(isJP){const p=getJPPool(G.level);const e=p[Math.floor(Math.random()*p.length)];word=e.r;kana=e.k;}else{const p=getWordPool(G.level);word=p[Math.floor(Math.random()*p.length)];}// EASY/NORMALはレベルによる加速を抑制
+const lvSpeedup=G.diff==='easy'?100:G.diff==='normal'?200:300;
+const advanceMs=Math.max(G.diff==='easy'?5000:G.diff==='normal'?3500:2500,cfg.advanceSec*1000-(G.level-1)*lvSpeedup);const baseH=360;const baseW=Math.round(baseH*0.6);const el=document.createElement('div');el.className='target-wrap walking';el.dataset.id=id;el.style.position='absolute';el.style.top='0px';el.style.left='0px';el.style.transformOrigin='center bottom';const wHTML=isJP?`<div class="target-kana">${kana}</div><div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`:`<div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`;el.innerHTML=`<div>${TARGET_SVGS[svgIdx](baseH)}</div><div class="target-timer"><div class="target-timer-bar"></div></div>${wHTML}`;lane.appendChild(el);// JP: ローマ字表示レベル適用
 if(isJP) applyRomaVisibility(el, G.level);
-const t={id,word,typed:'',el,advanceMs,startTime:Date.now(),expired:false,laneX,laneIdx,baseH,baseW};G.activeTargets.push(t);if(!G.focused)G.focused=id;updateFocusClass();}
+const t={id,word,typed:'',kana,el,advanceMs,startTime:Date.now(),expired:false,laneX,laneIdx,baseH,baseW};G.activeTargets.push(t);
+// JP: かな初期表示（白で初期化）
+if(isJP&&kana){setTimeout(()=>updateKanaProgress(t),10);}
+if(!G.focused)G.focused=id;updateFocusClass();}
 
 // ═══ TARGET EXPIRED ═══
 function onTargetExpired(t){if(G.phase!=='playing')return;G.combo=0;G.shotsMissed++;t.el.classList.add('miss-shake');setTimeout(()=>t.el.remove(),320);removeTarget(t.id);damageHP();updateHUD();updateAccDisplay();}
@@ -2159,14 +2168,69 @@ function onTargetExpired(t){if(G.phase!=='playing')return;G.combo=0;G.shotsMisse
 hiddenInput.addEventListener('input',e=>{const ch=(e.data||'').toUpperCase();hiddenInput.value='';if(!ch||!/[A-Z]/.test(ch))return;if(D.phase==='typing'){handleDuelChar(ch);return;}if(TA.phase==='playing'){handleTAChar(ch);return;}if(scPrac&&!scPrac.classList.contains('hidden')){handlePracChar(ch);return;}if(G.phase!=='playing')return;handleChar(ch);});
 document.addEventListener('keydown',e=>{if(D.phase==='typing'){hiddenInput.focus();return;}if(G.phase!=='playing')return;hiddenInput.focus();if(e.key==='Tab'){e.preventDefault();cycleFocus();}});
 function cycleFocus(){if(!G.activeTargets.length)return;const idx=G.activeTargets.findIndex(t=>t.id===G.focused);G.focused=G.activeTargets[(idx+1)%G.activeTargets.length].id;updateFocusClass();}
-function handleChar(ch){let t=G.activeTargets.find(x=>x.id===G.focused&&!x.expired);if(!t||t.typed.length===0){const h=G.activeTargets.find(x=>!x.expired&&x.word[0]===ch&&x.typed.length===0);if(h){t=h;G.focused=t.id;updateFocusClass();}}if(!t){sfxMiss();flashScreen();return;}const exp=t.word[t.typed.length];if(ch===exp){t.typed+=ch;addWPMKey();updateWordDisplay(t);if(t.typed===t.word)onWordComplete(t);}else{G.shotsMissed++;sfxMiss();flashScreen();updateAccDisplay();}}
-function updateWordDisplay(t){const w=t.el.querySelector('.target-word');if(!w)return;const r=t.word.slice(t.typed.length);w.innerHTML=`<span class="typed">${t.typed}</span><span class="cursor"></span><span class="remain">${r}</span>`;// JP: ローマ字表示クラスを維持（innerHTML更新でclassがリセットされないよう再適用）
+function handleChar(ch){
+  let t=G.activeTargets.find(x=>x.id===G.focused&&!x.expired);
+  if(!t||t.typed.length===0){
+    const h=G.activeTargets.find(x=>!x.expired&&x.word[0]===ch&&x.typed.length===0);
+    // ゆらぎ対応: 先頭文字が別表記で始まる単語も探す
+    if(h){
+      t=h; G.focused=t.id; updateFocusClass();
+    } else if(G.lang==='jp'){
+      const hv=G.activeTargets.find(x=>{
+        if(x.expired||x.typed.length!==0) return false;
+        const res=checkRomaVariant(x.word,x.typed,ch);
+        return res&&res.ok;
+      });
+      if(hv){t=hv;G.focused=t.id;updateFocusClass();}
+    }
+  }
+  if(!t){sfxMiss();flashScreen();return;}
+
+  // ゆらぎ対応判定
+  if(G.lang==='jp'){
+    const res=checkRomaVariant(t.word, t.typed, ch);
+    if(res&&res.ok){
+      t.word  = res.word;   // 代替ローマ字に更新
+      t.typed = res.typed;
+      addWPMKey();
+      updateWordDisplay(t);
+      if(t.typed===t.word) onWordComplete(t);
+      return;
+    }
+  } else {
+    const exp=t.word[t.typed.length];
+    if(ch===exp){
+      t.typed+=ch;addWPMKey();updateWordDisplay(t);
+      if(t.typed===t.word)onWordComplete(t);
+      return;
+    }
+  }
+  G.shotsMissed++;sfxMiss();flashScreen();updateAccDisplay();
+}
+function updateWordDisplay(t){
+  const w=t.el.querySelector('.target-word');
+  if(!w)return;
+  const r=t.word.slice(t.typed.length);
+  w.innerHTML=`<span class="typed">${t.typed}</span><span class="cursor"></span><span class="remain">${r}</span>`;
+  // JP: かな文字の色を打鍵進捗に合わせて変える（通常/かなのみ両対応）
+  if(G.lang==='jp' && t.kana){
+    updateKanaProgress(t);
+  }
+  // JP: ローマ字表示クラスを維持（innerHTML更新でclassがリセットされないよう再適用）
 if(G.lang==='jp') applyRomaVisibility(t.el, G.level);}
-function updateFocusClass(){G.activeTargets.forEach(t=>t.el.classList.toggle('focused',t.id===G.focused));}
+function updateFocusClass(){
+  G.activeTargets.forEach(t=>{
+    t.el.classList.toggle('focused',t.id===G.focused);
+    // JP: かな進捗を再描画（通常/かなのみ両対応）
+    if(G.lang==='jp' && t.kana){
+      updateKanaProgress(t);
+    }
+  });
+}
 
 // ═══ WORD COMPLETE ═══
 function onWordComplete(t){t.expired=true;G.shotsHit++;G.combo++;_wpmKeyCount+=t.word.length;if(G.combo>G.maxCombo)G.maxCombo=G.combo;const bonus=G.combo>=5?3:G.combo>=3?2:1;const pts=(t.word.length*10+G.level*5)*bonus;G.score+=pts;const cfg=DIFF[G.diff];if(G.shotsHit>0&&G.shotsHit%cfg.lvEvery===0){G.level++;sfxLevelUp();showPop(t.el,`LV.${G.level} UP! ⭐`,'#ffd040');if(G.lang==='jp')showKanaNotify(G.level);
-    if(G.level>=5&&!BOSS.active&&!G.endless){startBGM('G');}clearInterval(G.spawnTimer);G.spawnTimer=setInterval(()=>{const c=DIFF[G.diff];if(G.activeTargets.length<c.maxT+Math.floor(G.level/4))spawnTarget();},Math.max(900,cfg.spawnMs-(G.level-1)*150));}updateHUD();maybeShowNewRecord();sfxGunshot(G.combo);shootEffect(t,pts);player.classList.remove('player-shoot');void player.offsetWidth;player.classList.add('player-shoot');setTimeout(()=>player.classList.remove('player-shoot'),250);t.el.classList.remove('walking');t.el.classList.add('shot');setTimeout(()=>{t.el.remove();removeTarget(t.id);},580);}
+    if(G.level>=5&&!BOSS.active&&!G.endless){startBGM('G');}clearInterval(G.spawnTimer);G.spawnTimer=setInterval(()=>{const c=DIFF[G.diff];if(!BOSS.active&&G.activeTargets.length<c.maxT+Math.floor(G.level/4))spawnTarget();},Math.max(G.diff==='easy'?2500:G.diff==='normal'?1500:900,cfg.spawnMs-(G.level-1)*(G.diff==='easy'?80:G.diff==='normal'?100:150)));}updateHUD();maybeShowNewRecord();sfxGunshot(G.combo);shootEffect(t,pts);player.classList.remove('player-shoot');void player.offsetWidth;player.classList.add('player-shoot');setTimeout(()=>player.classList.remove('player-shoot'),250);t.el.classList.remove('walking');t.el.classList.add('shot');setTimeout(()=>{t.el.remove();removeTarget(t.id);},580);}
 
 // ═══ SHOOT EFFECT ═══
 function shootEffect(t,pts){const rect=t.el.getBoundingClientRect();const lr=lane.getBoundingClientRect();const cx=rect.left-lr.left+rect.width*0.5;const cy=rect.top-lr.top+rect.height*0.32;const hole=document.createElement('div');hole.className='bullet-hole';hole.style.cssText=`left:${cx-9}px;top:${cy-9}px;`;hole.innerHTML=`<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="#000" opacity="0.9"/><circle cx="9" cy="9" r="6" fill="#111"/><circle cx="9" cy="9" r="3" fill="#000"/><line x1="9" y1="1" x2="9" y2="5" stroke="#333" stroke-width="1"/><line x1="9" y1="13" x2="9" y2="17" stroke="#333" stroke-width="1"/><line x1="1" y1="9" x2="5" y2="9" stroke="#333" stroke-width="1"/><line x1="13" y1="9" x2="17" y2="9" stroke="#333" stroke-width="1"/></svg>`;lane.appendChild(hole);setTimeout(()=>hole.remove(),2500);const smoke=document.createElement('div');smoke.style.cssText=`position:absolute;left:${cx-16}px;top:${cy-20}px;font-size:1.6rem;pointer-events:none;z-index:200;animation:scorePop 0.7s ease-out forwards;`;smoke.textContent='💨';lane.appendChild(smoke);setTimeout(()=>smoke.remove(),800);showPop(t.el,`+${pts}${G.combo>=3?' 🔥×'+G.combo:''}`,G.combo>=5?'#ff6020':'#fff');}
@@ -2277,7 +2341,106 @@ const duelKana=document.getElementById('duel-kana');
 const duelTimerBar=document.getElementById('duel-timer-bar');
 const duelStreakDisp=document.getElementById('duel-streak-disp');
 const LS_DUEL='gunman_duel_scores_v1';
-function loadDuelRanking(){try{return JSON.parse(localStorage.getItem(LS_DUEL))||[];}catch(e){return[];}}
+// ── かなのみモード: 打鍵進捗をかな文字の色で表現 ──
+function updateKanaProgress(t){
+  const kanaEl = t.el.querySelector('.target-kana');
+  if(!kanaEl || !t.kana) return;
+
+  // ── かな→ローマ字マップ（長い順・関数内に直接定義してスコープ問題を回避）──
+  const KR = [
+    ['きゃ','KYA'],['きゅ','KYU'],['きょ','KYO'],
+    ['しゃ','SYA'],['しゅ','SYU'],['しょ','SYO'],
+    ['ちゃ','TYA'],['ちゅ','TYU'],['ちょ','TYO'],
+    ['にゃ','NYA'],['にゅ','NYU'],['にょ','NYO'],
+    ['ひゃ','HYA'],['ひゅ','HYU'],['ひょ','HYO'],
+    ['みゃ','MYA'],['みゅ','MYU'],['みょ','MYO'],
+    ['りゃ','RYA'],['りゅ','RYU'],['りょ','RYO'],
+    ['ぎゃ','GYA'],['ぎゅ','GYU'],['ぎょ','GYO'],
+    ['じゃ','ZYA'],['じゅ','ZYU'],['じょ','ZYO'],
+    ['びゃ','BYA'],['びゅ','BYU'],['びょ','BYO'],
+    ['ぴゃ','PYA'],['ぴゅ','PYU'],['ぴょ','PYO'],
+    ['ジェ','ZYE'],['チェ','TYE'],['シェ','SYE'],
+    // 1文字かな（ひらがな）
+    ['あ','A'],  ['い','I'],  ['う','U'],  ['え','E'],  ['お','O'],
+    ['か','KA'], ['き','KI'], ['く','KU'], ['け','KE'], ['こ','KO'],
+    ['さ','SA'], ['し','SI'], ['す','SU'], ['せ','SE'], ['そ','SO'],
+    ['た','TA'], ['ち','TI'], ['つ','TSU'],['て','TE'], ['と','TO'],
+    ['な','NA'], ['に','NI'], ['ぬ','NU'], ['ね','NE'], ['の','NO'],
+    ['は','HA'], ['ひ','HI'], ['ふ','HU'], ['へ','HE'], ['ほ','HO'],
+    ['ま','MA'], ['み','MI'], ['む','MU'], ['め','ME'], ['も','MO'],
+    ['や','YA'], ['ゆ','YU'], ['よ','YO'],
+    ['ら','RA'], ['り','RI'], ['る','RU'], ['れ','RE'], ['ろ','RO'],
+    ['わ','WA'], ['を','WO'], ['ん','NN'], ['っ','XTU'],
+    ['が','GA'], ['ぎ','GI'], ['ぐ','GU'], ['げ','GE'], ['ご','GO'],
+    ['ざ','ZA'], ['じ','ZI'], ['ず','ZU'], ['ぜ','ZE'], ['ぞ','ZO'],
+    ['だ','DA'], ['ぢ','DI'], ['づ','DU'], ['で','DE'], ['ど','DO'],
+    ['ば','BA'], ['び','BI'], ['ぶ','BU'], ['べ','BE'], ['ぼ','BO'],
+    ['ぱ','PA'], ['ぴ','PI'], ['ぷ','PU'], ['ぺ','PE'], ['ぽ','PO'],
+    // 1文字かな（カタカナ）
+    ['ア','A'],  ['イ','I'],  ['ウ','U'],  ['エ','E'],  ['オ','O'],
+    ['カ','KA'], ['キ','KI'], ['ク','KU'], ['ケ','KE'], ['コ','KO'],
+    ['サ','SA'], ['シ','SI'], ['ス','SU'], ['セ','SE'], ['ソ','SO'],
+    ['タ','TA'], ['チ','TI'], ['ツ','TSU'],['テ','TE'], ['ト','TO'],
+    ['ナ','NA'], ['ニ','NI'], ['ヌ','NU'], ['ネ','NE'], ['ノ','NO'],
+    ['ハ','HA'], ['ヒ','HI'], ['フ','HU'], ['ヘ','HE'], ['ホ','HO'],
+    ['マ','MA'], ['ミ','MI'], ['ム','MU'], ['メ','ME'], ['モ','MO'],
+    ['ヤ','YA'], ['ユ','YU'], ['ヨ','YO'],
+    ['ラ','RA'], ['リ','RI'], ['ル','RU'], ['レ','RE'], ['ロ','RO'],
+    ['ワ','WA'], ['ヲ','WO'], ['ン','NN'], ['ッ','XTU'],
+    ['ガ','GA'], ['ギ','GI'], ['グ','GU'], ['ゲ','GE'], ['ゴ','GO'],
+    ['ザ','ZA'], ['ジ','ZI'], ['ズ','ZU'], ['ゼ','ZE'], ['ゾ','ZO'],
+    ['ダ','DA'], ['ヂ','DI'], ['ヅ','DU'], ['デ','DE'], ['ド','DO'],
+    ['バ','BA'], ['ビ','BI'], ['ブ','BU'], ['ベ','BE'], ['ボ','BO'],
+    ['パ','PA'], ['ピ','PI'], ['プ','PU'], ['ペ','PE'], ['ポ','PO'],
+    // 長音符（ー）→ 直前の母音を繰り返す扱いで1文字として処理
+    ['ー','ー'],
+  ];
+
+  // かな文字列→ローマ字区間リストに変換
+  function seg(kanaStr, romaStr){
+    const out = [], ka = [...kanaStr];
+    let kp=0, rp=0;
+    while(kp < ka.length){
+      let hit = false;
+      for(const [k,r] of KR){
+        const kl = [...k].length;
+        if(ka.slice(kp,kp+kl).join('') !== k) continue;
+        // 長音符(ー)は直前母音の繰り返し → 1文字分のローマ字消費
+        if(k === 'ー'){
+          out.push({kana:k, romaStart:rp, romaEnd:rp+1});
+          rp += 1;
+        } else {
+          out.push({kana:k, romaStart:rp, romaEnd:rp+r.length});
+          rp += r.length;
+        }
+        kp += kl; hit = true; break;
+      }
+      if(!hit){ out.push({kana:ka[kp], romaStart:rp, romaEnd:rp}); kp++; }
+    }
+    return out;
+  }
+
+  const typedLen = t.typed.length;
+  const segments = seg(t.kana, t.word);
+  let html = '';
+  segments.forEach(({kana,romaStart,romaEnd}) => {
+    const segLen = romaEnd - romaStart;
+    if(romaEnd > 0 && romaEnd <= typedLen){
+      // 打ち終わり → 金色
+      html += `<span style="color:#d4a227;text-shadow:0 0 12px rgba(212,162,39,0.9)">${kana}</span>`;
+    } else if(romaStart < typedLen){
+      // 打鍵中 → 白→金グラデーション
+      const pct = segLen > 0 ? (typedLen - romaStart) / segLen : 0;
+      const g2 = Math.round(255 - (255-162)*pct);
+      const b2 = Math.round(255 - (255- 39)*pct);
+      html += `<span style="color:rgb(255,${g2},${b2})">${kana}</span>`;
+    } else {
+      // 未打鍵 → 白
+      html += `<span style="color:#ffffff">${kana}</span>`;
+    }
+  });
+  kanaEl.innerHTML = html;
+}function loadDuelRanking(){try{return JSON.parse(localStorage.getItem(LS_DUEL))||[];}catch(e){return[];}}
 function saveDuelRanking(l){try{localStorage.setItem(LS_DUEL,JSON.stringify(l));}catch(e){}}
 function addDuelScore(entry){const l=loadDuelRanking();l.push(entry);l.sort((a,b)=>b.streak-a.streak);const t=l.slice(0,10);const rank=t.findIndex(e=>e===entry)+1;saveDuelRanking(t);return{rank,list:t};}
 function renderDuelRanking(list,my){const el=document.getElementById('duel-ranking-list');if(!list.length){el.innerHTML='<div style="padding:8px;text-align:center;color:#555">NO DATA YET</div>';return;}const md=['🥇','🥈','🥉'];el.innerHTML=list.map((e,i)=>{const me=e===my;const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${me?' rk-new':''}`;const d=new Date(e.ts);const dt=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return`<div class="${cls}"><span class="rk-col rk-no">${md[i]||('#'+(i+1))}${me?' ◀':''}</span><span class="rk-col rk-score">${e.streak}連勝</span><span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} LV${e.level||1}</span><span class="rk-col rk-date">${dt}</span></div>`;}).join('');}
@@ -2294,7 +2457,24 @@ if(duelWordEl){duelWordEl.classList.remove('roma-fading','roma-hidden');if(rv===
 const duelKanaEl=document.getElementById('duel-kana');
 if(duelKanaEl){duelKanaEl.style.fontSize=rv>=2?'clamp(2.2rem,5vw,3.5rem)':'';duelKanaEl.style.color=rv>=2?'#fff080':'';}
 renderDuelWord();duelWordBox.classList.remove('hidden');duelTimerBar.style.transition='none';duelTimerBar.style.width='100%';duelTimerBar.style.background='var(--gold)';void duelTimerBar.offsetHeight;duelTimerBar.style.transition=`width ${D.limitMs}ms linear,background 0.3s`;duelTimerBar.style.width='0%';setTimeout(()=>{if(D.phase==='typing')duelTimerBar.style.background='#ff9940';},D.limitMs*0.4);setTimeout(()=>{if(D.phase==='typing')duelTimerBar.style.background='#cc2020';},D.limitMs*0.7);D.rafId=setTimeout(()=>{if(D.phase==='typing')onDuelTimeout();},D.limitMs);hiddenInput.focus();}
-function handleDuelChar(ch){if(D.phase!=='typing')return;const exp=D.word[D.typed.length];if(ch===exp){D.typed+=ch;renderDuelWord();if(D.typed===D.word)onDuelWin();}else{sfxMiss();if(D.diff==='hard'){flashScreen('#660000');clearTimeout(D.rafId);onDuelTimeout();}else{flashScreen();}}}
+function handleDuelChar(ch){
+  if(D.phase!=='typing')return;
+  if(D.lang==='jp'){
+    const res=checkRomaVariant(D.word,D.typed,ch);
+    if(res&&res.ok){
+      D.word=res.word; D.typed=res.typed;
+      renderDuelWord();
+      if(D.typed===D.word)onDuelWin();
+      return;
+    }
+  } else {
+    const exp=D.word[D.typed.length];
+    if(ch===exp){D.typed+=ch;renderDuelWord();if(D.typed===D.word)onDuelWin();return;}
+  }
+  sfxMiss();
+  if(D.diff==='hard'){flashScreen('#660000');clearTimeout(D.rafId);onDuelTimeout();}
+  else{flashScreen();}
+}
 function renderDuelWord(){duelWordDisp.innerHTML=`<span class="typed">${D.typed}</span><span class="cursor"></span><span>${D.word.slice(D.typed.length)}</span>`;}
 function onDuelWin(){if(D.phase!=='typing')return;D.phase='result';clearTimeout(D.rafId);duelWordBox.classList.add('hidden');D.streak++;const cfg=DUEL_DIFF[D.diff];if(D.streak%cfg.lvEvery===0){D.level++;sfxLevelUp();}duelStatusMsg.style.color='#ffd700';duelStatusMsg.textContent=D.streak===1?'NICE SHOT!':D.streak<5?'WIN!':D.streak<10?`${D.streak} WINS! 🔥`:`${D.streak} WINS!! 🌟`;sfxGunshot(D.streak);duelPlayerFig.classList.remove('shoot');void duelPlayerFig.offsetWidth;duelPlayerFig.classList.add('shoot');setTimeout(()=>{duelEnemyFig.classList.remove('hit');void duelEnemyFig.offsetWidth;duelEnemyFig.classList.add('hit');},180);shootBulletLine(document.getElementById('duel-player').getBoundingClientRect(),document.getElementById('duel-enemy').getBoundingClientRect());duelStreakDisp.textContent=`🔥 ${D.streak} WIN STREAK`;setTimeout(()=>{if(D.phase!=='result')return;duelEnemyFig.style.animation='';duelEnemyFig.style.opacity='1';duelPlayerFig.style.animation='';duelEnemyFig.textContent=['🕵️','🤖','👹','💀','🧟','🦹','🥷'][Math.floor(Math.random()*7)];startDuelCountdown();},1600);}
 function onDuelTimeout(){if(D.phase!=='typing'&&D.phase!=='staredown')return;D.phase='result';clearTimeout(D.rafId);duelWordBox.classList.add('hidden');sfxDamage();flashScreen('#660000');duelStatusMsg.style.color='#cc2020';duelStatusMsg.textContent='TOO SLOW...';duelEnemyFig.classList.remove('shoot');void duelEnemyFig.offsetWidth;duelEnemyFig.classList.add('shoot');setTimeout(()=>{duelPlayerFig.classList.remove('hit');void duelPlayerFig.offsetWidth;duelPlayerFig.classList.add('hit');},180);shootBulletLine(document.getElementById('duel-enemy').getBoundingClientRect(),document.getElementById('duel-player').getBoundingClientRect());setTimeout(showDuelResult,1800);}
@@ -2406,86 +2586,9 @@ window.addEventListener('DOMContentLoaded', function() {
   }catch(e){}};
 
   // ── イントロBGM（緊張感のある西部劇テーマ） ──
-  // ④ 荒野のロック入場（イントロBGM）
-  let _introBgmGain=null;
-  const startIntroBGM=()=>{
-    try{
-      const c=getACtx(), T0=c.currentTime+0.1;
-      _introBgmGain=c.createGain();
-      _introBgmGain.gain.value=0;
-      _introBgmGain.connect(c.destination);
-      _introBgmGain.gain.linearRampToValueAtTime(0.55, T0+0.6);
-
-      const mg=_introBgmGain;
-      function tn(type,freq,t,dur,vol,vr=0,vd=0){
-        const o=c.createOscillator(),og=c.createGain();
-        o.type=type; o.frequency.value=freq;
-        if(vr){const l=c.createOscillator(),lg=c.createGain();l.frequency.value=vr;lg.gain.value=vd;l.connect(lg);lg.connect(o.frequency);l.start(t);l.stop(t+dur);}
-        o.connect(og); og.connect(mg);
-        og.gain.setValueAtTime(0,t);
-        og.gain.linearRampToValueAtTime(vol,t+Math.min(0.05,dur*.12));
-        og.gain.setValueAtTime(vol*.7,t+dur*.6);
-        og.gain.exponentialRampToValueAtTime(0.001,t+dur*.95);
-        o.start(t); o.stop(t+dur);
-      }
-      function kk(t,v=0.45){
-        const o=c.createOscillator(),g=c.createGain();o.type='sine';
-        o.frequency.setValueAtTime(100,t);o.frequency.exponentialRampToValueAtTime(25,t+0.2);
-        o.connect(g);g.connect(mg);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.25);o.start(t);o.stop(t+0.28);
-      }
-      function sn(t,v=0.14){
-        const nb=getNoiseBuffer(),ns=c.createBufferSource(),nf=c.createBiquadFilter(),ng=c.createGain();
-        ns.buffer=nb;nf.type='bandpass';nf.frequency.value=1200;nf.Q.value=1.2;
-        ns.connect(nf);nf.connect(ng);ng.connect(mg);
-        ng.gain.setValueAtTime(v,t);ng.gain.exponentialRampToValueAtTime(0.001,t+0.1);ns.start(t);ns.stop(t+0.12);
-      }
-
-      const T=0.18;
-      // ── メインリフ（0〜3.6s・1ループ）──
-      const riff=[[220,T*2],[0,T],[220,T],[247,T],[0,T],[261,T*2],[0,T],
-                   [220,T*2],[0,T],[220,T],[196,T],[0,T],[175,T*3],[0,T]];
-      const lead=[[440,T*2],[0,T],[494,T],[523,T],[0,T],[587,T*2],[0,T],
-                   [523,T*2],[0,T],[494,T],[440,T],[0,T],[392,T*3],[0,T]];
-      let rt=T0; riff.forEach(([f,d])=>{if(f>0)tn('sawtooth',f,rt,d,0.25);rt+=d;});
-      let lt=T0; lead.forEach(([f,d])=>{if(f>0)tn('triangle',f,lt,d,0.2,5,4);lt+=d;});
-      const loopDur=riff.reduce((s,[,d])=>s+d,0);
-      const steps=Math.round(loopDur/T);
-      for(let i=0;i<steps;i++){
-        if(i%4===0) kk(T0+i*T,0.45);
-        if(i%4===2) sn(T0+i*T,0.14);
-      }
-
-      // ── 2ループ目（3.6〜7.2s）──
-      const T1=T0+loopDur;
-      let r2=T1; riff.forEach(([f,d])=>{if(f>0)tn('sawtooth',f,r2,d,0.28);r2+=d;});
-      let l2=T1; lead.forEach(([f,d])=>{if(f>0)tn('triangle',f,l2,d,0.22,5,4);l2+=d;});
-      for(let i=0;i<steps;i++){
-        if(i%4===0) kk(T1+i*T,0.48);
-        if(i%4===2) sn(T1+i*T,0.16);
-      }
-
-      // ── 盛り上がり（5.0〜6.0s）──
-      [[220,.2],[247,.15],[277,.15],[311,.15],[349,.15],[392,.15],[440,.15],[494,.15],[523,.2]]
-        .forEach(([f,d],i)=>tn('sawtooth',f,T0+5.0+i*.18,d,0.2+i*.025));
-
-      // ── DRAW! ファンファーレ（6.0〜）──
-      [[392,.12],[523,.12],[659,.12],[784,.4]]
-        .forEach(([f,d],i)=>tn('sawtooth',f,T0+6.0+i*.15,d,0.35));
-
-      // ── フェードアウト（7.2〜）──
-      mg.gain.setValueAtTime(0.55,T0+7.0);
-      mg.gain.linearRampToValueAtTime(0,T0+8.5);
-
-    }catch(e){}
-  };
-  const stopIntroBGM=()=>{
-    if(!_introBgmGain)return;
-    try{_introBgmGain.gain.linearRampToValueAtTime(0,getACtx().currentTime+0.3);}catch(e){}
-    setTimeout(()=>{try{_introBgmGain&&_introBgmGain.disconnect();}catch(e){} _introBgmGain=null;},400);
-  };
+  // イントロBGM: なし（バキューンSEのみ）
 
   // タイムライン
-  startIntroBGM();
   T(()=>fade(iBg,1,1400),200);
   T(()=>{
     iSun.style.transition='opacity 900ms ease, transform 1s cubic-bezier(0.34,1.3,0.64,1)';
@@ -2506,7 +2609,7 @@ window.addEventListener('DOMContentLoaded', function() {
     requestAnimationFrame(()=>requestAnimationFrame(()=>{iDr.style.opacity='1';iDr.style.transform='translateX(-50%) scale(1)';}));
   },6000);
   T(()=>{
-    unlockAudio(); boom(); stopIntroBGM();
+    unlockAudio(); boom();
     iML.style.opacity=iMR.style.opacity='1';
     setTimeout(()=>{iML.style.transition=iMR.style.transition='opacity 0.3s';iML.style.opacity=iMR.style.opacity='0';},80);
     iPlayer.style.transition='transform 0.25s ease';
@@ -2814,6 +2917,24 @@ function handlePracChar(ch){
   const card = P.cards[P.focused];
   if(!card || card.done) return;
 
+  // ゆらぎ対応
+  const kanaOnlyCats2=['kana50','dakuten','handakuten','youon'];
+  const isJPCat = kanaOnlyCats2.includes(P.cat) || P.lang==='jp';
+  if(isJPCat){
+    const res=checkRomaVariant(card.word,card.typed,ch);
+    if(res&&res.ok){
+      card.word=res.word; card.typed=res.typed;
+      const w=card.el.querySelector('.prac-card-word');
+      if(w){const rem=card.word.slice(card.typed.length);w.innerHTML=`<span class="typed">${card.typed}</span><span class="cursor"></span><span class="remain">${rem}</span>`;}
+      P.hit++; updatePracStats();
+      if(card.typed===card.word) onPracWordComplete(card);
+      return;
+    }
+    // ミス
+    P.miss++; updatePracStats(); sfxMiss();
+    if(card.el){card.el.classList.remove('miss-shake-prac');void card.el.offsetWidth;card.el.classList.add('miss-shake-prac');setTimeout(()=>{if(card.el)card.el.classList.remove('miss-shake-prac');},300);}
+    return;
+  }
   const expected = card.word[card.typed.length];
   if(ch===expected){
     card.typed += ch;
@@ -3666,8 +3787,25 @@ function handleTAChar(ch){
   if(TA.phase!=='playing') return;
   const entry = TA.words[TA.current];
   const word  = entry.r;
+  const isJPTA = TA.lang==='jp';
+  if(isJPTA){
+    const res=checkRomaVariant(word,TA.typed,ch);
+    if(res&&res.ok){
+      // 代替ローマ字を単語リストに反映
+      TA.words[TA.current].r=res.word;
+      TA.typed=res.typed; TA.hit++;
+      const w=document.getElementById('ta-card-wrap').querySelector('.prac-card-word');
+      if(w) w.innerHTML=`<span class="typed">${TA.typed}</span><span class="cursor"></span><span class="remain">${res.word.slice(TA.typed.length)}</span>`;
+      updateTAStats();
+      if(TA.typed===res.word){sfxGunshot(0);TA.current++;TA.typed='';if(TA.current>=TA.words.length){finishTimeAttack();}else{setTimeout(()=>showTACard(TA.current),300);}}
+      return;
+    }
+    TA.miss++;sfxMiss();flashScreen();updateTAStats();
+    const wrap=document.getElementById('ta-card-wrap').querySelector('.prac-card');
+    if(wrap){wrap.classList.remove('miss-shake-prac');void wrap.offsetWidth;wrap.classList.add('miss-shake-prac');setTimeout(()=>wrap.classList.remove('miss-shake-prac'),280);}
+    return;
+  }
   const expected = word[TA.typed.length];
-
   if(ch===expected){
     TA.typed+=ch; TA.hit++;
     // 表示更新
@@ -3879,7 +4017,7 @@ function checkBossSpawn() {
 function spawnBoss() {
   if(G.phase !== 'playing') return;
   BOSS.active   = true;
-  BOSS.maxHp    = Math.min(3 + Math.floor(G.level / 5), 7);
+  BOSS.maxHp    = 4; // 全レベル固定（Lv5と同じ4回）
   BOSS.hp       = BOSS.maxHp;
   BOSS.targetId = G.nextId++;
 
@@ -3960,6 +4098,8 @@ function hideBossHPBar() {
   BOSS.targetId = null;
   const bossBar = document.getElementById('boss-hp-bar');
   bossBar.classList.remove('visible');
+  // ボス撃破後: Lv5以上ならGのBGMに戻す
+  if(G.phase==='playing'){startBGM(G.level>=5?'G':G.endless?'E':'B');}
 }
 
 // ── onWordComplete を拡張してボス対応 ──
@@ -4122,6 +4262,109 @@ spawnTarget = function() {
   if(!G.focused) G.focused = id;
   updateFocusClass();
 };
+
+
+// ════════════════════════════════════════
+//  日本語ローマ字ゆらぎ対応テーブル
+//  key: 標準ローマ字, value: 受け付ける別表記リスト
+// ════════════════════════════════════════
+const ROMA_VARIANTS = {
+  // さ行
+  'SI':'SHI', 'SHI':'SI',
+  // た行
+  'TI':'CHI', 'CHI':'TI',
+  'TSU':'TU', 'TU':'TSU',
+  // は行
+  'HU':'FU', 'FU':'HU',
+  // じ行
+  'ZI':'JI', 'JI':'ZI',
+  // ち行拗音
+  'TYA':'CHA', 'CHA':'TYA',
+  'TYU':'CHU', 'CHU':'TYU',
+  'TYO':'CHO', 'CHO':'TYO',
+  // し行拗音
+  'SYA':'SHA', 'SHA':'SYA',
+  'SYU':'SHU', 'SHU':'SYU',
+  'SYO':'SHO', 'SHO':'SYO',
+  // じ行拗音
+  'ZYA':'JA',  'JA':'ZYA',
+  'ZYU':'JU',  'JU':'ZYU',
+  'ZYO':'JO',  'JO':'ZYO',
+  // ん
+  'NN':'N',  // NN → N (文末)
+  // っ
+  'LTU':'XTU', 'XTU':'LTU',
+  // 小文字
+  'XA':'LA', 'LA':'XA',
+  'XI':'LI', 'LI':'XI',
+  'XU':'LU', 'LU':'XU',
+  'XE':'LE', 'LE':'XE',
+  'XO':'LO', 'LO':'XO',
+  'XYA':'LYA', 'LYA':'XYA',
+  'XYU':'LYU', 'LYU':'XYU',
+  'XYO':'LYO', 'LYO':'XYO',
+};
+
+// かなとローマ字の全対応マップ（逆引き用）
+// かな文字 → [標準ローマ字, 別表記...]
+const KANA_TO_ROMAS = {
+  'し':['SI','SHI'],
+  'ち':['TI','CHI'],
+  'つ':['TSU','TU'],
+  'ふ':['HU','FU'],
+  'じ':['ZI','JI'],
+  'ちゃ':['TYA','CHA'],
+  'ちゅ':['TYU','CHU'],
+  'ちょ':['TYO','CHO'],
+  'しゃ':['SYA','SHA'],
+  'しゅ':['SYU','SHU'],
+  'しょ':['SYO','SHO'],
+  'じゃ':['ZYA','JA'],
+  'じゅ':['ZYU','JU'],
+  'じょ':['ZYO','JO'],
+  'っ':['XTU','LTU'],
+};
+
+// ── ゆらぎ付き文字判定 ──
+// typed + ch が word にマッチするか
+// 別表記も含めてチェックし、マッチすれば正解のローマ字に変換して返す
+// 返り値: { ok: bool, newWord: string, newTyped: string } | null
+function checkRomaVariant(word, typed, ch){
+  // まず標準チェック
+  if(word[typed.length] === ch){
+    return { ok: true, word, typed: typed + ch };
+  }
+
+  if(!ch) return null;
+
+  // 現在の typed + ch を先頭として別表記を探す
+  const candidate = typed + ch;
+
+  // ゆらぎテーブルから候補を生成
+  // どの別表記がマッチするか調べる
+  // 例: word='SHI', typed='', ch='S' → 'S'は'SHI'の先頭でもあり'SI'の先頭でもある
+  //     next chars of candidate を確認
+
+  // 戦略: candidate が word の先頭と一致しなければ
+  //       ROMA_VARIANTSで word を変換して再チェック
+  for(const [from, to] of Object.entries(ROMA_VARIANTS)){
+    // word内の 'from' を 'to' に変換した代替単語を生成
+    if(!word.includes(from)) continue;
+    const altWord = word.replace(from, to);
+    if(altWord === word) continue;
+
+    // 代替単語に対して candidate がプレフィックスか確認
+    if(altWord.startsWith(candidate)){
+      // マッチ！以降は代替単語でタイピングを続ける
+      return { ok: true, word: altWord, typed: candidate };
+    }
+    // candidate が altWord と完全一致（単語完成）
+    if(altWord === candidate){
+      return { ok: true, word: altWord, typed: candidate };
+    }
+  }
+  return null;
+}
 
 </script>
 </body>
