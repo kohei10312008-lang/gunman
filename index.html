@@ -1651,7 +1651,9 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 function romaVisibility(level){
   if(level<=9)  return 0;   // Lv1〜9: ローマ字あり
   if(level===10) return 1;  // Lv10: うっすら
-  return 2;                 // Lv11+: かなのみ
+  // EASYはLv11以降もうっすら維持（かなのみにしない）
+  if(G.diff==='easy') return 1;
+  return 2;                 // NORMAL/HARD Lv11+: かなのみ
 }
 function applyRomaVisibility(el, level){
   const w=el.querySelector('.target-word');
@@ -1667,7 +1669,7 @@ function showKanaNotify(level){
   if(!el) return;
   if(level===10){
     el.innerHTML='🇯🇵 Lv10 ローマ字がうっすら…';
-  } else if(level===11){
+  } else if(level===11 && G.diff!=='easy'){
     el.innerHTML='🇯🇵 Lv11 かなのみモード！<br><span style="font-size:0.75em;color:#c4935a">ローマ字を思い出せ！</span>';
   } else {
     return; // Lv7以降は通知なし
@@ -2158,7 +2160,7 @@ const advanceMs=Math.max(G.diff==='easy'?5000:G.diff==='normal'?3500:2500,cfg.ad
 if(isJP) applyRomaVisibility(el, G.level);
 const t={id,word,typed:'',kana,el,advanceMs,startTime:Date.now(),expired:false,laneX,laneIdx,baseH,baseW};G.activeTargets.push(t);
 // JP: かな初期表示（白で初期化）
-if(isJP&&kana){setTimeout(()=>updateKanaProgress(t),10);}
+if(isJP&&kana&&G.diff!=='easy'){setTimeout(()=>updateKanaProgress(t),10);}
 if(!G.focused)G.focused=id;updateFocusClass();}
 
 // ═══ TARGET EXPIRED ═══
@@ -2212,8 +2214,8 @@ function updateWordDisplay(t){
   if(!w)return;
   const r=t.word.slice(t.typed.length);
   w.innerHTML=`<span class="typed">${t.typed}</span><span class="cursor"></span><span class="remain">${r}</span>`;
-  // JP: かな文字の色を打鍵進捗に合わせて変える（通常/かなのみ両対応）
-  if(G.lang==='jp' && t.kana){
+  // JP: かなのみモード時のみかな色変化（EASYはローマ字が残るので不要）
+  if(G.lang==='jp' && t.kana && G.diff!=='easy'){
     updateKanaProgress(t);
   }
   // JP: ローマ字表示クラスを維持（innerHTML更新でclassがリセットされないよう再適用）
@@ -2222,7 +2224,7 @@ function updateFocusClass(){
   G.activeTargets.forEach(t=>{
     t.el.classList.toggle('focused',t.id===G.focused);
     // JP: かな進捗を再描画（通常/かなのみ両対応）
-    if(G.lang==='jp' && t.kana){
+    if(G.lang==='jp' && t.kana && G.diff!=='easy'){
       updateKanaProgress(t);
     }
   });
