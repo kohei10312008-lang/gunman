@@ -2538,11 +2538,15 @@ function updateKanaProgress(t){
 
   const typedLen = t.typed.length;
   const segments = seg(t.kana, t.word);
+
+  // 確定かな数をカウント（音の判定用）
+  let confirmedCount = 0;
   let html = '';
   segments.forEach(({kana,romaStart,romaEnd}) => {
     const segLen = romaEnd - romaStart;
     if(romaEnd > 0 && romaEnd <= typedLen){
       // 打ち終わり → 金色
+      confirmedCount++;
       html += `<span style="color:#d4a227;text-shadow:0 0 12px rgba(212,162,39,0.9)">${kana}</span>`;
     } else if(romaStart < typedLen){
       // 打鍵中 → 白→金グラデーション
@@ -2556,7 +2560,31 @@ function updateKanaProgress(t){
     }
   });
   kanaEl.innerHTML = html;
-}function loadDuelRanking(){try{return JSON.parse(localStorage.getItem(LS_DUEL))||[];}catch(e){return[];}}
+
+  // 確定かな数が増えたら音を鳴らす（HARDモードのみ）
+  if(G.diff === 'hard' && G.lang === 'jp'){
+    const prev = t._confirmedKana || 0;
+    if(confirmedCount > prev){
+      sfxKanaConfirm();
+    }
+    t._confirmedKana = confirmedCount;
+  }
+}
+// ── かな確定音（HARDモード日本語専用） ──
+function sfxKanaConfirm(){
+  try{
+    const c=getACtx(), t=c.currentTime;
+    const o=c.createOscillator(), g=c.createGain();
+    o.type='sine';
+    o.frequency.setValueAtTime(880, t);
+    o.frequency.exponentialRampToValueAtTime(1109, t+0.04);
+    o.connect(g); g.connect(c.destination);
+    g.gain.setValueAtTime(0.18, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t+0.12);
+    o.start(t); o.stop(t+0.13);
+  }catch(e){}
+}
+function loadDuelRanking(){try{return JSON.parse(localStorage.getItem(LS_DUEL))||[];}catch(e){return[];}}
 function saveDuelRanking(l){try{localStorage.setItem(LS_DUEL,JSON.stringify(l));}catch(e){}}
 function addDuelScore(entry){const l=loadDuelRanking();l.push(entry);l.sort((a,b)=>b.streak-a.streak);const t=l.slice(0,10);const rank=t.findIndex(e=>e===entry)+1;saveDuelRanking(t);return{rank,list:t};}
 function renderDuelRanking(list,my){const el=document.getElementById('duel-ranking-list');if(!list.length){el.innerHTML='<div style="padding:8px;text-align:center;color:#555">NO DATA YET</div>';return;}const md=['🥇','🥈','🥉'];el.innerHTML=list.map((e,i)=>{const me=e===my;const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${me?' rk-new':''}`;const d=new Date(e.ts);const dt=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return`<div class="${cls}"><span class="rk-col rk-no">${md[i]||('#'+(i+1))}${me?' ◀':''}</span><span class="rk-col rk-score">${e.streak}連勝</span><span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} LV${e.level||1}</span><span class="rk-col rk-date">${dt}</span></div>`;}).join('');}
@@ -4362,8 +4390,8 @@ spawnTarget = function() {
   const cfg    = DIFF[G.diff];
   const isJP   = G.lang === 'jp';
   const id     = G.nextId++;
-  // 全6種類からランダム（ボスは除く）
   const svgIdx = Math.floor(Math.random() * ALL_SVG.length);
+
   let laneIdx;
   do { laneIdx = Math.floor(Math.random() * LANES.length); }
   while(G.activeTargets.length > 0 &&
@@ -4381,21 +4409,24 @@ spawnTarget = function() {
     word = pool[Math.floor(Math.random()*pool.length)];
   }
 
-  const advanceMs = Math.max(2500, cfg.advanceSec*1000-(G.level-1)*300);
-  const baseH = 360;
-  const baseW = Math.round(baseH*0.6);
+  const lvSpeedup = G.diff==='easy'?60:G.diff==='normal'?100:200;
+  const advanceMs = Math.max(
+    G.diff==='easy'?7000:G.diff==='normal'?5000:3500,
+    cfg.advanceSec*1000-(G.level-1)*lvSpeedup
+  );
+  const baseH = 360, baseW = Math.round(baseH*0.6);
 
   const el = document.createElement('div');
   el.className = 'target-wrap walking';
   el.dataset.id = id;
-  el.style.position      = 'absolute';
-  el.style.top           = '0px';
-  el.style.left          = '0px';
-  el.style.transformOrigin = 'center bottom';
+  el.style.cssText = 'position:absolute;top:0px;left:0px;transform-origin:center bottom;';
+
+  // HARDの日本語: ローマ字エリアを最初から非表示
+  const hideRoma = isJP && G.diff==='hard';
+  const wordStyle = hideRoma ? ' style="display:none"' : '';
 
   const wHTML = isJP
-    ? `<div class="target-kana">${kana}</div>
-       <div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`
+    ? `<div class="target-kana">${kana}</div><div class="target-word"${wordStyle}><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`
     : `<div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`;
 
   el.innerHTML = `
@@ -4405,12 +4436,21 @@ spawnTarget = function() {
   `;
   lane.appendChild(el);
 
+  // JP: ローマ字表示クラス適用（EASY/NORMAL）
+  if(isJP && !hideRoma) applyRomaVisibility(el, G.level);
+
   const t = {
-    id, word, typed:'', el, advanceMs,
+    id, word, typed:'', kana, el, advanceMs,
     startTime: Date.now(), expired: false,
     laneX, laneIdx, baseH, baseW, isBoss: false,
   };
   G.activeTargets.push(t);
+
+  // JP: かな色変化の初期表示（白）
+  if(isJP && kana && G.diff !== 'easy'){
+    setTimeout(() => updateKanaProgress(t), 10);
+  }
+
   if(!G.focused) G.focused = id;
   updateFocusClass();
 };
