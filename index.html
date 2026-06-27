@@ -1101,6 +1101,348 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
   100% { transform: translateY(110vh) rotate(720deg); opacity: 0.3; }
 }
+
+/* ════════════════════════════
+   C: 文章入力モード
+════════════════════════════ */
+#screen-sentence {
+  background: rgba(8,4,1,0.97);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+}
+#sent-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(0,0,0,0.65);
+  border-bottom: 1px solid #3a2008;
+  flex-shrink: 0;
+}
+#sent-header-title { font-family:'Rye',serif; font-size:1.1rem; color:var(--gold); letter-spacing:2px; }
+#sent-meta { display:flex; gap:16px; font-size:0.82rem; }
+#sent-wpm   { color:#60dd40; }
+#sent-acc   { color:var(--gold); }
+#sent-time  { color:var(--sand); }
+
+/* カテゴリバー */
+#sent-cat-bar {
+  display:flex; gap:6px; padding:8px 16px;
+  background:rgba(0,0,0,0.4);
+  border-bottom:1px solid #2a1608;
+  flex-shrink:0; overflow-x:auto; scrollbar-width:none;
+}
+#sent-cat-bar::-webkit-scrollbar{display:none;}
+.sent-cat {
+  font-family:'Rye',serif; font-size:0.7rem; color:var(--smoke);
+  background:rgba(255,255,255,0.04); border:1.5px solid #3a2008;
+  border-radius:4px; padding:5px 14px; cursor:pointer; white-space:nowrap;
+  display:flex; flex-direction:column; align-items:center; gap:1px;
+  transition:all 0.15s; flex-shrink:0;
+}
+.sent-cat span { font-family:'Courier Prime',monospace; font-size:0.6rem; color:#665040; }
+.sent-cat:hover { border-color:var(--sand); color:var(--sand); }
+.sent-cat.active { border-color:var(--gold); color:var(--gold); background:rgba(212,162,39,0.12); }
+
+/* メイン入力エリア */
+#sent-body {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:24px 28px; gap:20px; position:relative;
+}
+/* 進捗バー */
+#sent-progress-wrap { width:100%; height:5px; background:#1a0a02; border-radius:3px; }
+#sent-progress-fill { height:100%; background:var(--gold); border-radius:3px; transition:width 0.2s ease; }
+/* 問題番号 */
+#sent-counter { font-size:0.78rem; color:var(--smoke); letter-spacing:2px; }
+
+/* 文章表示エリア */
+#sent-display-wrap {
+  width:100%; max-width:820px;
+  background:rgba(0,0,0,0.5);
+  border:1.5px solid #3a2008;
+  border-radius:8px;
+  padding:20px 24px;
+}
+/* 文章（文字ごとにspan） */
+#sent-display {
+  font-family:'Courier Prime',monospace;
+  font-size:clamp(1.2rem,2.5vw,1.8rem);
+  line-height:1.9;
+  letter-spacing:2px;
+  word-break:break-all;
+}
+.sc-done    { color:var(--gold); }
+.sc-cursor  {
+  color:#fff;
+  background:rgba(212,162,39,0.35);
+  border-radius:2px;
+  animation:blink 0.55s steps(1) infinite;
+}
+.sc-error   { color:#ff4040; background:rgba(255,0,0,0.2); border-radius:2px; }
+.sc-remain  { color:rgba(255,255,255,0.35); }
+
+/* 入力フィールド表示 */
+#sent-input-display {
+  width:100%; max-width:820px;
+  font-family:'Courier Prime',monospace;
+  font-size:clamp(1rem,2vw,1.4rem);
+  color:#c0a070;
+  letter-spacing:2px;
+  min-height:2rem;
+  padding:6px 4px;
+  border-bottom:1px solid #3a2008;
+}
+
+/* 完了オーバーレイ */
+#sent-complete {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:rgba(10,5,2,0.92); z-index:20;
+}
+#sent-complete.hidden { display:none; }
+#sent-complete-msg {
+  font-family:'Rye',serif;
+  font-size:clamp(1.8rem,5vw,3rem);
+  color:var(--gold);
+  text-shadow:0 0 30px rgba(212,162,39,0.7),3px 3px 0 #5a3000;
+  letter-spacing:4px; margin-bottom:10px;
+}
+#sent-complete-detail { color:var(--smoke); font-size:0.85rem; line-height:2.2; text-align:center; margin-bottom:12px; }
+/* ════ 文章モードここまで ════ */
+
+/* ════════════════════════════
+   練習モード選択画面
+════════════════════════════ */
+#screen-renshu {
+  background: rgba(10,5,2,0.97);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.renshu-card {
+  width: min(480px, 88vw);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 22px 28px;
+  background: #140a02;
+  border: 2px solid #3a2008;
+  border-radius: 10px;
+  margin: 8px 0;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: left;
+}
+.renshu-card:hover {
+  border-color: var(--gold);
+  background: rgba(212,162,39,0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+.renshu-card-icon {
+  font-size: 2.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.renshu-card-text {}
+.renshu-card-title {
+  font-family: 'Rye', serif;
+  font-size: 1.15rem;
+  color: var(--gold);
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.renshu-card-desc {
+  font-size: 0.75rem;
+  color: var(--smoke);
+  line-height: 1.6;
+  letter-spacing: 1px;
+}
+#renshu-back {
+  margin-top: 16px;
+  font-size: 0.8rem;
+}
+
+/* ════════════════════════════
+   D: キーボード練習
+════════════════════════════ */
+#screen-keyboard {
+  background: rgba(8,4,1,0.97);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+}
+#kb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(0,0,0,0.65);
+  border-bottom: 1px solid #3a2008;
+  flex-shrink: 0;
+}
+#kb-header-title { font-family:'Rye',serif; font-size:1.1rem; color:var(--gold); letter-spacing:2px; }
+#kb-meta { display:flex; gap:16px; font-size:0.82rem; }
+#kb-acc { color:var(--gold); }
+#kb-done { color:#60dd40; }
+
+/* ステップバー */
+#kb-steps {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px;
+  background: rgba(0,0,0,0.4);
+  border-bottom: 1px solid #2a1608;
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#kb-steps::-webkit-scrollbar { display:none; }
+.kb-step-btn {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.68rem;
+  color: var(--smoke);
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid #3a2008;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.kb-step-btn:hover { border-color:var(--sand); color:var(--sand); }
+.kb-step-btn.active { border-color:var(--gold); color:var(--gold); background:rgba(212,162,39,0.12); }
+.kb-step-btn.cleared { border-color:#3a5a1a; color:#60dd40; }
+
+/* メインエリア */
+#kb-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px;
+  gap: 16px;
+  overflow: hidden;
+}
+
+/* キーボード図 */
+#kb-keyboard-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.kb-row { display:flex; gap:4px; }
+.kb-key {
+  width: clamp(28px,4vw,42px);
+  height: clamp(28px,4vw,42px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e1008;
+  border: 1.5px solid #3a2008;
+  border-radius: 4px;
+  font-family: 'Courier Prime', monospace;
+  font-size: clamp(0.55rem, 1.2vw, 0.78rem);
+  font-weight: 700;
+  color: #5a3a10;
+  transition: all 0.12s;
+  position: relative;
+  user-select: none;
+}
+.kb-key.active-key { border-color:#fff; color:#fff; background:#2a1a08; }
+.kb-key.target-key {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(212,162,39,0.2);
+  box-shadow: 0 0 10px rgba(212,162,39,0.4);
+  animation: kbPulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes kbPulse {
+  from { box-shadow: 0 0 6px rgba(212,162,39,0.3); }
+  to   { box-shadow: 0 0 16px rgba(212,162,39,0.7); }
+}
+.kb-key.hit-key  { background:#1a3a10; border-color:#60dd40; color:#60dd40; }
+.kb-key.miss-key { background:#3a1010; border-color:#ff4040; color:#ff4040; }
+/* 指色 */
+.f-lp { background:#1a1a3a; } /* 左小指 */
+.f-lr { background:#1a2a3a; } /* 左薬指 */
+.f-lm { background:#1a3a3a; } /* 左中指 */
+.f-li { background:#1a3a2a; } /* 左人差し指 */
+.f-ri { background:#2a3a1a; } /* 右人差し指 */
+.f-rm { background:#3a3a1a; } /* 右中指 */
+.f-rr { background:#3a2a1a; } /* 右薬指 */
+.f-rp { background:#3a1a1a; } /* 右小指 */
+.kb-key.active-key.f-lp,.kb-key.active-key.f-lr,.kb-key.active-key.f-lm,
+.kb-key.active-key.f-li,.kb-key.active-key.f-ri,.kb-key.active-key.f-rm,
+.kb-key.active-key.f-rr,.kb-key.active-key.f-rp { opacity:1; }
+
+/* 手のひら図示 */
+#kb-hands {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: 0.7rem;
+  color: var(--smoke);
+  letter-spacing: 1px;
+}
+.kb-hand { text-align:center; }
+.kb-finger-highlight {
+  font-size: 1.4rem;
+  margin-bottom: 2px;
+}
+
+/* 入力エリア */
+#kb-target-display {
+  font-family: 'Rye', serif;
+  font-size: clamp(1.8rem,4vw,3rem);
+  color: var(--gold);
+  letter-spacing: 6px;
+  min-height: 3.5rem;
+  text-align: center;
+  text-shadow: 0 0 12px rgba(212,162,39,0.4);
+}
+#kb-input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+#kb-typed-display {
+  font-family: 'Courier Prime', monospace;
+  font-size: clamp(1.4rem,3vw,2.2rem);
+  letter-spacing: 5px;
+  min-height: 2.8rem;
+  min-width: clamp(100px,30vw,300px);
+  text-align: center;
+}
+#kb-typed-display .kb-ch-done  { color: var(--gold); }
+#kb-typed-display .kb-ch-error { color: #ff4040; }
+#kb-typed-display .kb-ch-cur   { color:#fff; border-bottom:3px solid #fff; animation:blink 0.55s steps(1) infinite; }
+
+#kb-instruction {
+  font-size: 0.78rem;
+  color: var(--smoke);
+  letter-spacing: 2px;
+  text-align: center;
+  min-height: 1.4rem;
+}
+/* 完了オーバーレイ */
+#kb-complete { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,5,2,0.92);z-index:20; }
+#kb-complete.hidden { display:none; }
 </style>
 </head>
 <body>
@@ -1223,11 +1565,11 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   <h1>GUNMAN<br>TYPER</h1>
   <p class="sub">— Type fast. Shoot faster. —</p>
   <div class="diff-btns" style="margin-bottom:0.6rem;">
-    <button class="diff-btn active" data-mode="survival">🎯 SURVIVAL</button>
-    <button class="diff-btn" data-mode="endless">♾️ ENDLESS</button>
-    <button class="diff-btn" data-mode="timeattack">⚡ TIME ATTACK</button>
-    <button class="diff-btn" data-mode="duel">🤠 DUEL</button>
-    <button class="diff-btn" data-mode="practice">🎯 PRACTICE</button>
+    <button class="diff-btn active" data-mode="survival">🎯 サバイバル</button>
+    <button class="diff-btn" data-mode="endless">♾️ エンドレス</button>
+    <button class="diff-btn" data-mode="timeattack">⚡ タイムアタック</button>
+    <button class="diff-btn" data-mode="duel">🤠 決闘</button>
+    <button class="diff-btn" data-mode="renshu">📚 練習モード</button>
   </div>
   <div id="mode-desc" style="font-size:0.72rem;color:var(--smoke);letter-spacing:1px;margin-bottom:0.8rem;min-height:1.2rem;">次々来う的を撃て！10分間スコアアタック</div>
   <div class="diff-btns" style="margin-bottom:0.6rem;">
@@ -1479,6 +1821,102 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
     <button class="btn" id="clear-btn-retry">もう一度</button>
     <button class="btn secondary" id="clear-btn-title">タイトルへ</button>
+  </div>
+</div>
+
+
+<!-- 文章入力モード -->
+<div class="screen hidden" id="screen-sentence">
+  <div id="sent-header">
+    <div id="sent-header-title">📝 SENTENCE</div>
+    <div id="sent-meta">
+      <span id="sent-wpm">WPM: --</span>
+      <span id="sent-acc">ACC: --%</span>
+      <span id="sent-time">⏱ 0.0s</span>
+    </div>
+    <button class="btn secondary" id="sent-btn-quit" style="font-size:0.8rem;padding:7px 16px;">← もどる</button>
+  </div>
+  <div id="sent-cat-bar">
+    <button class="sent-cat active" data-scat="en-easy">英語<span>短文</span></button>
+    <button class="sent-cat" data-scat="en-hard">英語<span>長文</span></button>
+    <button class="sent-cat" data-scat="num">数字<span>0〜9</span></button>
+    <button class="sent-cat" data-scat="symbol">記号<span>., !?</span></button>
+    <button class="sent-cat" data-scat="jp-easy">日本語<span>短文</span></button>
+    <button class="sent-cat" data-scat="jp-hard">日本語<span>長文</span></button>
+  </div>
+  <div id="sent-body">
+    <div id="sent-progress-wrap"><div id="sent-progress-fill" style="width:0%"></div></div>
+    <div id="sent-counter">1 / 10</div>
+    <div id="sent-display-wrap">
+      <div id="sent-display"></div>
+    </div>
+    <div id="sent-input-display"></div>
+    <div id="sent-complete" class="hidden">
+      <div id="sent-complete-msg">✅ COMPLETE!</div>
+      <div id="sent-complete-detail"></div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+        <button class="btn" id="sent-btn-retry">もう一度</button>
+        <button class="btn secondary" id="sent-btn-next-cat">次のカテゴリ →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 練習モード選択画面 -->
+<div class="screen hidden" id="screen-renshu">
+  <h1 style="font-size:clamp(1.6rem,5vw,2.8rem);margin-bottom:4px;">📚 練習モード</h1>
+  <p class="sub" style="margin-bottom:20px;">— 練習の種類を選んでください —</p>
+  <div class="renshu-card" id="renshu-typing">
+    <div class="renshu-card-icon">🎯</div>
+    <div class="renshu-card-text">
+      <div class="renshu-card-title">タイピング練習</div>
+      <div class="renshu-card-desc">単語・五十音・濁音・拗音を<br>1問ずつ撃ち抜いて練習</div>
+    </div>
+  </div>
+  <div class="renshu-card" id="renshu-sentence">
+    <div class="renshu-card-icon">📝</div>
+    <div class="renshu-card-text">
+      <div class="renshu-card-title">文章練習</div>
+      <div class="renshu-card-desc">英語・日本語の文章を丸ごと入力<br>数字・記号も練習できる</div>
+    </div>
+  </div>
+  <div class="renshu-card" id="renshu-keyboard">
+    <div class="renshu-card-icon">⌨️</div>
+    <div class="renshu-card-text">
+      <div class="renshu-card-title">キーボード練習</div>
+      <div class="renshu-card-desc">ホームポジションから段階的に練習<br>どの指でどのキーを打つか覚えよう</div>
+    </div>
+  </div>
+  <button class="btn secondary" id="renshu-back" style="margin-top:16px;">← もどる</button>
+</div>
+
+<!-- キーボード練習画面 -->
+<div class="screen hidden" id="screen-keyboard">
+  <div id="kb-header">
+    <div id="kb-header-title">⌨️ キーボード練習</div>
+    <div id="kb-meta">
+      <span id="kb-done">完了: 0問</span>
+      <span id="kb-acc">正確率: --%</span>
+    </div>
+    <button class="btn secondary" id="kb-btn-quit" style="font-size:0.8rem;padding:7px 16px;">← もどる</button>
+  </div>
+  <div id="kb-steps"></div>
+  <div id="kb-body">
+    <div id="kb-target-display"></div>
+    <div id="kb-keyboard-wrap"></div>
+    <div id="kb-instruction"></div>
+    <div id="kb-input-row">
+      <div id="kb-typed-display"></div>
+    </div>
+    <div id="kb-complete" class="hidden">
+      <div style="font-family:'Rye',serif;font-size:clamp(1.8rem,5vw,3rem);color:var(--gold);letter-spacing:4px;margin-bottom:10px;">✅ ステップ完了！</div>
+      <div id="kb-complete-detail" style="color:var(--smoke);font-size:0.85rem;line-height:2;text-align:center;margin-bottom:12px;"></div>
+      <div style="display:flex;gap:8px;justify-content:center;">
+        <button class="btn" id="kb-btn-retry">もう一度</button>
+        <button class="btn secondary" id="kb-btn-next-step">次のステップ →</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2137,7 +2575,7 @@ function checkInGameRecord(){_currentBest=loadRanking()[0]?.score??0;}
 function maybeShowNewRecord(){if(G.score>_currentBest&&_currentBest>0){_currentBest=G.score;const b=document.getElementById('new-record-banner');b.classList.remove('hidden');void b.offsetWidth;b.classList.add('show');sfxLevelUp();setTimeout(()=>{b.classList.remove('show');setTimeout(()=>b.classList.add('hidden'),300);},2200);}}
 
 // ═══ UI EVENTS ═══
-const MODE_DESC={survival:'次々来う的を撃て！10分間スコアアタック',endless:'時間制限なし！HPが尽きるまで生き残れ',timeattack:'⚡ 固定リストを最速クリア！タイムを競え',duel:'1対1の早撃ち勝負！何連勝できるか？',practice:'焦らず練習！的を自分のペースで撃ち倒せ'};
+const MODE_DESC={survival:'次々来う的を撃て！10分間スコアアタック',endless:'時間制限なし！HPが尽きるまで生き残れ',timeattack:'⚡ 固定リストを最速クリア！タイムを競え',duel:'1対1の早撃ち勝負！何連勝できるか？',practice:'焦らず練習！的を自分のペースで撃ち倒せ',sentence:'文章をまるごと入力！記号・数字も練習'};
 document.querySelectorAll('[data-mode]').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('[data-mode]').forEach(x=>x.classList.remove('active'));b.classList.add('active');G_mode=b.dataset.mode;document.getElementById('mode-desc').textContent=MODE_DESC[G_mode];});});
 document.querySelectorAll('[data-lang]').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('[data-lang]').forEach(x=>x.classList.remove('active'));b.classList.add('active');G.lang=b.dataset.lang;});});
 document.querySelectorAll('[data-diff]').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('[data-diff]').forEach(x=>x.classList.remove('active'));b.classList.add('active');G.diff=b.dataset.diff;});});
@@ -2147,6 +2585,8 @@ document.getElementById('btn-start').addEventListener('click',()=>{
   else if(G_mode==='practice')startPractice();
   else if(G_mode==='endless'){G.endless=true;startCountdown();}
   else if(G_mode==='timeattack')openTimeAttackSetup();
+  else if(G_mode==='sentence')startSentenceMode();
+  else if(G_mode==='renshu')openRenshuMenu();
   else startCountdown();
 });
 document.getElementById('btn-retry').addEventListener('click',startCountdown);
@@ -2260,7 +2700,20 @@ if(!G.focused)G.focused=id;updateFocusClass();}
 function onTargetExpired(t){if(G.phase!=='playing')return;G.combo=0;G.shotsMissed++;t.el.classList.add('miss-shake');setTimeout(()=>t.el.remove(),320);removeTarget(t.id);damageHP();updateHUD();updateAccDisplay();}
 
 // ═══ INPUT ═══
-hiddenInput.addEventListener('input',e=>{const ch=(e.data||'').toUpperCase();hiddenInput.value='';if(!ch||!/[A-Z]/.test(ch))return;if(D.phase==='typing'){handleDuelChar(ch);return;}if(TA.phase==='playing'){handleTAChar(ch);return;}if(scPrac&&!scPrac.classList.contains('hidden')){handlePracChar(ch);return;}if(G.phase!=='playing')return;handleChar(ch);});
+hiddenInput.addEventListener('input',e=>{const raw=e.data||'';hiddenInput.value='';
+  // SENTENCEモードは記号・数字・スペースも受け付ける
+  if(scSent&&!scSent.classList.contains('hidden')&&document.getElementById('sent-complete').classList.contains('hidden')){
+    if(raw) handleSentChar(raw);
+    return;
+  }
+  if(scKeyboard&&!scKeyboard.classList.contains('hidden')){
+    return; // keydownで処理済み
+  }
+  const ch=raw.toUpperCase();if(!ch||!/[A-Z]/.test(ch))return;if(D.phase==='typing'){handleDuelChar(ch);return;}if(TA.phase==='playing'){handleTAChar(ch);return;}
+  if(scSent&&!scSent.classList.contains('hidden')&&document.getElementById('sent-complete').classList.contains('hidden'))
+    {handleSentChar(ch);return;}
+  if(scKeyboard&&!scKeyboard.classList.contains('hidden')&&document.getElementById('kb-complete').classList.contains('hidden'))
+    {handleKBChar(ch);return;}if(scPrac&&!scPrac.classList.contains('hidden')){handlePracChar(ch);return;}if(G.phase!=='playing')return;handleChar(ch);});
 document.addEventListener('keydown',e=>{if(D.phase==='typing'){hiddenInput.focus();return;}if(G.phase!=='playing')return;hiddenInput.focus();if(e.key==='Tab'){e.preventDefault();cycleFocus();}});
 function cycleFocus(){if(!G.activeTargets.length)return;const idx=G.activeTargets.findIndex(t=>t.id===G.focused);G.focused=G.activeTargets[(idx+1)%G.activeTargets.length].id;updateFocusClass();}
 function handleChar(ch){
@@ -2948,13 +3401,7 @@ document.querySelectorAll('.prac-cat').forEach(b=>{
 });
 
 // ── 終了ボタン ──
-document.getElementById('prac-btn-quit').addEventListener('click',()=>{
-  hideQuitBtn();
-  stopBGM();
-  scPrac.classList.add('hidden');
-  scTitle.classList.remove('hidden');
-  renderTitleRanking();
-});
+document.getElementById('prac-btn-quit').addEventListener('click',goBackToRenshu);
 
 // ── もう一度 ──
 document.getElementById('prac-btn-retry').addEventListener('click',()=>{
@@ -3740,11 +4187,11 @@ document.getElementById('quit-yes').addEventListener('click', () => {
     scTitle.classList.remove('hidden');
     renderTitleRanking();
   } else if(scPracEl && !scPracEl.classList.contains('hidden')){
-    // PRACTICE
-    hideQuitBtn();
-    scPracEl.classList.add('hidden');
-    scTitle.classList.remove('hidden');
-    renderTitleRanking();
+    goBackToRenshu();
+  } else if(scSent && !scSent.classList.contains('hidden')){
+    goBackToRenshu();
+  } else if(scKeyboard && !scKeyboard.classList.contains('hidden')){
+    goBackToRenshu();
   }
 });
 
@@ -4639,6 +5086,664 @@ document.getElementById('clear-btn-title').addEventListener('click',()=>{
   scTitle.classList.remove('hidden');
   renderTitleRanking();
 });
+
+
+// ════════════════════════════════════════
+//  📝 文章入力モード（SENTENCE）
+// ════════════════════════════════════════
+
+// ── 文章データ ──
+const SENT_DATA = {
+  'en-easy': [
+    'The quick brown fox jumps.',
+    'Pack my box with five dozen liquor jugs.',
+    'How vexingly quick daft zebras jump.',
+    'The five boxing wizards jump quickly.',
+    'Sphinx of black quartz, judge my vow.',
+    'Two plus two equals four.',
+    'She sells sea shells by the sea shore.',
+    'Peter Piper picked a peck of pickled peppers.',
+    'How much wood would a woodchuck chuck.',
+    'The early bird catches the worm.',
+  ],
+  'en-hard': [
+    'Typing quickly and accurately is a valuable skill that takes time to develop.',
+    'The best way to improve your typing speed is to practice every single day.',
+    'A good typist can type over 100 words per minute without looking at the keyboard.',
+    'Proper finger placement on the home row keys is the foundation of touch typing.',
+    'Regular practice sessions help build muscle memory for faster and more accurate typing.',
+    'The keyboard layout we use today was designed in the 1870s for typewriter mechanics.',
+    'Keeping your eyes on the screen rather than the keyboard will greatly improve your speed.',
+    'Learning to type is one of the most useful skills you can develop in modern times.',
+    'Focus on accuracy first, and speed will naturally increase as you gain more confidence.',
+    'Professional typists use all ten fingers and rarely need to look down at the keys.',
+  ],
+  'num': [
+    '1 2 3 4 5 6 7 8 9 0',
+    '123 456 789 0',
+    '100 200 300 400 500',
+    '1234567890',
+    '3.14 2.71 1.41',
+    '2024 1999 2000 2025',
+    '10 20 30 40 50 60 70 80 90',
+    '111 222 333 444 555',
+    '9876543210',
+    '1 + 1 = 2, 3 x 4 = 12',
+  ],
+  'symbol': [
+    'Hello, World! How are you?',
+    'Price: $12.99 (10% off)',
+    'www.example.com/path?q=test',
+    'Email: user@example.com',
+    'C:\\Users\\Desktop\\file.txt',
+    'if (x > 0 && y < 10) { return true; }',
+    'SELECT * FROM users WHERE id = 1;',
+    'git commit -m "fix: update readme"',
+    '(A + B) * C - D / E = F',
+    'Hello! Nice to meet you. My name is Taro.',
+  ],
+  'jp-easy': [
+    'あいうえお かきくけこ',
+    'さしすせそ たちつてと',
+    'なにぬねの はひふへほ',
+    'まみむめも やゆよ らりるれろ',
+    'わをん がぎぐげご',
+    'ざじずぜぞ だぢづでど',
+    'ばびぶべぼ ぱぴぷぺぽ',
+    'きゃきゅきょ しゃしゅしょ',
+    'ちゃちゅちょ にゃにゅにょ',
+    'りゃりゅりょ ぎゃぎゅぎょ',
+  ],
+  'jp-hard': [
+    'にほんごのたいぴんぐれんしゅうをまいにちつづけましょう。',
+    'はやくただしくうつことができれば、しごとのこうりつがあがります。',
+    'キーボードのホームポジションをおぼえることがたいせつです。',
+    'タイピングはなんどもれんしゅうすることでじょうずになります。',
+    'ゆびをただしくつかってうつれんしゅうをしましょう。',
+    'まいにちすこしずつれんしゅうすることがじょうたつのちかみちです。',
+    'せいかくさをたいせつにしながら、すこしずつはやくしていきましょう。',
+    'パソコンのそうさにはキーボードのれんしゅうがひつようです。',
+    'タイピングゲームでたのしくれんしゅうしましょう。',
+    'むずかしいもじでもあきらめずにうちつづけることがたいせつです。',
+  ],
+};
+
+const SENT_CAT_ORDER = ['en-easy','en-hard','num','symbol','jp-easy','jp-hard'];
+
+// ── 状態 ──
+const SENT = {
+  cat:      'en-easy',
+  sentences: [],
+  current:  0,
+  typed:    '',
+  hit:      0,
+  miss:     0,
+  startTs:  0,
+  timerRaf: null,
+  wpmKeys:  0,
+};
+
+const scSent = document.getElementById('screen-sentence');
+
+// ── カテゴリ切替 ──
+document.querySelectorAll('.sent-cat').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.sent-cat').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    SENT.cat = b.dataset.scat;
+    buildSentence();
+  });
+});
+
+// ── 終了ボタン ──
+document.getElementById('sent-btn-quit').addEventListener('click',goBackToRenshu);
+
+// ── もう一度 ──
+document.getElementById('sent-btn-retry').addEventListener('click',()=>{
+  document.getElementById('sent-complete').classList.add('hidden');
+  buildSentence();
+});
+
+// ── 次のカテゴリ ──
+document.getElementById('sent-btn-next-cat').addEventListener('click',()=>{
+  const idx = SENT_CAT_ORDER.indexOf(SENT.cat);
+  if(idx >= 0 && idx < SENT_CAT_ORDER.length-1){
+    SENT.cat = SENT_CAT_ORDER[idx+1];
+    document.querySelectorAll('.sent-cat').forEach(b=>b.classList.toggle('active', b.dataset.scat===SENT.cat));
+  }
+  document.getElementById('sent-complete').classList.add('hidden');
+  buildSentence();
+});
+
+// ── 文章モード開始 ──
+function startSentenceMode(){
+  scTitle.classList.add('hidden');
+  scSent.classList.remove('hidden');
+  SENT.cat='en-easy';
+  document.querySelectorAll('.sent-cat').forEach(b=>b.classList.toggle('active',b.dataset.scat==='en-easy'));
+  startBGM('J');
+  showQuitBtn('文章練習を中断します');
+  buildSentence();
+  hiddenInput.focus();
+}
+
+// ── 文章リスト構築 ──
+function buildSentence(){
+  const pool = SENT_DATA[SENT.cat] || [];
+  // シャッフル
+  SENT.sentences = [...pool].sort(()=>Math.random()-0.5);
+  SENT.current = 0;
+  SENT.hit  = 0;
+  SENT.miss = 0;
+  SENT.wpmKeys = 0;
+  SENT.startTs = 0;
+  cancelAnimationFrame(SENT.timerRaf);
+  document.getElementById('sent-complete').classList.add('hidden');
+  updateSentMeta();
+  showSentence(0);
+  hiddenInput.focus();
+}
+
+// ── 文章を表示 ──
+function showSentence(idx){
+  SENT.typed = '';
+  SENT.startTs = Date.now();
+  const sent = SENT.sentences[idx] || '';
+
+  // 進捗バー
+  const pct = Math.round(idx / SENT.sentences.length * 100);
+  document.getElementById('sent-progress-fill').style.width = pct + '%';
+  document.getElementById('sent-counter').textContent = `${idx+1} / ${SENT.sentences.length}`;
+
+  // 文字ごとにspan生成
+  renderSentDisplay(sent, '');
+  document.getElementById('sent-input-display').textContent = '';
+  hiddenInput.focus();
+}
+
+// ── 文章表示レンダリング ──
+function renderSentDisplay(sent, typed){
+  const el = document.getElementById('sent-display');
+  let html = '';
+  [...sent].forEach((ch, i)=>{
+    if(i < typed.length){
+      if(typed[i] === ch){
+        html += `<span class="sc-done">${ch==' '?'␣':ch}</span>`;
+      } else {
+        html += `<span class="sc-error">${ch==' '?'␣':ch}</span>`;
+      }
+    } else if(i === typed.length){
+      html += `<span class="sc-cursor">${ch==' '?'␣':ch}</span>`;
+    } else {
+      html += `<span class="sc-remain">${ch}</span>`;
+    }
+  });
+  el.innerHTML = html;
+  // カーソル位置をスクロール
+  const cursor = el.querySelector('.sc-cursor');
+  if(cursor) cursor.scrollIntoView({block:'nearest',inline:'nearest'});
+}
+
+// ── メタ情報更新（WPM・ACC・タイム） ──
+function updateSentMeta(){
+  const elapsed = SENT.startTs ? (Date.now()-SENT.startTs)/60000 : 0;
+  const wpm = elapsed > 0.008 ? Math.round((SENT.wpmKeys/5)/elapsed) : 0;
+  const total = SENT.hit + SENT.miss;
+  const acc = total > 0 ? Math.round(SENT.hit/total*100) : 100;
+  const sec = SENT.startTs ? ((Date.now()-SENT.startTs)/1000).toFixed(1) : '0.0';
+  document.getElementById('sent-wpm').textContent = `WPM: ${wpm}`;
+  document.getElementById('sent-acc').textContent = `ACC: ${acc}%`;
+  document.getElementById('sent-time').textContent = `⏱ ${sec}s`;
+}
+
+// ── キー入力処理（SENTENCE用） ──
+function handleSentChar(ch){
+  const sent = SENT.sentences[SENT.current];
+  if(!sent) return;
+
+  // タイマー開始
+  if(SENT.typed.length === 0) SENT.startTs = Date.now();
+
+  const expected = sent[SENT.typed.length];
+
+  if(ch === expected){
+    SENT.typed += ch;
+    SENT.hit++;
+    SENT.wpmKeys++;
+    updateSentMeta();
+    renderSentDisplay(sent, SENT.typed);
+    document.getElementById('sent-input-display').textContent = SENT.typed;
+
+    if(SENT.typed === sent){
+      // 1文完了
+      sfxGunshot(0);
+      SENT.current++;
+      if(SENT.current >= SENT.sentences.length){
+        // 全完了
+        setTimeout(showSentComplete, 300);
+      } else {
+        setTimeout(()=>showSentence(SENT.current), 400);
+      }
+    }
+  } else {
+    SENT.miss++;
+    sfxMiss();
+    flashScreen();
+    updateSentMeta();
+    // ミス: エラー表示（入力はリセットしない）
+    renderSentDisplay(sent, SENT.typed + '?');
+    setTimeout(()=>renderSentDisplay(sent, SENT.typed), 200);
+  }
+}
+
+// ── Backspaceで1文字削除 ──
+document.addEventListener('keydown', e=>{
+  // キーボード練習: Enter・スペースも受け付ける
+  if(scKeyboard&&!scKeyboard.classList.contains('hidden')&&document.getElementById('kb-complete').classList.contains('hidden')){
+    if(e.key==='Enter'){e.preventDefault();handleKBChar('\n');return;}
+    if(e.key===' '){e.preventDefault();handleKBChar(' ');return;}
+    if(e.key.length===1){e.preventDefault();handleKBChar(e.key);return;}
+    return;
+  }
+  if(scSent.classList.contains('hidden')) return;
+  if(e.key === 'Backspace'){
+    e.preventDefault();
+    if(SENT.typed.length > 0){
+      SENT.typed = SENT.typed.slice(0,-1);
+      renderSentDisplay(SENT.sentences[SENT.current]||'', SENT.typed);
+      document.getElementById('sent-input-display').textContent = SENT.typed;
+    }
+  }
+});
+
+// ── 全完了画面 ──
+function showSentComplete(){
+  const total = SENT.hit + SENT.miss;
+  const acc   = total>0 ? Math.round(SENT.hit/total*100) : 100;
+  const elapsed = ((Date.now()-SENT.startTs)/1000).toFixed(1);
+  const wpm = elapsed > 0 ? Math.round((SENT.wpmKeys/5)/(parseFloat(elapsed)/60)) : 0;
+  const catNames = {'en-easy':'英語短文','en-hard':'英語長文','num':'数字','symbol':'記号','jp-easy':'日本語短文','jp-hard':'日本語長文'};
+
+  document.getElementById('sent-complete-detail').innerHTML =
+    `${catNames[SENT.cat]||SENT.cat} &nbsp;|&nbsp; `+
+    `WPM: <span style="color:var(--gold)">${wpm}</span> &nbsp;|&nbsp; `+
+    `正確率: <span style="color:var(--gold)">${acc}%</span><br>`+
+    `タイム: <span style="color:var(--gold)">${elapsed}s</span> &nbsp;|&nbsp; `+
+    `ミス: <span style="color:#ff6040">${SENT.miss}</span>`;
+
+  document.getElementById('sent-progress-fill').style.width='100%';
+  document.getElementById('sent-complete').classList.remove('hidden');
+  sfxLevelUp();
+
+  // 次カテゴリボタン表示制御
+  const idx = SENT_CAT_ORDER.indexOf(SENT.cat);
+  document.getElementById('sent-btn-next-cat').style.display =
+    (idx>=0&&idx<SENT_CAT_ORDER.length-1)?'':'none';
+}
+
+
+// ════════════════════════════════════════
+//  📚 練習モード統合メニュー
+// ════════════════════════════════════════
+const scRenshu   = document.getElementById('screen-renshu');
+const scKeyboard = document.getElementById('screen-keyboard');
+
+function openRenshuMenu(){
+  scTitle.classList.add('hidden');
+  scRenshu.classList.remove('hidden');
+}
+document.getElementById('renshu-back').addEventListener('click',()=>{
+  scRenshu.classList.add('hidden');
+  scTitle.classList.remove('hidden');
+  renderTitleRanking();
+});
+document.getElementById('renshu-typing').addEventListener('click',()=>{
+  scRenshu.classList.add('hidden');
+  startPractice();
+});
+document.getElementById('renshu-sentence').addEventListener('click',()=>{
+  scRenshu.classList.add('hidden');
+  startSentenceMode();
+});
+document.getElementById('renshu-keyboard').addEventListener('click',()=>{
+  scRenshu.classList.add('hidden');
+  startKeyboardMode();
+});
+
+// PRACTICE/SENTENCEの「もどる」ボタンをrenshuに変更
+function goBackToRenshu(){
+  stopBGM(); hideQuitBtn();
+  // 全サブモード画面を隠す
+  document.getElementById('screen-practice').classList.add('hidden');
+  document.getElementById('screen-sentence').classList.add('hidden');
+  scKeyboard.classList.add('hidden');
+  scRenshu.classList.remove('hidden');
+}
+
+// ════════════════════════════════════════
+//  ⌨️ キーボード練習モード（Dモード）
+// ════════════════════════════════════════
+
+// ── キーボードレイアウト定義 ──
+// [キー文字, 指番号, 行]
+// 指: lp=左小指, lr=左薬指, lm=左中指, li=左人差し指
+//     ri=右人差し指, rm=右中指, rr=右薬指, rp=右小指
+const KB_LAYOUT = {
+  row0: [ // 数字段
+    ['1','lp'],['2','lr'],['3','lm'],['4','li'],['5','li'],
+    ['6','ri'],['7','ri'],['8','rm'],['9','rr'],['0','rp'],
+  ],
+  row1: [ // 上段 QWERTY
+    ['Q','lp'],['W','lr'],['E','lm'],['R','li'],['T','li'],
+    ['Y','ri'],['U','ri'],['I','rm'],['O','rr'],['P','rp'],
+  ],
+  row2: [ // ホーム段 ASDF
+    ['A','lp'],['S','lr'],['D','lm'],['F','li'],['G','li'],
+    ['H','ri'],['J','ri'],['K','rm'],['L','rr'],[';','rp'],
+  ],
+  row3: [ // 下段 ZXCV
+    ['Z','lp'],['X','lr'],['C','lm'],['V','li'],['B','li'],
+    ['N','ri'],['M','ri'],[',','rm'],['.',  'rr'],['/','rp'],
+  ],
+};
+
+// ── 練習ステップ定義 ──
+const KB_STEPS = [
+  {
+    id:0, label:'Step1\n左ホーム',
+    title:'左手ホームポジション',
+    desc: '左手をホームに置こう\na=小指  s=薬指  d=中指  f=人差し指',
+    keys: 'aaasssdddfff asdf asdf fdsa',
+    type: 'alpha',
+  },
+  {
+    id:1, label:'Step2\n右ホーム',
+    title:'右手ホームポジション',
+    desc: '右手をホームに置こう\nj=人差し指  k=中指  l=薬指  ;=小指',
+    keys: 'jjjkkklll jkl jlkj jklkjl',
+    type: 'alpha',
+  },
+  {
+    id:2, label:'Step3\n両手ホーム',
+    title:'両手ホームポジション',
+    desc: '両手を使ってみよう！\nasdf + jkl; をまんべんなく',
+    keys: 'asjd kflj asdf ghjkl fdsa kjl',
+    type: 'alpha',
+  },
+  {
+    id:3, label:'Step4\n上段',
+    title:'上段キー（qwerty）',
+    desc: 'ホームから上に指を伸ばす\nqwert + yuiop',
+    keys: 'qwert yuiop qwerty uiop qw',
+    type: 'alpha',
+  },
+  {
+    id:4, label:'Step5\n下段',
+    title:'下段キー（zxcvb）',
+    desc: 'ホームから下に指を曲げる\nzxcvb + nm',
+    keys: 'zxcvb znm zxcvb nmzxcv',
+    type: 'alpha',
+  },
+  {
+    id:5, label:'Step6\n数字',
+    title:'数字キー（1〜0）',
+    desc: '数字は上段よりさらに上\n指を大きく伸ばそう',
+    keys: '1234567890 1234 56789 012',
+    type: 'num',
+  },
+  {
+    id:6, label:'Step7\n大文字',
+    title:'大文字の打ち方（Shift）',
+    desc: '大文字は Shift を押しながら！\n右手の文字→左Shift　左手の文字→右Shift',
+    keys: 'AaBbCcDdEeFfGgHhIiJjKkLlMm',
+    type: 'shift',
+  },
+  {
+    id:7, label:'Step8\n記号',
+    title:'記号キー（. , ! ? ;）',
+    desc: '文章に使う記号を練習しよう\n. と , は右手小指・薬指',
+    keys: '.,.,., !? !? ;: ;: ., !? ;:',
+    type: 'symbol',
+  },
+  {
+    id:8, label:'Step9\nEnter',
+    title:'EnterキーとSpaceキー',
+    desc: 'スペース=右親指　Enter=右小指\nリズムよく打ってみよう',
+    keys: 'hello world\nhi there\ngood morning',
+    type: 'enter',
+  },
+  {
+    id:9, label:'Step10\n総合',
+    title:'総合練習（全キー）',
+    desc: '全てのキーを組み合わせて練習！\nHello, World! Good morning.',
+    keys: 'Hello, World!\nThe quick brown fox.\nGood morning!',
+    type: 'all',
+  },
+];
+
+const KB = {
+  step:    0,
+  keys:    '',
+  pos:     0,
+  hit:     0,
+  miss:    0,
+  cleared: new Set(),
+};
+
+function startKeyboardMode(){
+  scKeyboard.classList.remove('hidden');
+  showQuitBtn('キーボード練習を終了します');
+  buildKBStepBar();
+  loadKBStep(0);
+  hiddenInput.focus();
+}
+
+document.getElementById('kb-btn-quit').addEventListener('click',()=>goBackToRenshu());
+
+function buildKBStepBar(){
+  const bar = document.getElementById('kb-steps');
+  bar.innerHTML = '';
+  KB_STEPS.forEach((s,i)=>{
+    const b = document.createElement('button');
+    b.className = 'kb-step-btn' +
+      (i===KB.step?' active':'') +
+      (KB.cleared.has(i)?' cleared':'');
+    b.textContent = s.label.replace('\n',' ');
+    b.dataset.step = i;
+    b.addEventListener('click',()=>loadKBStep(i));
+    bar.appendChild(b);
+  });
+}
+
+function loadKBStep(idx){
+  KB.step = idx;
+  KB.pos  = 0;
+  KB.hit  = 0;
+  KB.miss = 0;
+  const step = KB_STEPS[idx];
+  KB.keys = step.keys;
+  document.getElementById('kb-complete').classList.add('hidden');
+  let instText = step.desc;
+  if(step.type==='shift') instText += '\n⇧L/Rキーはキーボード図で確認！';
+  if(step.type==='enter') instText += '\n↵ = Enter  ␣ = Space';
+  if(step.type==='all')   instText += '\n大文字・記号・Enterも含む総合！';
+  document.getElementById('kb-instruction').textContent = instText;
+  buildKBKeyboard();
+  buildKBStepBar();
+  renderKBTarget();
+  renderKBTyped();
+  updateKBMeta();
+  hiddenInput.focus();
+}
+
+// ── キーボード図生成 ──
+const FINGER_COLOR = {
+  lp:'#3a3a8a', lr:'#3a6a8a', lm:'#3a8a8a', li:'#3a8a5a',
+  ri:'#5a8a3a', rm:'#8a8a3a', rr:'#8a5a3a', rp:'#8a3a3a',
+};
+function buildKBKeyboard(){
+  const wrap = document.getElementById('kb-keyboard-wrap');
+  wrap.innerHTML = '';
+  const currentKey = (KB.keys[KB.pos] || '').toUpperCase();
+  Object.entries(KB_LAYOUT).forEach(([rowName, keys])=>{
+    const row = document.createElement('div');
+    row.className = 'kb-row';
+    keys.forEach(([k, finger])=>{
+      const el = document.createElement('div');
+      el.className = 'kb-key f-' + finger;
+      el.id = 'kbkey-' + k;
+      el.textContent = k;
+      // 現在のターゲットキーをハイライト
+      if(k === currentKey) el.classList.add('target-key');
+      row.appendChild(el);
+    });
+    wrap.appendChild(row);
+  });
+  // Shiftキー行（下段の前後）
+  // ← Shift は row3 の前、 → Shift は後ろに追加
+  const shiftL = wrap.children[3]; // row3
+  if(shiftL){
+    const sL=document.createElement('div');
+    sL.className='kb-key f-lp'; sL.id='kbkey-LSHIFT';
+    sL.style.cssText='min-width:clamp(36px,6vw,60px);font-size:0.55rem;';
+    sL.textContent='⇧L';
+    if(currentKey==='LSHIFT') sL.classList.add('target-key');
+    shiftL.insertBefore(sL, shiftL.firstChild);
+    const sR=document.createElement('div');
+    sR.className='kb-key f-rp'; sR.id='kbkey-RSHIFT';
+    sR.style.cssText='min-width:clamp(36px,6vw,60px);font-size:0.55rem;';
+    sR.textContent='⇧R';
+    if(currentKey==='RSHIFT') sR.classList.add('target-key');
+    shiftL.appendChild(sR);
+  }
+  // EnterキーをBackspaceキーとしてrow1末尾に追加
+  const row1=wrap.children[1];
+  if(row1){
+    const enterEl=document.createElement('div');
+    enterEl.className='kb-key f-rp'; enterEl.id='kbkey-ENTER';
+    enterEl.style.cssText='min-width:clamp(36px,7vw,70px);font-size:0.6rem;';
+    enterEl.textContent='↵Enter';
+    if(currentKey==='\n') enterEl.classList.add('target-key');
+    row1.appendChild(enterEl);
+  }
+  // スペースバー
+  const spRow = document.createElement('div');
+  spRow.className = 'kb-row';
+  const sp = document.createElement('div');
+  sp.className = 'kb-key f-ri'; sp.id='kbkey-SPACE';
+  sp.style.width = 'clamp(100px,22vw,200px)';
+  sp.textContent = 'SPACE ␣';
+  if(currentKey===' ') sp.classList.add('target-key');
+  spRow.appendChild(sp);
+  wrap.appendChild(spRow);
+}
+
+function highlightKBKey(k, type){
+  const id = k==='\n'?'kbkey-ENTER':k===' '?'kbkey-SPACE':'kbkey-'+k.toUpperCase();
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.remove('target-key','hit-key','miss-key');
+  el.classList.add(type+'-key');
+  setTimeout(()=>{
+    el.classList.remove('hit-key','miss-key');
+    // 次のターゲットに合わせてハイライトを復元
+    const next=KB.keys[KB.pos]||'';
+    const nextId=next==='\n'?'kbkey-ENTER':next===' '?'kbkey-SPACE':'kbkey-'+next.toUpperCase();
+    if(id===nextId) el.classList.add('target-key');
+  }, 300);
+}
+
+function renderKBTarget(){
+  const step = KB_STEPS[KB.step];
+  const currentKey = (KB.keys[KB.pos] || '').toUpperCase();
+  // 現在打つキーと前後を表示
+  const start = Math.max(0, KB.pos - 3);
+  const end   = Math.min(KB.keys.length, KB.pos + 8);
+  let html = '';
+  for(let i=start; i<end; i++){
+    const k = KB.keys[i];
+    const disp = k==='\n'?'↵':k===' '?'␣':k;
+    if(i < KB.pos)        html += `<span style="color:var(--gold);opacity:0.4">${disp}</span>`;
+    else if(i === KB.pos) html += `<span style="color:#fff;text-shadow:0 0 16px rgba(255,255,255,0.8);font-size:1.2em">${disp}</span>`;
+    else                  html += `<span style="color:rgba(255,255,255,0.2)">${disp}</span>`;
+  }
+  document.getElementById('kb-target-display').innerHTML = html;
+}
+
+function renderKBTyped(){
+  // 現在のステップの打鍵済みを色表示
+  let html = '';
+  for(let i=0;i<KB.pos && i<KB.keys.length;i++){
+    const ch2=KB.keys[i];
+    html += `<span class="kb-ch-done">${ch2==='\n'?'↵':ch2===' '?'␣':ch2}</span>`;
+  }
+  if(KB.pos < KB.keys.length){
+    const cur=KB.keys[KB.pos];
+    html += `<span class="kb-ch-cur">${cur==='\n'?'↵':cur===' '?'␣':cur}</span>`;
+  }
+  document.getElementById('kb-typed-display').innerHTML = html;
+}
+
+function updateKBMeta(){
+  const total = KB.hit + KB.miss;
+  const acc = total > 0 ? Math.round(KB.hit/total*100) : 100;
+  document.getElementById('kb-done').textContent = `完了: ${KB.pos}/${KB.keys.length}問`;
+  document.getElementById('kb-acc').textContent  = `正確率: ${acc}%`;
+}
+
+function handleKBChar(ch){
+  if(document.getElementById('kb-complete') &&
+     !document.getElementById('kb-complete').classList.contains('hidden')) return;
+  if(!KB.keys[KB.pos]) return;
+
+  const expected = KB.keys[KB.pos];
+
+  if(ch === expected){
+    KB.hit++; KB.pos++;
+    sfxKanaConfirm();
+    highlightKBKey(expected==='\n'?'ENTER':expected===' '?'SPACE':expected, 'hit');
+    updateKBMeta();
+    if(KB.pos >= KB.keys.length){
+      KB.cleared.add(KB.step);
+      setTimeout(showKBComplete, 400);
+    } else {
+      renderKBTarget();
+      renderKBTyped();
+      buildKBKeyboard();
+    }
+  } else {
+    KB.miss++;
+    sfxMiss(); flashScreen();
+    highlightKBKey(ch==='\n'?'ENTER':ch===' '?'SPACE':ch, 'miss');
+    updateKBMeta();
+  }
+}
+
+function showKBComplete(){
+  const total = KB.hit + KB.miss;
+  const acc   = total>0?Math.round(KB.hit/total*100):100;
+  document.getElementById('kb-complete-detail').innerHTML =
+    `ステップ${KB.step+1}: ${KB_STEPS[KB.step].title}<br>`+
+    `正確率: <span style="color:var(--gold)">${acc}%</span> &nbsp;|&nbsp; `+
+    `ミス: <span style="color:#ff6040">${KB.miss}</span>`;
+  const hasNext = KB.step < KB_STEPS.length-1;
+  document.getElementById('kb-btn-next-step').style.display = hasNext?'':'none';
+  document.getElementById('kb-complete').classList.remove('hidden');
+  sfxLevelUp();
+  buildKBStepBar();
+}
+
+document.getElementById('kb-btn-retry').addEventListener('click',()=>{
+  document.getElementById('kb-complete').classList.add('hidden');
+  loadKBStep(KB.step);
+});
+document.getElementById('kb-btn-next-step').addEventListener('click',()=>{
+  document.getElementById('kb-complete').classList.add('hidden');
+  loadKBStep(KB.step+1);
+});
+
+// ── inputハンドラにKB追加 ──
+// (後でinputハンドラに組み込む)
 
 </script>
 </body>
