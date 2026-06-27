@@ -1053,6 +1053,54 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   color: #ffaaaa;
 }
 /* ════ PHASE 9 ここまで ════ */
+
+/* ════════════ EASYクリア画面 ════════════ */
+#screen-clear {
+  background: radial-gradient(ellipse at center, #1a2a0a 0%, #0a1a04 60%, #000 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 500;
+}
+#clear-title {
+  font-family: 'Rye', serif;
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  color: #ffd700;
+  text-shadow: 0 0 40px rgba(255,215,0,0.8), 4px 4px 0 #5a4000, 0 0 80px rgba(255,200,0,0.4);
+  letter-spacing: 5px;
+  margin-bottom: 10px;
+  animation: clearPulse 1.5s ease-in-out infinite alternate;
+}
+@keyframes clearPulse {
+  from { text-shadow: 0 0 30px rgba(255,215,0,0.6), 4px 4px 0 #5a4000; }
+  to   { text-shadow: 0 0 60px rgba(255,215,0,1.0), 4px 4px 0 #8a6000, 0 0 100px rgba(255,200,0,0.6); }
+}
+#clear-sub {
+  font-family: 'Rye', serif;
+  font-size: clamp(1rem, 3vw, 1.6rem);
+  color: #c4935a;
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+}
+#clear-stats {
+  font-size: 0.85rem;
+  color: #a08060;
+  line-height: 2.2;
+  text-align: center;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+.clear-stat-val { color: #ffd700; font-weight: 700; }
+#clear-confetti { position: fixed; inset: 0; pointer-events: none; z-index: 490; }
+/* 紙吹雪 */
+.confetti-piece {
+  position: absolute;
+  width: 10px; height: 14px;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0.3; }
+}
 </style>
 </head>
 <body>
@@ -1421,6 +1469,19 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   </div>
 </div>
 
+
+<!-- EASYクリア画面 -->
+<div class="screen hidden" id="screen-clear">
+  <div id="clear-confetti"></div>
+  <div id="clear-title">🎉 CONGRATULATIONS! 🎉</div>
+  <div id="clear-sub">— EASY MODE CLEAR! —</div>
+  <div id="clear-stats"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+    <button class="btn" id="clear-btn-retry">もう一度</button>
+    <button class="btn secondary" id="clear-btn-title">タイトルへ</button>
+  </div>
+</div>
+
 <!-- MANUAL -->
 <div id="screen-manual" class="screen hidden">
   <div id="manual-box">
@@ -1468,9 +1529,9 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
         <div class="m-section">
           <div class="m-section-title">📈 難易度</div>
           <div class="m-table">
-            <div class="m-row"><span class="m-badge easy">EASY</span><span>出現が遅く時間に余裕あり。HP5。初心者向け。</span></div>
-            <div class="m-row"><span class="m-badge normal">NORMAL</span><span>標準スピード。HP3。</span></div>
-            <div class="m-row"><span class="m-badge hard">HARD</span><span>高速・短時間。HP2。DUELではミスで即死。</span></div>
+            <div class="m-row"><span class="m-badge easy">EASY</span><span>ゆっくり・短い単語のみ。HP8。日本語はローマ字常時表示。</span></div>
+            <div class="m-row"><span class="m-badge normal">NORMAL</span><span>標準スピード。HP7。日本語はLv10でうっすら→Lv11かなのみ。</span></div>
+            <div class="m-row"><span class="m-badge hard">HARD</span><span>高速。HP4。日本語は<span class="m-hl">最初からかなのみ</span>。</span></div>
           </div>
         </div>
       </div>
@@ -1649,27 +1710,34 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 // ═══ 日本語かな表示レベル制御 ═══
 // 0=通常表示, 1=薄表示(fading), 2=非表示(hidden)
 function romaVisibility(level){
-  if(level<=9)  return 0;   // Lv1〜9: ローマ字あり
-  if(level===10) return 1;  // Lv10: うっすら
-  // EASYはLv11以降もうっすら維持（かなのみにしない）
-  if(G.diff==='easy') return 1;
-  return 2;                 // NORMAL/HARD Lv11+: かなのみ
+  // HARDは最初からかなのみ
+  if(G.diff==='hard') return 2;
+  // EASYはうっすらのみ（かなのみにしない）
+  if(G.diff==='easy'){
+    if(level<=9) return 0;
+    return 1; // Lv10以降うっすら維持
+  }
+  // NORMAL: Lv10うっすら、Lv11+かなのみ
+  if(level<=9)  return 0;
+  if(level===10) return 1;
+  return 2;
 }
 function applyRomaVisibility(el, level){
   const w=el.querySelector('.target-word');
   if(!w) return;
+  const rv = romaVisibility(level);
   w.classList.remove('roma-fading','roma-hidden');
-  if(level===10) w.classList.add('roma-fading');
-  else if(level>=11) w.classList.add('roma-hidden');
-  el.classList.toggle('kana-only-mode', level>=11);
+  if(rv===1) w.classList.add('roma-fading');
+  else if(rv===2) w.classList.add('roma-hidden');
+  el.classList.toggle('kana-only-mode', rv===2);
 }
 // レベルアップ時の通知表示
 function showKanaNotify(level){
   const el=document.getElementById('kana-notify');
   if(!el) return;
-  if(level===10){
-    el.innerHTML='🇯🇵 Lv10 ローマ字がうっすら…';
-  } else if(level===11 && G.diff!=='easy'){
+  if(level===10 && G.diff!=='hard'){
+    el.innerHTML= G.diff==='easy' ? '🇯🇵 Lv10 ローマ字がうっすら…' : '🇯🇵 Lv10 ローマ字がうっすら…';
+  } else if(level===11 && G.diff==='normal'){
     el.innerHTML='🇯🇵 Lv11 かなのみモード！<br><span style="font-size:0.75em;color:#c4935a">ローマ字を思い出せ！</span>';
   } else {
     return; // Lv7以降は通知なし
@@ -1935,6 +2003,14 @@ const WORD_CATS = {
             'WAGON','WRATH','YODEL','BANDIT','BOUNTY','BRONCO','CANYON','CATTLE','CORRAL','COWBOY'],
 };
 function getWordPool(lv){
+  // EASYはLv9まで1〜3文字、Lv10以降4文字以上解禁
+  if(G.diff==='easy'){
+    if(lv<=2)  return WORDS_BY_LEVEL[0];           // Lv1-2: 1文字
+    if(lv<=5)  return WORDS_BY_LEVEL[1];           // Lv3-5: 2文字
+    if(lv<=9)  return WORDS_BY_LEVEL[2];           // Lv6-9: 3文字
+    if(lv<=13) return WORDS_BY_LEVEL[3];           // Lv10-13: 4〜5文字
+    return WORDS_BY_LEVEL[4];                      // Lv14+: 5〜7文字
+  }
   if(lv<=1)return WORDS_BY_LEVEL[0];
   if(lv<=2)return WORDS_BY_LEVEL[1];
   if(lv<=3)return WORDS_BY_LEVEL[2];
@@ -2020,13 +2096,22 @@ const JP_BY_LEVEL=[
    {k:'ジェットコースター',r:'ZYETTOKOUSUTAA'},{k:'ゆうえんち',r:'YUUENTI'},
    {k:'ほんやくこんにゃく',r:'HONYAKUKONNNYAKU'},{k:'しんりがく',r:'SINRIGAKU'}],
 ];
-function getJPPool(lv){return JP_BY_LEVEL[Math.min(lv<=1?0:lv<=2?1:lv<=3?2:lv<=5?3:lv<=8?4:5,JP_BY_LEVEL.length-1)];}
+function getJPPool(lv){
+  // EASYはLv9まで1〜2文字、Lv10以降3文字以上解禁
+  if(G.diff==='easy'){
+    if(lv<=4) return JP_BY_LEVEL[0]; // Lv1-4: 1文字（五十音）
+    if(lv<=9) return JP_BY_LEVEL[1]; // Lv5-9: 2文字
+    if(lv<=13) return JP_BY_LEVEL[2];// Lv10-13: 3文字
+    return JP_BY_LEVEL[3];           // Lv14+: 4〜5文字
+  }
+  return JP_BY_LEVEL[Math.min(lv<=1?0:lv<=2?1:lv<=3?2:lv<=5?3:lv<=8?4:5,JP_BY_LEVEL.length-1)];
+}
 
 // ═══ CONFIG ═══
 const DIFF={
-  easy:  {spawnMs:5000,advanceSec:18,maxT:2,hp:7,lvEvery:6},   // 大幅緩和
-  normal:{spawnMs:3200,advanceSec:12,maxT:3,hp:4,lvEvery:6},   // 少し緩和
-  hard:  {spawnMs:1800,advanceSec:6, maxT:5,hp:2,lvEvery:8},   // 据え置き
+  easy:  {spawnMs:6000,advanceSec:22,maxT:2,hp:8,lvEvery:7},   // 超ゆっくり・短単語
+  normal:{spawnMs:5000,advanceSec:18,maxT:2,hp:7,lvEvery:7},   // 旧EASY
+  hard:  {spawnMs:3200,advanceSec:12,maxT:3,hp:4,lvEvery:7},   // 旧NORMAL
 };
 const LANES=[10,27,45,63,80];
 
@@ -2106,6 +2191,11 @@ function startGame(){
   });
   lane.innerHTML='';resetFlame();resetAccDisplay();resetWPM();
   updateHUD();renderHP();hiddenInput.focus();startBGM(G.endless?'E':'B');checkInGameRecord();
+  // HARDの日本語モード: 開始時にかなのみ通知
+  if(G.lang==='jp'&&G.diff==='hard'){
+    const el=document.getElementById('kana-notify');
+    if(el){el.innerHTML='💀 HARD: 最初からかなのみ！';el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
+  }
   spawnTarget();
   G.spawnTimer=setInterval(()=>{
     const c=DIFF[G.diff];
@@ -2155,8 +2245,8 @@ function rafLoop(){if(G.phase!=='playing')return;const now=Date.now();const W=la
 
 // ═══ SPAWN ═══
 function spawnTarget(){if(G.phase!=='playing')return;const cfg=DIFF[G.diff];const isJP=G.lang==='jp';const id=G.nextId++;const svgIdx=Math.floor(Math.random()*TARGET_SVGS.length);let laneIdx;do{laneIdx=Math.floor(Math.random()*LANES.length);}while(G.activeTargets.length>0&&G.activeTargets[G.activeTargets.length-1].laneIdx===laneIdx&&Math.random()<0.6);const laneX=LANES[laneIdx];let word,kana=null;if(isJP){const p=getJPPool(G.level);const e=p[Math.floor(Math.random()*p.length)];word=e.r;kana=e.k;}else{const p=getWordPool(G.level);word=p[Math.floor(Math.random()*p.length)];}// EASY/NORMALはレベルによる加速を抑制
-const lvSpeedup=G.diff==='easy'?100:G.diff==='normal'?200:300;
-const advanceMs=Math.max(G.diff==='easy'?5000:G.diff==='normal'?3500:2500,cfg.advanceSec*1000-(G.level-1)*lvSpeedup);const baseH=360;const baseW=Math.round(baseH*0.6);const el=document.createElement('div');el.className='target-wrap walking';el.dataset.id=id;el.style.position='absolute';el.style.top='0px';el.style.left='0px';el.style.transformOrigin='center bottom';const wHTML=isJP?`<div class="target-kana">${kana}</div><div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`:`<div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`;el.innerHTML=`<div>${TARGET_SVGS[svgIdx](baseH)}</div><div class="target-timer"><div class="target-timer-bar"></div></div>${wHTML}`;lane.appendChild(el);// JP: ローマ字表示レベル適用
+const lvSpeedup=G.diff==='easy'?60:G.diff==='normal'?100:200;
+const advanceMs=Math.max(G.diff==='easy'?7000:G.diff==='normal'?5000:3500,cfg.advanceSec*1000-(G.level-1)*lvSpeedup);const baseH=360;const baseW=Math.round(baseH*0.6);const el=document.createElement('div');el.className='target-wrap walking';el.dataset.id=id;el.style.position='absolute';el.style.top='0px';el.style.left='0px';el.style.transformOrigin='center bottom';const wHTML=isJP?`<div class="target-kana">${kana}</div><div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`:`<div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`;el.innerHTML=`<div>${TARGET_SVGS[svgIdx](baseH)}</div><div class="target-timer"><div class="target-timer-bar"></div></div>${wHTML}`;lane.appendChild(el);// JP: ローマ字表示レベル適用
 if(isJP) applyRomaVisibility(el, G.level);
 const t={id,word,typed:'',kana,el,advanceMs,startTime:Date.now(),expired:false,laneX,laneIdx,baseH,baseW};G.activeTargets.push(t);
 // JP: かな初期表示（白で初期化）
@@ -2214,7 +2304,7 @@ function updateWordDisplay(t){
   if(!w)return;
   const r=t.word.slice(t.typed.length);
   w.innerHTML=`<span class="typed">${t.typed}</span><span class="cursor"></span><span class="remain">${r}</span>`;
-  // JP: かなのみモード時のみかな色変化（EASYはローマ字が残るので不要）
+  // JP: かな色変化（HARDは常時・NORMALはかなのみ時・EASYは無効）
   if(G.lang==='jp' && t.kana && G.diff!=='easy'){
     updateKanaProgress(t);
   }
@@ -2473,9 +2563,7 @@ function handleDuelChar(ch){
     const exp=D.word[D.typed.length];
     if(ch===exp){D.typed+=ch;renderDuelWord();if(D.typed===D.word)onDuelWin();return;}
   }
-  sfxMiss();
-  if(D.diff==='hard'){flashScreen('#660000');clearTimeout(D.rafId);onDuelTimeout();}
-  else{flashScreen();}
+  sfxMiss(); flashScreen();
 }
 function renderDuelWord(){duelWordDisp.innerHTML=`<span class="typed">${D.typed}</span><span class="cursor"></span><span>${D.word.slice(D.typed.length)}</span>`;}
 function onDuelWin(){if(D.phase!=='typing')return;D.phase='result';clearTimeout(D.rafId);duelWordBox.classList.add('hidden');D.streak++;const cfg=DUEL_DIFF[D.diff];if(D.streak%cfg.lvEvery===0){D.level++;sfxLevelUp();}duelStatusMsg.style.color='#ffd700';duelStatusMsg.textContent=D.streak===1?'NICE SHOT!':D.streak<5?'WIN!':D.streak<10?`${D.streak} WINS! 🔥`:`${D.streak} WINS!! 🌟`;sfxGunshot(D.streak);duelPlayerFig.classList.remove('shoot');void duelPlayerFig.offsetWidth;duelPlayerFig.classList.add('shoot');setTimeout(()=>{duelEnemyFig.classList.remove('hit');void duelEnemyFig.offsetWidth;duelEnemyFig.classList.add('hit');},180);shootBulletLine(document.getElementById('duel-player').getBoundingClientRect(),document.getElementById('duel-enemy').getBoundingClientRect());duelStreakDisp.textContent=`🔥 ${D.streak} WIN STREAK`;setTimeout(()=>{if(D.phase!=='result')return;duelEnemyFig.style.animation='';duelEnemyFig.style.opacity='1';duelPlayerFig.style.animation='';duelEnemyFig.textContent=['🕵️','🤖','👹','💀','🧟','🦹','🥷'][Math.floor(Math.random()*7)];startDuelCountdown();},1600);}
@@ -4134,6 +4222,11 @@ onWordComplete = function(t) {
 
       sfxLevelUp();
       showPop(t.el, `BOSS DOWN!! +${pts} 🌟`, '#ffd700');
+      // EASY Lv15ボス撃破 → クリア！
+      if(G.diff==='easy' && G.level===15){
+        setTimeout(showEasyClear, 800);
+        return;
+      }
 
       // 爆発アニメ
       t.el.classList.remove('walking');
@@ -4367,6 +4460,85 @@ function checkRomaVariant(word, typed, ch){
   }
   return null;
 }
+
+
+// ════════════════════════════════════════
+//  🎉 EASYクリア処理
+// ════════════════════════════════════════
+function showEasyClear(){
+  G.phase = 'clear';
+  clearInterval(G.spawnTimer); clearInterval(G.gameTimer);
+  cancelAnimationFrame(G.rafId);
+  lane.innerHTML=''; G.activeTargets=[];
+  resetFlame(); resetBoss(); stopBGM(); hideQuitBtn();
+
+  // ファンファーレ
+  try{
+    const c=getACtx(), t=c.currentTime;
+    const mg=c.createGain(); mg.gain.value=0.5; mg.connect(c.destination);
+    [[523,.15],[659,.15],[784,.15],[1047,.4],[988,.2],[1047,.6]].forEach(([f,d],i)=>{
+      const o=c.createOscillator(),og=c.createGain();
+      o.type='triangle'; o.frequency.value=f;
+      o.connect(og); og.connect(mg);
+      og.gain.setValueAtTime(0.6,t+i*.2); og.gain.exponentialRampToValueAtTime(0.001,t+i*.2+d);
+      o.start(t+i*.2); o.stop(t+i*.2+d+.05);
+    });
+  }catch(e){}
+
+  // 統計
+  const total = G.shotsHit+G.shotsMissed;
+  const acc   = total>0?Math.round(G.shotsHit/total*100):100;
+  const elapsed = Math.floor((Date.now()-(G.surviveStart||Date.now()))/1000);
+  const m = Math.floor(elapsed/60), s = elapsed%60;
+  document.getElementById('clear-stats').innerHTML =
+    `LEVEL: <span class="clear-stat-val">${G.level}</span> &nbsp;|&nbsp; `+
+    `SCORE: <span class="clear-stat-val">${G.score.toLocaleString()}</span> &nbsp;|&nbsp; `+
+    `TIME: <span class="clear-stat-val">${m}:${String(s).padStart(2,'0')}</span><br>`+
+    `HIT: <span class="clear-stat-val">${G.shotsHit}</span> &nbsp;|&nbsp; `+
+    `ACC: <span class="clear-stat-val">${acc}%</span> &nbsp;|&nbsp; `+
+    `MAX COMBO: <span class="clear-stat-val">${G.maxCombo}</span>`;
+
+  // 紙吹雪
+  const confetti = document.getElementById('clear-confetti');
+  confetti.innerHTML = '';
+  const colors=['#ffd700','#ff6040','#60dd40','#40a0ff','#ff40ff','#ffffff','#d4a227'];
+  for(let i=0;i<80;i++){
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    const color=colors[Math.floor(Math.random()*colors.length)];
+    const left=Math.random()*100;
+    const delay=Math.random()*3;
+    const dur=2.5+Math.random()*2.5;
+    const size=8+Math.random()*8;
+    el.style.cssText=`left:${left}vw;top:-20px;width:${size}px;height:${size*1.4}px;background:${color};border-radius:${Math.random()>0.5?'50%':'2px'};animation-duration:${dur}s;animation-delay:${delay}s;opacity:0.9;`;
+    confetti.appendChild(el);
+  }
+  // 3秒後に追加の紙吹雪
+  setTimeout(()=>{
+    for(let i=0;i<60;i++){
+      const el=document.createElement('div');
+      el.className='confetti-piece';
+      const color=colors[Math.floor(Math.random()*colors.length)];
+      el.style.cssText=`left:${Math.random()*100}vw;top:-20px;width:${8+Math.random()*8}px;height:${10+Math.random()*10}px;background:${color};border-radius:${Math.random()>0.5?'50%':'2px'};animation-duration:${2+Math.random()*2}s;opacity:0.9;`;
+      confetti.appendChild(el);
+    }
+  },3000);
+
+  document.getElementById('screen-clear').classList.remove('hidden');
+}
+
+document.getElementById('clear-btn-retry').addEventListener('click',()=>{
+  document.getElementById('screen-clear').classList.add('hidden');
+  document.getElementById('clear-confetti').innerHTML='';
+  G.endless=false;
+  startCountdown();
+});
+document.getElementById('clear-btn-title').addEventListener('click',()=>{
+  document.getElementById('screen-clear').classList.add('hidden');
+  document.getElementById('clear-confetti').innerHTML='';
+  scTitle.classList.remove('hidden');
+  renderTitleRanking();
+});
 
 </script>
 </body>
