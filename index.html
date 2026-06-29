@@ -2697,7 +2697,26 @@ if(isJP&&kana){
 if(!G.focused)G.focused=id;updateFocusClass();}
 
 // ═══ TARGET EXPIRED ═══
-function onTargetExpired(t){if(G.phase!=='playing')return;G.combo=0;G.shotsMissed++;t.el.classList.add('miss-shake');setTimeout(()=>t.el.remove(),320);removeTarget(t.id);damageHP();updateHUD();updateAccDisplay();}
+function onTargetExpired(t){
+  if(G.phase!=='playing')return;
+  G.combo=0; G.shotsMissed++;
+  t.el.classList.add('miss-shake');
+  setTimeout(()=>t.el.remove(),320);
+  removeTarget(t.id);
+  // ボス的が期限切れ → 即ゲームオーバー
+  if(t.isBoss){
+    hideBossHPBar();
+    BOSS.active=false; BOSS.targetId=null;
+    // ボス撃破失敗 = HP0 → 即ゲームオーバー
+    sfxDamage(); flashScreen('#660000');
+    G.hp = 0;
+    renderHP();
+    setTimeout(()=>endGame(), 600);
+    return;
+  }
+  damageHP();
+  updateHUD(); updateAccDisplay();
+}
 
 // ═══ INPUT ═══
 hiddenInput.addEventListener('input',e=>{const raw=e.data||'';hiddenInput.value='';
