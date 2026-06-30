@@ -483,31 +483,32 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 /* ════════════════════════════
    PHASE 3: 炎エフェクト・ACC
 ════════════════════════════ */
-/* 画面端の炎コンテナ */
+/* 画面端の炎コンテナ（縦に伸ばさず、コンボが上がるほど横に列を増やす） */
 #flame-left, #flame-right {
   position: fixed;
   bottom: 0;
-  width: 90px;
-  height: 60vh;
+  width: auto;
+  max-width: 46vw;
+  height: 24vh;
   z-index: 90;
   pointer-events: none;
   display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
-  gap: 0;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 3px;
   opacity: 0;
   transition: opacity 0.6s ease;
 }
-#flame-left  { left: 0; }
-#flame-right { right: 0; transform: scaleX(-1); }
+#flame-left  { left: 0; justify-content: flex-start; }
+#flame-right { right: 0; justify-content: flex-start; transform: scaleX(-1); }
 #flame-left.active, #flame-right.active { opacity: 1; }
 
-/* 炎パーティクル */
+/* 炎パーティクル（1列分） */
 .flame-col {
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
-  width: 100%;
+  width: 42px;
 }
 @keyframes flameDance {
   0%,100% { transform: scaleX(1) translateY(0) rotate(-2deg); opacity: 0.9; }
@@ -531,14 +532,13 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 .flame-lv2 { filter: drop-shadow(0 0 10px rgba(255,80,0,0.9)); font-size: 2.6rem; }
 .flame-lv3 { filter: drop-shadow(0 0 14px rgba(255,0,0,1));    font-size: 3rem; }
 
-/* ACC表示 */
+/* ACC表示（中央下から左上・HPバーの下へ移動し、視認性を上げて大きく） */
 #acc-display {
   position: absolute;
-  bottom: calc(27% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+  top: 96px;
+  left: 14px;
   font-family: 'Courier Prime', monospace;
-  font-size: 0.78rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 2px;
   color: var(--smoke);
@@ -840,25 +840,26 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
    PHASE 8: タイムアタック・中断
 ════════════════════════════ */
 
-/* 中断ボタン（全モード共通・HUD右下） */
+/* 中断ボタン（全モード共通・画面右下→右上のステータス下へ移動し視認性向上） */
 #btn-quit-game {
   position: fixed;
-  bottom: 18px;
-  right: 18px;
+  top: 96px;
+  right: 20px;
+  bottom: auto;
   z-index: 350;
   font-family: 'Rye', serif;
-  font-size: 0.68rem;
-  color: rgba(160,128,96,0.6);
-  background: rgba(0,0,0,0.45);
-  border: 1px solid rgba(90,58,16,0.5);
+  font-size: 0.78rem;
+  color: var(--sand);
+  background: rgba(0,0,0,0.7);
+  border: 1.5px solid var(--smoke);
   border-radius: 4px;
-  padding: 5px 10px;
+  padding: 6px 14px;
   cursor: pointer;
   letter-spacing: 1px;
   transition: all 0.2s;
   display: none;
 }
-#btn-quit-game:hover { color: var(--sand); border-color: var(--sand); background: rgba(0,0,0,0.7); }
+#btn-quit-game:hover { color: var(--gold); border-color: var(--gold); background: rgba(0,0,0,0.85); }
 #btn-quit-game.visible { display: block; }
 
 /* 確認ダイアログ */
@@ -2432,6 +2433,15 @@ const WORD_CATS = {
             'PARDON','POSSE','RODEO','RUSTLER','SADDLE','SALOON','SHERIFF','SILVER','SQUINT','STETSON',
             'STOMP','STRAP','STRAW','STEED','TEXAS','TRAIL','TRAMP','TROVE','TWANG','VARMINT',
             'WAGON','WRATH','YODEL','BANDIT','BOUNTY','BRONCO','CANYON','CATTLE','CORRAL','COWBOY'],
+  school:  ['PEN','BAG','MAP','BUS','ART','GYM','BOOK','DESK','NOTE','TEST',
+            'CLAY','CHALK','PAPER','ERASE','RULER','GRADE','CLASS','RECESS','LESSON','PENCIL',
+            'CRAYON','LOCKER','MARKER','TEACH','READ','WRITE','LEARN','STUDY','RECITE','REVIEW',
+            'SCHOOL','LIBRARY','SUBJECT','HOMEWORK','EXAM','QUIZ','SCIENCE','HISTORY','RECESS','UNIFORM',
+            'BACKPACK','NOTEBOOK','CLASSROOM','PRINCIPAL','HALLWAY','CAFETERIA','TIMETABLE','ASSEMBLY','CHALKBOARD','GRADUATE'],
+  space:   ['SUN','SKY','ORBIT','MOON','STAR','MARS','COMET','ROCKET','PLANET','GALAXY',
+            'NEBULA','METEOR','SATURN','VENUS','PLUTO','EARTH','SOLAR','LUNAR','SPACE','SHUTTLE',
+            'ASTRO','COSMOS','GRAVITY','UNIVERSE','TELESCOPE','ASTEROID','CRATER','ECLIPSE','HORIZON','METEORITE',
+            'NEPTUNE','JUPITER','MERCURY','STARDUST','SPACESHIP','ASTRONAUT','BLACKHOLE','CONSTELLATION','LAUNCHPAD','OBSERVATORY'],
 };
 function getWordPool(lv){
   // EASYはLv9まで1〜3文字、Lv10以降4文字以上解禁
@@ -2480,7 +2490,10 @@ const JP_BY_LEVEL=[
    {k:'いえ',r:'IE'},{k:'みち',r:'MITI'},{k:'いろ',r:'IRO'},{k:'かお',r:'KAO'},
    {k:'あめ',r:'AME'},{k:'ゆき',r:'YUKI'},{k:'はる',r:'HARU'},{k:'なつ',r:'NATU'},
    {k:'あき',r:'AKI'},{k:'ふゆ',r:'HUYU'},{k:'はな',r:'HANA'},{k:'くさ',r:'KUSA'},
-   {k:'まち',r:'MATI'},{k:'ふね',r:'HUNE'},{k:'くるま',r:'KURUMA'},{k:'でんしゃ',r:'DENSYA'}],
+   {k:'まち',r:'MATI'},{k:'ふね',r:'HUNE'},{k:'くるま',r:'KURUMA'},{k:'でんしゃ',r:'DENSYA'},
+   {k:'たこ',r:'TAKO'},{k:'いか',r:'IKA'},{k:'くち',r:'KUTI'},{k:'はし',r:'HASI'},
+   {k:'みみ',r:'MIMI'},{k:'あし',r:'ASI'},{k:'せき',r:'SEKI'},{k:'いけ',r:'IKE'},
+   {k:'たね',r:'TANE'},{k:'うた',r:'UTA'}],
   // Lv3: 3文字（自然・動物・食べ物）
   [{k:'ほし',r:'HOSI'},{k:'てら',r:'TERA'},{k:'いし',r:'ISI'},{k:'にわ',r:'NIWA'},
    {k:'むし',r:'MUSI'},{k:'かみ',r:'KAMI'},{k:'いわ',r:'IWA'},{k:'たき',r:'TAKI'},
@@ -2491,7 +2504,10 @@ const JP_BY_LEVEL=[
    {k:'いちご',r:'ITIGO'},{k:'ぶどう',r:'BUDOU'},{k:'なし',r:'NASI'},
    {k:'にんじん',r:'NINZIN'},{k:'たまねぎ',r:'TAMANEGI'},{k:'きゅうり',r:'KYUURI'},
    {k:'とまと',r:'TOMATO'},{k:'じゃがいも',r:'ZYAGAIMO'},{k:'かぼちゃ',r:'KABOTYA'},
-   {k:'ほうれん',r:'HOUREN'},{k:'はくさい',r:'HAKUSAI'}],
+   {k:'ほうれん',r:'HOUREN'},{k:'はくさい',r:'HAKUSAI'},
+   {k:'けむり',r:'KEMURI'},{k:'たいこ',r:'TAIKO'},{k:'みなと',r:'MINATO'},{k:'ふくろ',r:'HUKURO'},
+   {k:'たまご',r:'TAMAGO'},{k:'すいか',r:'SUIKA'},{k:'めだか',r:'MEDAKA'},{k:'こおり',r:'KOORI'},
+   {k:'とけい',r:'TOKEI'},{k:'さんぽ',r:'SANPO'}],
   // Lv4-5: 4〜5文字（文化・生活）
   [{k:'かたな',r:'KATANA'},{k:'さむらい',r:'SAMURAI'},{k:'にんじゃ',r:'NINZYA'},
    {k:'まつり',r:'MATURI'},{k:'さくら',r:'SAKURA'},{k:'こころ',r:'KOKORO'},
@@ -2503,7 +2519,11 @@ const JP_BY_LEVEL=[
    {k:'がっこう',r:'GAKKOU'},{k:'せんせい',r:'SENSEI'},{k:'しごと',r:'SIGOTO'},
    {k:'たべもの',r:'TABEMONO'},{k:'のみもの',r:'NOMIMONO'},{k:'あさごはん',r:'ASAGOHAN'},
    {k:'ひるごはん',r:'HIRUGOHAN'},{k:'ばんごはん',r:'BANGOHAN'},{k:'おちゃ',r:'OTYA'},
-   {k:'おかし',r:'OKASI'},{k:'おすし',r:'OSUSI'},{k:'ラーメン',r:'RAAMEN'}],
+   {k:'おかし',r:'OKASI'},{k:'おすし',r:'OSUSI'},{k:'ラーメン',r:'RAAMEN'},
+   {k:'げんかん',r:'GENKAN'},{k:'おべんとう',r:'OBENTOU'},{k:'れいぞうこ',r:'REIZOUKO'},
+   {k:'せんたくき',r:'SENTAKUKI'},{k:'じてんしゃ',r:'ZITENSYA'},{k:'えんぴつ',r:'ENPITSU'},
+   {k:'けしごむ',r:'KESIGOMU'},{k:'らんどせる',r:'RANDOSERU'},{k:'ほいくえん',r:'HOIKUEN'},
+   {k:'すべりだい',r:'SUBERIDAI'}],
   // Lv6-8: 長め（自然・文化・抽象語）
   [{k:'たいよう',r:'TAIYOU'},{k:'かみなり',r:'KAMINARI'},{k:'しぜん',r:'SIZEN'},
    {k:'たびびと',r:'TABIBITO'},{k:'むらさき',r:'MURASAKI'},{k:'うずまき',r:'UZUMAKI'},
@@ -2514,7 +2534,11 @@ const JP_BY_LEVEL=[
    {k:'むずかしい',r:'MUZUKASII'},{k:'やさしい',r:'YASASII'},{k:'たのしい',r:'TANOSII'},
    {k:'さびしい',r:'SABISII'},{k:'あたらしい',r:'ATARASII'},{k:'ふるさと',r:'HURUSATO'},
    {k:'おまつり',r:'OMATURI'},{k:'はなび',r:'HANABI'},{k:'おみこし',r:'OMIKOSI'},
-   {k:'かぶきざ',r:'KABUKIZA'},{k:'にほんご',r:'NIHONGO'},{k:'ひらがな',r:'HIRAGANA'}],
+   {k:'かぶきざ',r:'KABUKIZA'},{k:'にほんご',r:'NIHONGO'},{k:'ひらがな',r:'HIRAGANA'},
+   {k:'つきあかり',r:'TSUKIAKARI'},{k:'ほしぞら',r:'HOSIZORA'},{k:'あまのがわ',r:'AMANOGAWA'},
+   {k:'しゃぼんだま',r:'SYABONDAMA'},{k:'たんぽぽ',r:'TANPOPO'},{k:'かたつむり',r:'KATATSUMURI'},
+   {k:'てんとうむし',r:'TENTOUMUSI'},{k:'かまきり',r:'KAMAKIRI'},{k:'くわがた',r:'KUWAGATA'},
+   {k:'かぶとむし',r:'KABUTOMUSI'}],
   // Lv9+: 長単語・難語
   [{k:'しんかんせん',r:'SINKANSEN'},{k:'かくめいてき',r:'KAKUMEITEKI'},
    {k:'でんこうせっか',r:'DENKOUSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
@@ -2525,7 +2549,10 @@ const JP_BY_LEVEL=[
    {k:'びじゅつかん',r:'BIZYUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
    {k:'やきゅうじょう',r:'YAKYUUZYOU'},{k:'かんらんしゃ',r:'KANRANSYA'},
    {k:'ジェットコースター',r:'ZYETTOKOUSUTAA'},{k:'ゆうえんち',r:'YUUENTI'},
-   {k:'ほんやくこんにゃく',r:'HONYAKUKONNNYAKU'},{k:'しんりがく',r:'SINRIGAKU'}],
+   {k:'うんどうかい',r:'UNDOUKAI'},{k:'しんりがく',r:'SINRIGAKU'},
+   {k:'たいいくかん',r:'TAIIKUKAN'},{k:'ほけんしつ',r:'HOKENSITSU'},{k:'しょくいんしつ',r:'SYOKUINSITSU'},
+   {k:'うんどうじょう',r:'UNDOUZYOU'},{k:'すいぞくかん',r:'SUIZOKUKAN'},{k:'どうぶつえん',r:'DOUBUTSUEN'},
+   {k:'しょうぼうしゃ',r:'SYOUBOUSYA'},{k:'きゅうきゅうしゃ',r:'KYUUKYUUSYA'},{k:'ゆうびんきょく',r:'YUUBINKYOKU'}],
 ];
 function getJPPool(lv){
   // EASYはLv9まで1〜2文字、Lv10以降3文字以上解禁
@@ -3717,32 +3744,35 @@ function updateFlameEffect(combo) {
   if (!_flameActive || lv !== _flameLevel) {
     _flameLevel  = lv;
     _flameActive = true;
-    buildFlameColumn(flL, lv);
-    buildFlameColumn(flR, lv);
+    buildFlameColumns(flL, lv);
+    buildFlameColumns(flR, lv);
     flL.classList.add('active');
     flR.classList.add('active');
   }
 }
 
-function buildFlameColumn(container, lv) {
+function buildFlameColumns(container, lv) {
   container.innerHTML = '';
-  const col = document.createElement('div');
-  col.className = 'flame-col';
-  // レベルに応じた高さ・密度
-  const count = lv === 3 ? 14 : lv === 2 ? 10 : 7;
+  // 縦に高く伸ばすのではなく、コンボレベルが上がるほど「横に列」を増やす
+  const cols    = lv === 3 ? 3 : lv === 2 ? 2 : 1;
+  const perCol  = lv === 3 ? 6 : lv === 2 ? 6 : 5;
   const lvClass = `flame-lv${lv}`;
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div');
-    p.className = `flame-particle ${lvClass}`;
-    // 下ほど大きく・上ほど小さく
-    const scale = 1 - (i / count) * 0.5;
-    const spd   = (0.6 + Math.random() * 0.6).toFixed(2);
-    const dly   = (Math.random() * 0.4).toFixed(2);
-    p.style.cssText = `--spd:${spd}s;--dly:${dly}s;transform:scale(${scale.toFixed(2)});`;
-    p.textContent = lv === 3 ? '🌋' : '🔥';
-    col.appendChild(p);
+  for (let c = 0; c < cols; c++) {
+    const col = document.createElement('div');
+    col.className = 'flame-col';
+    for (let i = 0; i < perCol; i++) {
+      const p = document.createElement('div');
+      p.className = `flame-particle ${lvClass}`;
+      // 下ほど大きく・上ほど小さく
+      const scale = 1 - (i / perCol) * 0.5;
+      const spd   = (0.6 + Math.random() * 0.6).toFixed(2);
+      const dly   = (Math.random() * 0.4).toFixed(2);
+      p.style.cssText = `--spd:${spd}s;--dly:${dly}s;transform:scale(${scale.toFixed(2)});`;
+      p.textContent = lv === 3 ? '🌋' : '🔥';
+      col.appendChild(p);
+    }
+    container.appendChild(col);
   }
-  container.appendChild(col);
 }
 
 function resetFlame() {
@@ -5059,6 +5089,22 @@ function showGameClear(diff){
   lane.innerHTML=''; G.activeTargets=[];
   resetFlame(); resetBoss(); stopBGM(); hideQuitBtn();
 
+  // 統計
+  const total = G.shotsHit+G.shotsMissed;
+  const acc   = total>0?Math.round(G.shotsHit/total*100):100;
+  const elapsed = Math.floor((Date.now()-(G.surviveStart||Date.now()))/1000);
+  const m = Math.floor(elapsed/60), s = elapsed%60;
+  const finalWPM = getCurrentWPM();
+
+  // ★ ラスボス撃破クリア時もランキングへスコアを登録（以前は未登録だったバグを修正）
+  showNameModal(G.score, (playerName) => {
+    const entry = {score:G.score, level:G.level, acc, maxCombo:G.maxCombo,
+                   diff:G.diff, lang:G.lang, name:playerName, wpm:finalWPM, ts:Date.now()};
+    addScoreWithName(entry);
+    renderClearScreen();
+  });
+
+  function renderClearScreen(){
   // ファンファーレ
   try{
     const c=getACtx(), t=c.currentTime;
@@ -5072,11 +5118,6 @@ function showGameClear(diff){
     });
   }catch(e){}
 
-  // 統計
-  const total = G.shotsHit+G.shotsMissed;
-  const acc   = total>0?Math.round(G.shotsHit/total*100):100;
-  const elapsed = Math.floor((Date.now()-(G.surviveStart||Date.now()))/1000);
-  const m = Math.floor(elapsed/60), s = elapsed%60;
   // タイトル2（難易度表示）
   const t2=document.getElementById('clear-title2');
   if(t2) t2.textContent = diff==='normal' ? '— NORMAL MODE CLEAR! —' : '— EASY MODE CLEAR! —';
@@ -5115,6 +5156,7 @@ function showGameClear(diff){
   },3000);
 
   document.getElementById('screen-clear').classList.remove('hidden');
+  }
 }
 
 document.getElementById('clear-btn-retry').addEventListener('click',()=>{
