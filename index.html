@@ -110,7 +110,13 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 .btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.6)}
 .btn:active{transform:translateY(1px)}
 .btn.secondary{background:linear-gradient(135deg,#5a3a1a,#3a2010);color:var(--sand)}
-#result-score{font-size:2rem;color:var(--gold);font-weight:700;margin:2px 0}
+#result-score{font-size:2rem;color:var(--gold);font-weight:700;margin:2px 0;transition:color 0.2s,transform 0.2s}
+#result-score.new-record-score{
+  color:#fff060;
+  font-size:2.6rem;
+  text-shadow:0 0 14px #fff060,0 0 30px #ffae00;
+  animation: newRecordPulse 0.9s ease-in-out infinite;
+}
 #result-detail{color:var(--smoke);font-size:0.82rem;line-height:2.2;margin-bottom:4px}
 
 /* COUNTDOWN */
@@ -145,6 +151,27 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 .rk-meta{flex:1;color:var(--smoke);font-size:0.68rem}
 .rk-date{flex:0 0 72px;color:var(--smoke);font-size:0.65rem}
 #result-rank-badge{font-family:'Rye',serif;font-size:1.3rem;min-height:1.8rem;margin:2px 0 4px;letter-spacing:2px}
+
+/* ニューレコード強調表示 */
+#result-title.new-record-title{
+  color:#fff060;
+  text-shadow:0 0 12px #fff060,0 0 28px #ffae00,3px 3px 0 #5a3000;
+  animation: newRecordPulse 0.9s ease-in-out infinite;
+}
+@keyframes newRecordPulse{
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.07); }
+}
+#result-congrats{
+  font-family:'Rye',serif;
+  font-size:clamp(0.85rem,2.4vw,1.2rem);
+  color:#ffd700;
+  letter-spacing:2px;
+  margin-bottom:0.5rem;
+  text-shadow:0 0 12px rgba(255,200,0,0.7);
+  display:none;
+}
+#result-congrats.show{ display:block; }
 #new-record-banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.5);font-family:'Rye',serif;font-size:clamp(1.8rem,5vw,3rem);color:#ffd700;text-shadow:0 0 30px rgba(255,200,0,0.9),3px 3px 0 #8b6000;background:rgba(0,0,0,0.75);border:3px solid #d4a227;border-radius:8px;padding:14px 32px;z-index:700;pointer-events:none;letter-spacing:3px;opacity:0;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),opacity 0.2s}
 #new-record-banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #new-record-banner.hidden{display:none}
@@ -483,32 +510,31 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 /* ════════════════════════════
    PHASE 3: 炎エフェクト・ACC
 ════════════════════════════ */
-/* 画面端の炎コンテナ（縦に伸ばさず、コンボが上がるほど横に列を増やす） */
+/* 画面端の炎コンテナ */
 #flame-left, #flame-right {
   position: fixed;
   bottom: 0;
-  width: auto;
-  max-width: 46vw;
-  height: 24vh;
+  width: 90px;
+  height: 60vh;
   z-index: 90;
   pointer-events: none;
   display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  gap: 3px;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 0;
   opacity: 0;
   transition: opacity 0.6s ease;
 }
-#flame-left  { left: 0; justify-content: flex-start; }
-#flame-right { right: 0; justify-content: flex-start; transform: scaleX(-1); }
+#flame-left  { left: 0; }
+#flame-right { right: 0; transform: scaleX(-1); }
 #flame-left.active, #flame-right.active { opacity: 1; }
 
-/* 炎パーティクル（1列分） */
+/* 炎パーティクル */
 .flame-col {
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
-  width: 42px;
+  width: 100%;
 }
 @keyframes flameDance {
   0%,100% { transform: scaleX(1) translateY(0) rotate(-2deg); opacity: 0.9; }
@@ -532,13 +558,14 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 .flame-lv2 { filter: drop-shadow(0 0 10px rgba(255,80,0,0.9)); font-size: 2.6rem; }
 .flame-lv3 { filter: drop-shadow(0 0 14px rgba(255,0,0,1));    font-size: 3rem; }
 
-/* ACC表示（中央下から左上・HPバーの下へ移動し、視認性を上げて大きく） */
+/* ACC表示 */
 #acc-display {
   position: absolute;
-  top: 96px;
-  left: 14px;
+  bottom: calc(27% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
   font-family: 'Courier Prime', monospace;
-  font-size: 1.05rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 2px;
   color: var(--smoke);
@@ -827,6 +854,258 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 }
 /* ════ PHASE 6 ここまで ════ */
 
+/* ════ 実績バッジ機能 ════ */
+#screen-achievements {
+  background: rgba(8,4,1,0.97);
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #5a3a10 #0d0600;
+}
+#ach-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: rgba(0,0,0,0.6);
+  border-bottom: 1px solid #3a2008;
+  flex-shrink: 0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#ach-header-title {
+  font-family: 'Rye', serif;
+  font-size: 1.2rem;
+  color: var(--gold);
+  letter-spacing: 3px;
+}
+#ach-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 160px;
+  max-width: 320px;
+}
+#ach-progress-bar {
+  flex: 1;
+  height: 10px;
+  background: #2a1608;
+  border: 1px solid #5a3a10;
+  border-radius: 5px;
+  overflow: hidden;
+}
+#ach-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d4a227, #ffd700);
+  width: 0%;
+  transition: width 0.5s ease;
+}
+#ach-progress {
+  font-size: 0.7rem;
+  color: var(--smoke);
+  white-space: nowrap;
+}
+#ach-body {
+  padding: 18px 24px 28px;
+}
+#ach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.ach-card {
+  background: #160a02;
+  border: 1.5px solid #3a2008;
+  border-radius: 8px;
+  padding: 14px 10px;
+  text-align: center;
+  transition: transform 0.15s, border-color 0.2s, background 0.2s;
+}
+.ach-card.got {
+  border-color: var(--gold);
+  background: linear-gradient(160deg,#2a1808,#160a02);
+  box-shadow: 0 0 12px rgba(212,162,39,0.15);
+}
+.ach-card.locked { opacity: 0.55; }
+.ach-card-icon {
+  font-size: 1.9rem;
+  line-height: 1;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+}
+.ach-card.locked .ach-card-icon { filter: grayscale(1) opacity(0.6); }
+.ach-card-name {
+  font-family: 'Rye', serif;
+  font-size: 0.78rem;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.ach-card.locked .ach-card-name { color: var(--smoke); }
+.ach-card-desc {
+  font-size: 0.62rem;
+  color: var(--smoke);
+  line-height: 1.5;
+}
+.ach-card-desc-hint {
+  display: none;
+  font-size: 0.62rem;
+  color: #ffd080;
+  line-height: 1.5;
+}
+.ach-card.hint-shown .ach-card-desc-hint { display: block; }
+.ach-card.hint-shown .ach-card-desc-prompt { display: none; }
+.ach-hint-btn {
+  margin-top: 8px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.6rem;
+  color: var(--bg);
+  background: linear-gradient(135deg, var(--gold), #9a6a00);
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+.ach-hint-btn:active { transform: translateY(1px); }
+
+/* タイトルの実績ボタン */
+#btn-achievements {
+  font-size: 0.82rem;
+  padding: 9px 16px;
+}
+
+/* 実績解除トースト通知 */
+#ach-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-30px);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #2a1808, #160a02);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  padding: 10px 22px 10px 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 20px rgba(212,162,39,0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  max-width: 92vw;
+}
+#ach-toast.hidden { display: none; }
+#ach-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.ach-toast-icon {
+  font-size: 2.1rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+}
+.ach-toast-label {
+  font-family: 'Rye', serif;
+  font-size: 0.62rem;
+  color: #ff9940;
+  letter-spacing: 2px;
+}
+.ach-toast-name {
+  font-family: 'Rye', serif;
+  font-size: 1rem;
+  color: var(--gold);
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}
+.ach-toast-desc {
+  font-size: 0.65rem;
+  color: var(--smoke);
+  margin-top: 1px;
+}
+/* ════ 実績バッジ機能ここまで ════ */
+
+/* ════ 今日の目標（デイリーミニゴール）════ */
+#daily-goal-box {
+  width: min(420px, 92vw);
+  margin: 0 auto 0.8rem;
+  background: linear-gradient(135deg,#1c0f04,#120800);
+  border: 1.5px solid #5a3a10;
+  border-radius: 8px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+#daily-goal-box.done {
+  border-color: var(--gold);
+  box-shadow: 0 0 14px rgba(212,162,39,0.35);
+}
+#daily-goal-icon { font-size: 1.6rem; flex-shrink: 0; }
+#daily-goal-text { flex: 1; min-width: 0; }
+#daily-goal-label {
+  font-family: 'Rye', serif;
+  font-size: 0.66rem;
+  color: #ff9940;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+#daily-goal-desc {
+  font-size: 0.74rem;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+#daily-goal-bar-outer {
+  height: 7px;
+  background: #2a1608;
+  border: 1px solid #5a3a10;
+  border-radius: 4px;
+  overflow: hidden;
+}
+#daily-goal-bar-inner {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,#d4a227,#ffd700);
+  transition: width 0.4s ease;
+}
+#daily-goal-check {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.3s, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+#daily-goal-box.done #daily-goal-check { opacity: 1; transform: scale(1); }
+/* ════ 今日の目標ここまで ════ */
+
+/* ════ 実績トースト演出強化 ════ */
+@keyframes achToastBounce {
+  0%   { opacity:0; transform:translateX(-50%) translateY(-40px) scale(0.7); }
+  55%  { opacity:1; transform:translateX(-50%) translateY(4px) scale(1.06); }
+  75%  { transform:translateX(-50%) translateY(-2px) scale(0.99); }
+  100% { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+}
+#ach-toast.show { animation: achToastBounce 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.ach-confetti {
+  position: fixed;
+  top: -20px;
+  font-size: 1.2rem;
+  z-index: 899;
+  pointer-events: none;
+  animation: achConfettiFall linear forwards;
+}
+@keyframes achConfettiFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
+}
+/* ════ 実績トースト演出強化ここまで ════ */
+
 /* ENDLESSモード: タイム表示を金色に */
 #time-display.endless-time {
   color: var(--gold);
@@ -840,26 +1119,25 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
    PHASE 8: タイムアタック・中断
 ════════════════════════════ */
 
-/* 中断ボタン（全モード共通・画面右下→右上のステータス下へ移動し視認性向上） */
+/* 中断ボタン（全モード共通・HUD右下） */
 #btn-quit-game {
   position: fixed;
-  top: 96px;
-  right: 20px;
-  bottom: auto;
+  bottom: 18px;
+  right: 18px;
   z-index: 350;
   font-family: 'Rye', serif;
-  font-size: 0.78rem;
-  color: var(--sand);
-  background: rgba(0,0,0,0.7);
-  border: 1.5px solid var(--smoke);
+  font-size: 0.68rem;
+  color: rgba(160,128,96,0.6);
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(90,58,16,0.5);
   border-radius: 4px;
-  padding: 6px 14px;
+  padding: 5px 10px;
   cursor: pointer;
   letter-spacing: 1px;
   transition: all 0.2s;
   display: none;
 }
-#btn-quit-game:hover { color: var(--gold); border-color: var(--gold); background: rgba(0,0,0,0.85); }
+#btn-quit-game:hover { color: var(--sand); border-color: var(--sand); background: rgba(0,0,0,0.7); }
 #btn-quit-game.visible { display: block; }
 
 /* 確認ダイアログ */
@@ -1528,6 +1806,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 </div>
 
 <div id="flash"></div>
+<div id="ach-toast" class="hidden"></div>
 <!-- 中断ボタン -->
 <button id="btn-quit-game">← やめる</button>
 <!-- 中断確認ダイアログ -->
@@ -1565,6 +1844,15 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 <div class="screen hidden" id="screen-title">
   <h1>GUNMAN<br>TYPER</h1>
   <p class="sub">— Type fast. Shoot faster. —</p>
+  <div id="daily-goal-box">
+    <div id="daily-goal-icon">🎯</div>
+    <div id="daily-goal-text">
+      <div id="daily-goal-label">今日の目標</div>
+      <div id="daily-goal-desc">読み込み中…</div>
+      <div id="daily-goal-bar-outer"><div id="daily-goal-bar-inner"></div></div>
+    </div>
+    <div id="daily-goal-check">✅</div>
+  </div>
   <div class="diff-btns" style="margin-bottom:0.6rem;">
     <button class="diff-btn active" data-mode="survival">🎯 サバイバル</button>
     <button class="diff-btn" data-mode="endless">♾️ エンドレス</button>
@@ -1596,12 +1884,14 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
     <button class="btn" id="btn-start">DRAW!</button>
     <button class="btn secondary" id="btn-manual" style="font-size:0.85rem;padding:11px 18px;">📖 説明書</button>
     <button class="btn secondary" id="btn-stats" >📊 統計</button>
+    <button class="btn secondary" id="btn-achievements">🏆 実績</button>
   </div>
 </div>
 
 <!-- RESULT -->
 <div class="screen hidden" id="screen-result">
   <h1 id="result-title">GAME OVER</h1>
+  <div id="result-congrats">🎉 CONGRATULATIONS! 🎉</div>
   <div id="result-score">0 pts</div>
   <div id="result-rank-badge"></div>
   <div id="result-detail"></div>
@@ -1740,6 +2030,21 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 </div>
 
 
+
+<!-- 実績バッジ画面 -->
+<div class="screen hidden" id="screen-achievements">
+  <div id="ach-header">
+    <div id="ach-header-title">🏆 実績バッジ</div>
+    <div id="ach-progress-wrap">
+      <div id="ach-progress-bar"><div id="ach-progress-fill"></div></div>
+      <div id="ach-progress">0 / 0 解除</div>
+    </div>
+    <button class="btn secondary" id="ach-btn-close" style="font-size:0.8rem;padding:7px 16px;">✕ 閉じる</button>
+  </div>
+  <div id="ach-body">
+    <div id="ach-grid"></div>
+  </div>
+</div>
 
 <!-- タイムアタック設定画面 -->
 <div class="screen hidden" id="screen-ta-setup">
@@ -2139,34 +2444,6 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 </div>
 
           </div>
-        </div>
-
-        <div class="m-section">
-          <div class="m-section-title">🔀 ゆらぎ文字（表記ゆれ）対応</div>
-          <p style="font-size:0.78rem;color:#c0a070;line-height:1.7;margin-bottom:8px;">
-            日本語モードでは、下記の文字は<span class="m-hl">どちらの綴りで打ってもOK</span>です。<br>
-            自分の慣れている方で入力できます。
-          </p>
-          <div class="m-roma-table m-roma-table-3">
-            <div class="m-roma-head">し</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SI</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SHI</span></div>
-            <div class="m-roma-head">ち</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TI</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">CHI</span></div>
-            <div class="m-roma-head">つ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TSU</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TU</span></div>
-            <div class="m-roma-head">ふ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">HU</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">FU</span></div>
-            <div class="m-roma-head">じ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">ZI</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">JI</span></div>
-            <div class="m-roma-head">しゃ行</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SYA</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SHA</span></div>
-            <div class="m-roma-head">ちゃ行</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TYA</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">CHA</span></div>
-            <div class="m-roma-head">じゃ行</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">ZYA</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">JA</span></div>
-            <div class="m-roma-head">じぇ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">ZYE</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">JE</span></div>
-            <div class="m-roma-head">ちぇ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TYE</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">CHE</span></div>
-            <div class="m-roma-head">しぇ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SYE</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SHE</span></div>
-            <div class="m-roma-head">ん</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">NN</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">N</span></div>
-            <div class="m-roma-head">っ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">XTU</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">LTU</span></div>
-          </div>
-          <p style="font-size:0.78rem;color:#c0a070;line-height:1.7;margin:12px 0 4px;">
-            <span class="m-hl">長音「ー」</span>は、<span class="m-hl">ハイフン「-」キー</span>で打つこともできます。<br>
-            （例：「ジェットコースター」→ <span class="m-hl">jetto-suta-</span> でもOK／母音を繰り返す通常の打ち方でもOK）
-          </p>
-        </div>
       </div>
     </div>
   </div>
@@ -2461,15 +2738,6 @@ const WORD_CATS = {
             'PARDON','POSSE','RODEO','RUSTLER','SADDLE','SALOON','SHERIFF','SILVER','SQUINT','STETSON',
             'STOMP','STRAP','STRAW','STEED','TEXAS','TRAIL','TRAMP','TROVE','TWANG','VARMINT',
             'WAGON','WRATH','YODEL','BANDIT','BOUNTY','BRONCO','CANYON','CATTLE','CORRAL','COWBOY'],
-  school:  ['PEN','BAG','MAP','BUS','ART','GYM','BOOK','DESK','NOTE','TEST',
-            'CLAY','CHALK','PAPER','ERASE','RULER','GRADE','CLASS','RECESS','LESSON','PENCIL',
-            'CRAYON','LOCKER','MARKER','TEACH','READ','WRITE','LEARN','STUDY','RECITE','REVIEW',
-            'SCHOOL','LIBRARY','SUBJECT','HOMEWORK','EXAM','QUIZ','SCIENCE','HISTORY','RECESS','UNIFORM',
-            'BACKPACK','NOTEBOOK','CLASSROOM','PRINCIPAL','HALLWAY','CAFETERIA','TIMETABLE','ASSEMBLY','CHALKBOARD','GRADUATE'],
-  space:   ['SUN','SKY','ORBIT','MOON','STAR','MARS','COMET','ROCKET','PLANET','GALAXY',
-            'NEBULA','METEOR','SATURN','VENUS','PLUTO','EARTH','SOLAR','LUNAR','SPACE','SHUTTLE',
-            'ASTRO','COSMOS','GRAVITY','UNIVERSE','TELESCOPE','ASTEROID','CRATER','ECLIPSE','HORIZON','METEORITE',
-            'NEPTUNE','JUPITER','MERCURY','STARDUST','SPACESHIP','ASTRONAUT','BLACKHOLE','CONSTELLATION','LAUNCHPAD','OBSERVATORY'],
 };
 function getWordPool(lv){
   // EASYはLv9まで1〜3文字、Lv10以降4文字以上解禁
@@ -2518,10 +2786,7 @@ const JP_BY_LEVEL=[
    {k:'いえ',r:'IE'},{k:'みち',r:'MITI'},{k:'いろ',r:'IRO'},{k:'かお',r:'KAO'},
    {k:'あめ',r:'AME'},{k:'ゆき',r:'YUKI'},{k:'はる',r:'HARU'},{k:'なつ',r:'NATU'},
    {k:'あき',r:'AKI'},{k:'ふゆ',r:'HUYU'},{k:'はな',r:'HANA'},{k:'くさ',r:'KUSA'},
-   {k:'まち',r:'MATI'},{k:'ふね',r:'HUNE'},{k:'くるま',r:'KURUMA'},{k:'でんしゃ',r:'DENSYA'},
-   {k:'たこ',r:'TAKO'},{k:'いか',r:'IKA'},{k:'くち',r:'KUTI'},{k:'はし',r:'HASI'},
-   {k:'みみ',r:'MIMI'},{k:'あし',r:'ASI'},{k:'せき',r:'SEKI'},{k:'いけ',r:'IKE'},
-   {k:'たね',r:'TANE'},{k:'うた',r:'UTA'}],
+   {k:'まち',r:'MATI'},{k:'ふね',r:'HUNE'},{k:'くるま',r:'KURUMA'},{k:'でんしゃ',r:'DENSYA'}],
   // Lv3: 3文字（自然・動物・食べ物）
   [{k:'ほし',r:'HOSI'},{k:'てら',r:'TERA'},{k:'いし',r:'ISI'},{k:'にわ',r:'NIWA'},
    {k:'むし',r:'MUSI'},{k:'かみ',r:'KAMI'},{k:'いわ',r:'IWA'},{k:'たき',r:'TAKI'},
@@ -2532,26 +2797,19 @@ const JP_BY_LEVEL=[
    {k:'いちご',r:'ITIGO'},{k:'ぶどう',r:'BUDOU'},{k:'なし',r:'NASI'},
    {k:'にんじん',r:'NINZIN'},{k:'たまねぎ',r:'TAMANEGI'},{k:'きゅうり',r:'KYUURI'},
    {k:'とまと',r:'TOMATO'},{k:'じゃがいも',r:'ZYAGAIMO'},{k:'かぼちゃ',r:'KABOTYA'},
-   {k:'ほうれん',r:'HOUREN'},{k:'はくさい',r:'HAKUSAI'},
-   {k:'けむり',r:'KEMURI'},{k:'たいこ',r:'TAIKO'},{k:'みなと',r:'MINATO'},{k:'ふくろ',r:'HUKURO'},
-   {k:'たまご',r:'TAMAGO'},{k:'すいか',r:'SUIKA'},{k:'めだか',r:'MEDAKA'},{k:'こおり',r:'KOORI'},
-   {k:'とけい',r:'TOKEI'},{k:'さんぽ',r:'SANPO'}],
+   {k:'ほうれん',r:'HOUREN'},{k:'はくさい',r:'HAKUSAI'}],
   // Lv4-5: 4〜5文字（文化・生活）
   [{k:'かたな',r:'KATANA'},{k:'さむらい',r:'SAMURAI'},{k:'にんじゃ',r:'NINZYA'},
    {k:'まつり',r:'MATURI'},{k:'さくら',r:'SAKURA'},{k:'こころ',r:'KOKORO'},
    {k:'ちから',r:'TIKARA'},{k:'ひかり',r:'HIKARI'},{k:'かがみ',r:'KAGAMI'},
    {k:'まもる',r:'MAMORU'},{k:'はやて',r:'HAYATE'},{k:'かすみ',r:'KASUMI'},
-   {k:'のぼる',r:'NOBORU'},{k:'いのち',r:'INOTI'},{k:'たたかい',r:'TATAKAI'},
+   {k:'のぼる',r:'NOBORU'},{k:'いのち',r:'INOTI'},{k:'たたかい',r:'TATAKAHI'},
    {k:'やくそく',r:'YAKUSOKU'},{k:'ともだち',r:'TOMODATI'},{k:'おとこ',r:'OTOKO'},
    {k:'おんな',r:'ONNA'},{k:'こども',r:'KODOMO'},{k:'おとな',r:'OTONA'},
    {k:'がっこう',r:'GAKKOU'},{k:'せんせい',r:'SENSEI'},{k:'しごと',r:'SIGOTO'},
    {k:'たべもの',r:'TABEMONO'},{k:'のみもの',r:'NOMIMONO'},{k:'あさごはん',r:'ASAGOHAN'},
    {k:'ひるごはん',r:'HIRUGOHAN'},{k:'ばんごはん',r:'BANGOHAN'},{k:'おちゃ',r:'OTYA'},
-   {k:'おかし',r:'OKASI'},{k:'おすし',r:'OSUSI'},{k:'ラーメン',r:'RAAMEN'},
-   {k:'げんかん',r:'GENKAN'},{k:'おべんとう',r:'OBENTOU'},{k:'れいぞうこ',r:'REIZOUKO'},
-   {k:'せんたくき',r:'SENTAKUKI'},{k:'じてんしゃ',r:'ZITENSYA'},{k:'えんぴつ',r:'ENPITSU'},
-   {k:'けしごむ',r:'KESIGOMU'},{k:'らんどせる',r:'RANDOSERU'},{k:'ほいくえん',r:'HOIKUEN'},
-   {k:'すべりだい',r:'SUBERIDAI'}],
+   {k:'おかし',r:'OKASI'},{k:'おすし',r:'OSUSI'},{k:'ラーメン',r:'RAAMEN'}],
   // Lv6-8: 長め（自然・文化・抽象語）
   [{k:'たいよう',r:'TAIYOU'},{k:'かみなり',r:'KAMINARI'},{k:'しぜん',r:'SIZEN'},
    {k:'たびびと',r:'TABIBITO'},{k:'むらさき',r:'MURASAKI'},{k:'うずまき',r:'UZUMAKI'},
@@ -2562,25 +2820,18 @@ const JP_BY_LEVEL=[
    {k:'むずかしい',r:'MUZUKASII'},{k:'やさしい',r:'YASASII'},{k:'たのしい',r:'TANOSII'},
    {k:'さびしい',r:'SABISII'},{k:'あたらしい',r:'ATARASII'},{k:'ふるさと',r:'HURUSATO'},
    {k:'おまつり',r:'OMATURI'},{k:'はなび',r:'HANABI'},{k:'おみこし',r:'OMIKOSI'},
-   {k:'かぶきざ',r:'KABUKIZA'},{k:'にほんご',r:'NIHONGO'},{k:'ひらがな',r:'HIRAGANA'},
-   {k:'つきあかり',r:'TSUKIAKARI'},{k:'ほしぞら',r:'HOSIZORA'},{k:'あまのがわ',r:'AMANOGAWA'},
-   {k:'しゃぼんだま',r:'SYABONDAMA'},{k:'たんぽぽ',r:'TANPOPO'},{k:'かたつむり',r:'KATATSUMURI'},
-   {k:'てんとうむし',r:'TENTOUMUSI'},{k:'かまきり',r:'KAMAKIRI'},{k:'くわがた',r:'KUWAGATA'},
-   {k:'かぶとむし',r:'KABUTOMUSI'}],
+   {k:'かぶきざ',r:'KABUKIZA'},{k:'にほんご',r:'NIHONGO'},{k:'ひらがな',r:'HIRAGANA'}],
   // Lv9+: 長単語・難語
   [{k:'しんかんせん',r:'SINKANSEN'},{k:'かくめいてき',r:'KAKUMEITEKI'},
-   {k:'でんこうせっか',r:'DENKOUSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
-   {k:'たつまき',r:'TATUMAKI'},{k:'みなみのかぜ',r:'MINAMINOKAZE'},
+   {k:'でんこうせっか',r:'DENKOSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
+   {k:'たつまき',r:'TATUMAKI'},{k:'みなみのかぜ',r:'MINAMIOKAZE'},
    {k:'さんかくけい',r:'SANKAKUKEI'},{k:'しかくけい',r:'SIKAKUKEI'},
-   {k:'ほうかごあそび',r:'HOUKAGOASOBI'},{k:'おんがくしつ',r:'ONGAKUSITU'},
+   {k:'ほうかごてい',r:'HOUKAGOASOBI'},{k:'おんがくしつ',r:'ONGAKUSITU'},
    {k:'としょかん',r:'TOSYOKAN'},{k:'はくぶつかん',r:'HAKUBUTSUKAN'},
-   {k:'びじゅつかん',r:'BIZYUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
-   {k:'やきゅうじょう',r:'YAKYUUZYOU'},{k:'かんらんしゃ',r:'KANRANSYA'},
+   {k:'びじゅつかん',r:'BIZUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
+   {k:'やきゅうじょう',r:'YAKYUUZYO'},{k:'かんらんしゃ',r:'KANRANSYA'},
    {k:'ジェットコースター',r:'ZYETTOKOUSUTAA'},{k:'ゆうえんち',r:'YUUENTI'},
-   {k:'うんどうかい',r:'UNDOUKAI'},{k:'しんりがく',r:'SINRIGAKU'},
-   {k:'たいいくかん',r:'TAIIKUKAN'},{k:'ほけんしつ',r:'HOKENSITSU'},{k:'しょくいんしつ',r:'SYOKUINSITSU'},
-   {k:'うんどうじょう',r:'UNDOUZYOU'},{k:'すいぞくかん',r:'SUIZOKUKAN'},{k:'どうぶつえん',r:'DOUBUTSUEN'},
-   {k:'しょうぼうしゃ',r:'SYOUBOUSYA'},{k:'きゅうきゅうしゃ',r:'KYUUKYUUSYA'},{k:'ゆうびんきょく',r:'YUUBINKYOKU'}],
+   {k:'ほんやくこんにゃく',r:'HONYAKUKONNNYAKU'},{k:'しんりがく',r:'SINRIGAKU'}],
 ];
 function getJPPool(lv){
   // EASYはLv9まで1〜2文字、Lv10以降3文字以上解禁
@@ -2626,8 +2877,9 @@ function addScore(entry){const l=loadRanking();l.push(entry);l.sort((a,b)=>b.sco
 function renderRanking(list,my){const c=document.getElementById('ranking-list');if(!list.length){c.innerHTML='<div style="padding:10px;text-align:center;color:#666">NO DATA YET</div>';return;}const md=['🥇','🥈','🥉'];c.innerHTML=list.map((e,i)=>{const me=e===my;const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${me?' rk-new':''}`;const d=new Date(e.ts);const dt=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return`<div class="${cls}"><span class="rk-col rk-no">${md[i]||('#'+(i+1))}${me?' ◀':''}</span><span class="rk-col rk-score">${e.score.toLocaleString()}</span><span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} LV${e.level} ${e.acc}% ×${e.maxCombo}</span><span class="rk-col rk-date">${dt}</span></div>`;}).join('');}
 function renderTitleRanking(){const l=loadRanking();const el=document.getElementById('title-ranking');if(!l.length){el.innerHTML='<span style="color:#555">— NO RECORDS YET —</span>';return;}const md=['🥇','🥈','🥉'];el.innerHTML=l.slice(0,3).map((e,i)=>`<span class="title-rank-item"><span class="tr-medal">${md[i]}</span><span class="tr-score">${e.score.toLocaleString()}</span> ${e.diff.toUpperCase()}</span>`).join('');}
 let _currentBest=0;
-function checkInGameRecord(){_currentBest=loadRanking()[0]?.score??0;}
-function maybeShowNewRecord(){if(G.score>_currentBest&&_currentBest>0){_currentBest=G.score;const b=document.getElementById('new-record-banner');b.classList.remove('hidden');void b.offsetWidth;b.classList.add('show');sfxLevelUp();setTimeout(()=>{b.classList.remove('show');setTimeout(()=>b.classList.add('hidden'),300);},2200);}}
+let _newRecordShown=false;
+function checkInGameRecord(){_currentBest=loadRanking()[0]?.score??0;_newRecordShown=false;}
+function maybeShowNewRecord(){if(_newRecordShown)return;if(G.score>_currentBest&&_currentBest>0){_newRecordShown=true;const b=document.getElementById('new-record-banner');b.classList.remove('hidden');void b.offsetWidth;b.classList.add('show');sfxLevelUp();setTimeout(()=>{b.classList.remove('show');setTimeout(()=>b.classList.add('hidden'),300);},2200);}}
 
 // ═══ UI EVENTS ═══
 const MODE_DESC={survival:'次々来う的を撃て！10分間スコアアタック',endless:'時間制限なし！HPが尽きるまで生き残れ',timeattack:'⚡ 固定リストを最速クリア！タイムを競え',duel:'1対1の早撃ち勝負！何連勝できるか？',practice:'焦らず練習！的を自分のペースで撃ち倒せ',sentence:'文章をまるごと入力！記号・数字も練習'};
@@ -2716,8 +2968,8 @@ function rafLoop(){if(G.phase!=='playing')return;const now=Date.now();const W=la
   const sc=0.45+(1.0-0.45)*Math.pow(pct,1.4);
   // 横位置: レーン中心
   const cx=(t.laneX/100)*W;
-  // 縦位置: 奥(top 28%)→手前(top 64%・太陽あたり) ＝ 炎エフェクト(下部24%)と重ならないよう全体を上げる
-  const topPct=0.28+(0.64-0.28)*pct;
+  // 縦位置: 奥(top 38%)→手前(top 78%) ＝ 画面中央〜下に配置
+  const topPct=0.38+(0.78-0.38)*pct;
   const ty=H*topPct;
   t.el.style.left=(cx-t.baseW*sc*0.5)+'px';
   t.el.style.top=(ty-t.baseH*sc)+'px';
@@ -2783,7 +3035,7 @@ hiddenInput.addEventListener('input',e=>{const raw=e.data||'';hiddenInput.value=
   if(scKeyboard&&!scKeyboard.classList.contains('hidden')){
     return; // keydownで処理済み
   }
-  const ch=raw.toUpperCase();if(!ch||!/[A-Z\-]/.test(ch))return;if(D.phase==='typing'){handleDuelChar(ch);return;}if(TA.phase==='playing'){handleTAChar(ch);return;}
+  const ch=raw.toUpperCase();if(!ch||!/[A-Z]/.test(ch))return;if(D.phase==='typing'){handleDuelChar(ch);return;}if(TA.phase==='playing'){handleTAChar(ch);return;}
   if(scSent&&!scSent.classList.contains('hidden')&&document.getElementById('sent-complete').classList.contains('hidden'))
     {handleSentChar(ch);return;}
   if(scKeyboard&&!scKeyboard.classList.contains('hidden')&&document.getElementById('kb-complete').classList.contains('hidden'))
@@ -2915,6 +3167,14 @@ function endGame(){
   // 統計更新
   updateStats({score:G.score,hit:G.shotsHit,miss:G.shotsMissed,
                keys:_wpmKeyCount,wpm:finalWPM,combo:G.maxCombo});
+  // 実績チェック
+  checkAchievements({score:G.score,hit:G.shotsHit,miss:G.shotsMissed,
+               acc,wpm:finalWPM,level:G.level,diff:G.diff,lang:G.lang,
+               mode:G.endless?'endless':'survival',
+               endlessSec:G.endless?surviveSec:0});
+  // 今日の目標 進捗加算
+  addDailyProgress('keys', _wpmKeyCount);
+  addDailyProgress('plays', 1);
   const wpmEl=document.getElementById('wpm-display');
   if(wpmEl) wpmEl.textContent='';
 
@@ -2929,6 +3189,9 @@ function endGame(){
 
       // リザルト画面流用
       document.getElementById('result-title').textContent='⏱ ENDLESS OVER';
+      document.getElementById('result-title').classList.remove('new-record-title');
+      document.getElementById('result-score').classList.remove('new-record-score');
+      document.getElementById('result-congrats').classList.remove('show');
       document.getElementById('result-score').textContent=G.score.toLocaleString()+' pts';
       const m=Math.floor(surviveSec/60),s=surviveSec%60;
       document.getElementById('result-detail').innerHTML=
@@ -2964,6 +3227,20 @@ function endGame(){
     else{badge.textContent='OUT OF TOP 10';badge.style.color='var(--smoke)';}
 
     document.getElementById('result-title').textContent=isNew?'★ NEW RECORD ★':'GAME OVER';
+    const titleEl=document.getElementById('result-title');
+    const congratsEl=document.getElementById('result-congrats');
+    const scoreEl=document.getElementById('result-score');
+    if(isNew){
+      titleEl.classList.add('new-record-title');
+      scoreEl.classList.add('new-record-score');
+      congratsEl.textContent=`🎉 CONGRATULATIONS! ${G.score.toLocaleString()} pts 🎉`;
+      congratsEl.classList.add('show');
+      try{ spawnAchConfetti(); }catch(e){}
+    }else{
+      titleEl.classList.remove('new-record-title');
+      scoreEl.classList.remove('new-record-score');
+      congratsEl.classList.remove('show');
+    }
     renderRankingFull(list, entry, 'ranking-list');
     scResult.classList.remove('hidden');
   });
@@ -3044,19 +3321,6 @@ function updateKanaProgress(t){
     const out = [], ka = [...kanaStr];
     let kp=0, rp=0;
     while(kp < ka.length){
-      // 促音(っ/ッ)は次の音の子音1文字分だけローマ字を消費（二重子音）
-      if(ka[kp]==='っ' || ka[kp]==='ッ'){
-        let dbl = '';
-        for(const [k2,r2] of KR){
-          if(k2==='ー'||k2==='っ'||k2==='ッ') continue;
-          const kl2 = [...k2].length;
-          if(ka.slice(kp+1,kp+1+kl2).join('') !== k2) continue;
-          dbl = r2[0]; break;
-        }
-        const len = dbl ? 1 : 0;
-        out.push({kana:ka[kp], romaStart:rp, romaEnd:rp+len});
-        rp += len; kp++; continue;
-      }
       let hit = false;
       for(const [k,r] of KR){
         const kl = [...k].length;
@@ -3180,7 +3444,7 @@ function updateDuelKanaProgress(typed,word,kana,kanaEl){
   if(!kanaEl||!kana) return;
   // updateKanaProgressと同じロジックをインライン展開
   const KR=[['きゃ','KYA'],['しゃ','SYA'],['ちゃ','TYA'],['にゃ','NYA'],['ひゃ','HYA'],['みゃ','MYA'],['りゃ','RYA'],['ぎゃ','GYA'],['じゃ','ZYA'],['びゃ','BYA'],['ぴゃ','PYA'],['あ','A'],['い','I'],['う','U'],['え','E'],['お','O'],['か','KA'],['き','KI'],['く','KU'],['け','KE'],['こ','KO'],['さ','SA'],['し','SI'],['す','SU'],['せ','SE'],['そ','SO'],['た','TA'],['ち','TI'],['つ','TSU'],['て','TE'],['と','TO'],['な','NA'],['に','NI'],['ぬ','NU'],['ね','NE'],['の','NO'],['は','HA'],['ひ','HI'],['ふ','HU'],['へ','HE'],['ほ','HO'],['ま','MA'],['み','MI'],['む','MU'],['め','ME'],['も','MO'],['や','YA'],['ゆ','YU'],['よ','YO'],['ら','RA'],['り','RI'],['る','RU'],['れ','RE'],['ろ','RO'],['わ','WA'],['を','WO'],['ん','NN'],['っ','XTU'],['が','GA'],['ぎ','GI'],['ぐ','GU'],['げ','GE'],['ご','GO'],['ざ','ZA'],['じ','ZI'],['ず','ZU'],['ぜ','ZE'],['ぞ','ZO'],['だ','DA'],['ぢ','DI'],['づ','DU'],['で','DE'],['ど','DO'],['ば','BA'],['び','BI'],['ぶ','BU'],['べ','BE'],['ぼ','BO'],['ぱ','PA'],['ぴ','PI'],['ぷ','PU'],['ぺ','PE'],['ぽ','PO'],['ア','A'],['イ','I'],['ウ','U'],['エ','E'],['オ','O'],['カ','KA'],['キ','KI'],['ク','KU'],['ケ','KE'],['コ','KO'],['サ','SA'],['シ','SI'],['ス','SU'],['セ','SE'],['ソ','SO'],['タ','TA'],['チ','TI'],['ツ','TSU'],['テ','TE'],['ト','TO'],['ナ','NA'],['ニ','NI'],['ヌ','NU'],['ネ','NE'],['ノ','NO'],['ハ','HA'],['ヒ','HI'],['フ','HU'],['ヘ','HE'],['ホ','HO'],['マ','MA'],['ミ','MI'],['ム','MU'],['メ','ME'],['モ','MO'],['ヤ','YA'],['ユ','YU'],['ヨ','YO'],['ラ','RA'],['リ','RI'],['ル','RU'],['レ','RE'],['ロ','RO'],['ワ','WA'],['ヲ','WO'],['ン','NN'],['ッ','XTU'],['ー','ー']];
-  function seg(ks,rs){const out=[],ka=[...ks];let kp=0,rp=0;while(kp<ka.length){if(ka[kp]==='っ'||ka[kp]==='ッ'){let dbl='';for(const [k2,r2] of KR){if(k2==='ー'||k2==='っ'||k2==='ッ')continue;const kl2=[...k2].length;if(ka.slice(kp+1,kp+1+kl2).join('')!==k2)continue;dbl=r2[0];break;}const len=dbl?1:0;out.push({kana:ka[kp],romaStart:rp,romaEnd:rp+len});rp+=len;kp++;continue;}if(ka[kp]==='ー'){const e=Math.min(rp+1,rs.length);out.push({kana:'ー',romaStart:rp,romaEnd:e});rp=e;kp++;continue;}let hit=false;for(const [k,r] of KR){const kl=[...k].length;if(ka.slice(kp,kp+kl).join('')!==k)continue;out.push({kana:k,romaStart:rp,romaEnd:rp+r.length});rp+=r.length;kp+=kl;hit=true;break;}if(!hit){out.push({kana:ka[kp],romaStart:rp,romaEnd:rp});kp++;}}return out;}
+  function seg(ks,rs){const out=[],ka=[...ks];let kp=0,rp=0;while(kp<ka.length){if(ka[kp]==='ー'){const e=Math.min(rp+1,rs.length);out.push({kana:'ー',romaStart:rp,romaEnd:e});rp=e;kp++;continue;}let hit=false;for(const [k,r] of KR){const kl=[...k].length;if(ka.slice(kp,kp+kl).join('')!==k)continue;out.push({kana:k,romaStart:rp,romaEnd:rp+r.length});rp+=r.length;kp+=kl;hit=true;break;}if(!hit){out.push({kana:ka[kp],romaStart:rp,romaEnd:rp});kp++;}}return out;}
   const tl=typed.length,segs=seg(kana,word);
   let html='';
   segs.forEach(({kana:ch,romaStart,romaEnd})=>{
@@ -3194,7 +3458,7 @@ function updateDuelKanaProgress(typed,word,kana,kanaEl){
 function onDuelWin(){if(D.phase!=='typing')return;D.phase='result';clearTimeout(D.rafId);duelWordBox.classList.add('hidden');D.streak++;const cfg=DUEL_DIFF[D.diff];if(D.streak%cfg.lvEvery===0){D.level++;sfxLevelUp();}duelStatusMsg.style.color='#ffd700';duelStatusMsg.textContent=D.streak===1?'NICE SHOT!':D.streak<5?'WIN!':D.streak<10?`${D.streak} WINS! 🔥`:`${D.streak} WINS!! 🌟`;sfxGunshot(D.streak);duelPlayerFig.classList.remove('shoot');void duelPlayerFig.offsetWidth;duelPlayerFig.classList.add('shoot');setTimeout(()=>{duelEnemyFig.classList.remove('hit');void duelEnemyFig.offsetWidth;duelEnemyFig.classList.add('hit');},180);shootBulletLine(document.getElementById('duel-player').getBoundingClientRect(),document.getElementById('duel-enemy').getBoundingClientRect());duelStreakDisp.textContent=`🔥 ${D.streak} WIN STREAK`;setTimeout(()=>{if(D.phase!=='result')return;duelEnemyFig.style.animation='';duelEnemyFig.style.opacity='1';duelPlayerFig.style.animation='';duelEnemyFig.textContent=['🕵️','🤖','👹','💀','🧟','🦹','🥷'][Math.floor(Math.random()*7)];startDuelCountdown();},1600);}
 function onDuelTimeout(){if(D.phase!=='typing'&&D.phase!=='staredown')return;D.phase='result';clearTimeout(D.rafId);duelWordBox.classList.add('hidden');sfxDamage();flashScreen('#660000');duelStatusMsg.style.color='#cc2020';duelStatusMsg.textContent='TOO SLOW...';duelEnemyFig.classList.remove('shoot');void duelEnemyFig.offsetWidth;duelEnemyFig.classList.add('shoot');setTimeout(()=>{duelPlayerFig.classList.remove('hit');void duelPlayerFig.offsetWidth;duelPlayerFig.classList.add('hit');},180);shootBulletLine(document.getElementById('duel-enemy').getBoundingClientRect(),document.getElementById('duel-player').getBoundingClientRect());setTimeout(showDuelResult,1800);}
 function shootBulletLine(from,to){const fx=from.left+from.width*0.5,fy=from.top+from.height*0.4,tx=to.left+to.width*0.5,ty=to.top+to.height*0.4,dx=tx-fx,dy=ty-fy,len=Math.sqrt(dx*dx+dy*dy),ang=Math.atan2(dy,dx)*180/Math.PI;const l=document.createElement('div');l.className='bullet-line';l.style.cssText=`left:${fx}px;top:${fy}px;width:${len}px;transform:rotate(${ang}deg)`;document.body.appendChild(l);setTimeout(()=>l.remove(),350);const d=document.createElement('div');d.className='dust-puff';d.textContent='💥';d.style.cssText=`left:${tx-20}px;top:${ty-20}px`;document.body.appendChild(d);setTimeout(()=>d.remove(),800);}
-function showDuelResult(){hideQuitBtn();stopBGM();scDuel.classList.add('hidden');scDuelResult.classList.remove('hidden');const entry={streak:D.streak,level:D.level,diff:D.diff,lang:D.lang,ts:Date.now()};const{rank,list}=addDuelScore(entry);document.getElementById('duel-result-title').textContent=D.streak===0?'GAME OVER':`${D.streak} WIN STREAK!`;document.getElementById('duel-result-streak').textContent=D.streak>0?`🔥 ${D.streak} 連勝`:'😵 0勝…';const md=['🥇','🥈','🥉'];document.getElementById('duel-result-detail').innerHTML=`${rank<=3?md[rank-1]+' '+rank+'位！<br>':''}DIFFICULTY: ${D.diff.toUpperCase()} LEVEL: ${D.level}`;renderDuelRanking(list,entry);}
+function showDuelResult(){hideQuitBtn();stopBGM();scDuel.classList.add('hidden');scDuelResult.classList.remove('hidden');const entry={streak:D.streak,level:D.level,diff:D.diff,lang:D.lang,ts:Date.now()};const{rank,list}=addDuelScore(entry);checkAchievements({duelStreak:D.streak,diff:D.diff,lang:D.lang});addDailyProgress('plays',1);document.getElementById('duel-result-title').textContent=D.streak===0?'GAME OVER':`${D.streak} WIN STREAK!`;document.getElementById('duel-result-streak').textContent=D.streak>0?`🔥 ${D.streak} 連勝`:'😵 0勝…';const md=['🥇','🥈','🥉'];document.getElementById('duel-result-detail').innerHTML=`${rank<=3?md[rank-1]+' '+rank+'位！<br>':''}DIFFICULTY: ${D.diff.toUpperCase()} LEVEL: ${D.level}`;renderDuelRanking(list,entry);}
 document.getElementById('duel-btn-retry').addEventListener('click',()=>{scDuelResult.classList.add('hidden');startDuel();});
 document.getElementById('duel-btn-title').addEventListener('click',()=>{scDuelResult.classList.add('hidden');scTitle.classList.remove('hidden');renderTitleRanking();});
 
@@ -3719,6 +3983,10 @@ function showPracComplete(){
 
   document.getElementById('prac-complete').classList.remove('hidden');
   sfxLevelUp();
+  incPracStat('typingClears');
+  checkAchievements({});
+  addDailyProgress('plays', 1);
+  addDailyProgress('keys', P.hit);
 }
 
 // ── PRACTICE 開始 ──
@@ -3772,35 +4040,32 @@ function updateFlameEffect(combo) {
   if (!_flameActive || lv !== _flameLevel) {
     _flameLevel  = lv;
     _flameActive = true;
-    buildFlameColumns(flL, lv);
-    buildFlameColumns(flR, lv);
+    buildFlameColumn(flL, lv);
+    buildFlameColumn(flR, lv);
     flL.classList.add('active');
     flR.classList.add('active');
   }
 }
 
-function buildFlameColumns(container, lv) {
+function buildFlameColumn(container, lv) {
   container.innerHTML = '';
-  // 縦に高く伸ばすのではなく、コンボレベルが上がるほど「横に列」を増やす
-  const cols    = lv === 3 ? 3 : lv === 2 ? 2 : 1;
-  const perCol  = lv === 3 ? 6 : lv === 2 ? 6 : 5;
+  const col = document.createElement('div');
+  col.className = 'flame-col';
+  // レベルに応じた高さ・密度
+  const count = lv === 3 ? 14 : lv === 2 ? 10 : 7;
   const lvClass = `flame-lv${lv}`;
-  for (let c = 0; c < cols; c++) {
-    const col = document.createElement('div');
-    col.className = 'flame-col';
-    for (let i = 0; i < perCol; i++) {
-      const p = document.createElement('div');
-      p.className = `flame-particle ${lvClass}`;
-      // 下ほど大きく・上ほど小さく
-      const scale = 1 - (i / perCol) * 0.5;
-      const spd   = (0.6 + Math.random() * 0.6).toFixed(2);
-      const dly   = (Math.random() * 0.4).toFixed(2);
-      p.style.cssText = `--spd:${spd}s;--dly:${dly}s;transform:scale(${scale.toFixed(2)});`;
-      p.textContent = lv === 3 ? '🌋' : '🔥';
-      col.appendChild(p);
-    }
-    container.appendChild(col);
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = `flame-particle ${lvClass}`;
+    // 下ほど大きく・上ほど小さく
+    const scale = 1 - (i / count) * 0.5;
+    const spd   = (0.6 + Math.random() * 0.6).toFixed(2);
+    const dly   = (Math.random() * 0.4).toFixed(2);
+    p.style.cssText = `--spd:${spd}s;--dly:${dly}s;transform:scale(${scale.toFixed(2)});`;
+    p.textContent = lv === 3 ? '🌋' : '🔥';
+    col.appendChild(p);
   }
+  container.appendChild(col);
 }
 
 function resetFlame() {
@@ -3935,6 +4200,7 @@ function renderTitleRanking() {
       <span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} LV${e.level} ${e.acc||0}%</span>
     </div>`;
   }).join('');
+  renderDailyGoal();
 }
 
 
@@ -4000,6 +4266,331 @@ function loadStats() {
 function saveStats(st) {
   try { localStorage.setItem(LS_STATS_KEY, JSON.stringify(st)); } catch(e) {}
 }
+
+// ════════════════════════════════════════
+//  🏆 実績バッジ機能
+// ════════════════════════════════════════
+const LS_ACH_KEY = 'gunman_ach_v1';
+
+// ── 練習モード累計クリア回数（バッジ判定用）──
+const LS_PRAC_KEY = 'gunman_prac_stats_v1';
+function loadPracStats(){
+  try{ return Object.assign({typingClears:0,sentenceClears:0,kbStepClears:0}, JSON.parse(localStorage.getItem(LS_PRAC_KEY))||{}); }
+  catch(e){ return {typingClears:0,sentenceClears:0,kbStepClears:0}; }
+}
+function savePracStats(p){
+  try{ localStorage.setItem(LS_PRAC_KEY, JSON.stringify(p)); }catch(e){}
+}
+function incPracStat(key){
+  const p = loadPracStats();
+  p[key] = (p[key]||0) + 1;
+  savePracStats(p);
+  return p;
+}
+
+// ════════════════════════════════════════
+//  🎯 今日の目標（デイリーミニゴール）
+// ════════════════════════════════════════
+const LS_DAILY_KEY = 'gunman_daily_v1';
+
+// 日替わりで選ばれる目標候補（タイプと達成数）
+const DAILY_GOAL_POOL = [
+  {type:'keys',  icon:'⌨️', label:'打鍵数',   target:300, unit:'打鍵'},
+  {type:'keys',  icon:'⌨️', label:'打鍵数',   target:500, unit:'打鍵'},
+  {type:'keys',  icon:'🔥', label:'打鍵数',   target:800, unit:'打鍵'},
+  {type:'plays', icon:'🤠', label:'プレイ回数', target:2,  unit:'回'},
+  {type:'plays', icon:'🎯', label:'プレイ回数', target:3,  unit:'回'},
+];
+
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function dayOfYear(d){
+  const start = new Date(d.getFullYear(),0,0);
+  return Math.floor((d - start) / 86400000);
+}
+
+// 今日の目標を取得（日付が変わっていれば新しい目標を生成）
+function ensureDailyGoal(){
+  let st;
+  try{ st = JSON.parse(localStorage.getItem(LS_DAILY_KEY)); }catch(e){ st = null; }
+  const today = todayStr();
+  if(!st || st.date !== today){
+    const idx = dayOfYear(new Date()) % DAILY_GOAL_POOL.length;
+    const goal = DAILY_GOAL_POOL[idx];
+    st = { date: today, type: goal.type, icon: goal.icon, label: goal.label,
+           target: goal.target, unit: goal.unit, progress: 0, claimed: false };
+    try{ localStorage.setItem(LS_DAILY_KEY, JSON.stringify(st)); }catch(e){}
+  }
+  return st;
+}
+
+// 進捗を加算する（type一致時のみ）
+function addDailyProgress(type, amount){
+  if(!amount) return;
+  const st = ensureDailyGoal();
+  if(st.type !== type) return;
+  const wasDone = st.progress >= st.target;
+  st.progress += amount;
+  try{ localStorage.setItem(LS_DAILY_KEY, JSON.stringify(st)); }catch(e){}
+  if(!wasDone && st.progress >= st.target){
+    onDailyGoalAchieved();
+  }
+  renderDailyGoal();
+}
+
+function onDailyGoalAchieved(){
+  // 累計達成回数を加算してバッジ判定にも使う
+  const p = loadPracStats();
+  p.dailyGoalsCompleted = (p.dailyGoalsCompleted||0) + 1;
+  savePracStats(p);
+  queueAchToasts([{icon:'🎉',name:'今日の目標達成！',desc:'また明日もチャレンジしよう'}]);
+  checkAchievements({});
+}
+
+function renderDailyGoal(){
+  const st = ensureDailyGoal();
+  const box  = document.getElementById('daily-goal-box');
+  if(!box) return;
+  const pct  = Math.min(100, Math.round(st.progress/st.target*100));
+  const done = st.progress >= st.target;
+  document.getElementById('daily-goal-icon').textContent = st.icon;
+  document.getElementById('daily-goal-desc').textContent =
+    done ? `${st.label} ${st.target}${st.unit} 達成！おめでとう！`
+         : `${st.label}を${st.target}${st.unit}！（${Math.min(st.progress,st.target)} / ${st.target}）`;
+  document.getElementById('daily-goal-bar-inner').style.width = pct + '%';
+  box.classList.toggle('done', done);
+}
+
+const ACHIEVEMENTS = [
+  {id:'score_1000',  icon:'🥉', name:'駆け出しガンマン',     desc:'1ゲームで1,000点以上を獲得する',          check:c=>c.score>=1000},
+  {id:'score_10000', icon:'🥈', name:'凄腕ガンマン',         desc:'1ゲームで10,000点以上を獲得する',         check:c=>c.score>=10000},
+  {id:'score_50000', icon:'🥇', name:'伝説のガンマン',       desc:'1ゲームで50,000点以上を獲得する',         check:c=>c.score>=50000},
+  {id:'score_100000',icon:'👑', name:'ゴーストタウンの覇者', desc:'1ゲームで100,000点以上を獲得する',        check:c=>c.score>=100000},
+  {id:'score_200000',icon:'☀️', name:'西部の太陽',           desc:'1ゲームで200,000点以上を獲得する',        check:c=>c.score>=200000},
+
+  {id:'combo_5',     icon:'🔥', name:'コンボ入門',           desc:'5コンボを達成する',                       check:c=>c.bestCombo>=5},
+  {id:'combo_10',    icon:'🔥', name:'連続射撃',             desc:'10コンボを達成する',                      check:c=>c.bestCombo>=10},
+  {id:'combo_20',    icon:'💥', name:'弾丸ライダー',         desc:'20コンボを達成する',                      check:c=>c.bestCombo>=20},
+  {id:'combo_30',    icon:'⚡', name:'マシンガンフィンガー', desc:'30コンボを達成する',                      check:c=>c.bestCombo>=30},
+
+  {id:'acc_95',      icon:'🎯', name:'凄腕の狙撃手',         desc:'20発以上撃って正確率95%以上でクリアする', check:c=>c.acc!=null&&c.shots>=20&&c.acc>=95},
+
+  {id:'plays_1',     icon:'🤠', name:'初陣',                 desc:'初めてゲームをプレイする',                check:c=>c.totalPlays>=1},
+  {id:'plays_10',    icon:'🤠', name:'常連ガンマン',         desc:'累計10プレイする',                        check:c=>c.totalPlays>=10},
+  {id:'plays_50',    icon:'🌵', name:'西部の住人',           desc:'累計50プレイする',                        check:c=>c.totalPlays>=50},
+  {id:'plays_100',   icon:'🏜️', name:'ガンスリンガーの魂',   desc:'累計100プレイする',                       check:c=>c.totalPlays>=100},
+
+  {id:'keys_1000',   icon:'⌨️', name:'千本ノック',           desc:'累計1,000打鍵する',                       check:c=>c.totalKeys>=1000},
+  {id:'keys_5000',   icon:'⌨️', name:'指慣らし完了',         desc:'累計5,000打鍵する',                       check:c=>c.totalKeys>=5000},
+  {id:'keys_10000',  icon:'🔩', name:'鋼の指',               desc:'累計10,000打鍵する',                      check:c=>c.totalKeys>=10000},
+  {id:'keys_30000',  icon:'🔩', name:'打鍵職人',             desc:'累計30,000打鍵する',                      check:c=>c.totalKeys>=30000},
+  {id:'keys_50000',  icon:'🦾', name:'打鍵の鬼',             desc:'累計50,000打鍵する',                      check:c=>c.totalKeys>=50000},
+  {id:'keys_100000', icon:'🦾', name:'十万打鍵の証',         desc:'累計100,000打鍵する',                     check:c=>c.totalKeys>=100000},
+  {id:'keys_300000', icon:'🏆', name:'打鍵マスター',         desc:'累計300,000打鍵する',                     check:c=>c.totalKeys>=300000},
+  {id:'keys_500000', icon:'👑', name:'伝説の早撃ち指',       desc:'累計500,000打鍵する',                     check:c=>c.totalKeys>=500000},
+
+  {id:'level_10',    icon:'⭐', name:'レベル10到達',         desc:'1ゲームでレベル10に到達する',             check:c=>c.level>=10},
+  {id:'level_20',    icon:'🌟', name:'レベル20到達',         desc:'1ゲームでレベル20に到達する',             check:c=>c.level>=20},
+
+  {id:'duel_win1',   icon:'🤝', name:'決闘の初勝利',         desc:'決闘モードで1勝以上する',                 check:c=>c.duelStreak>=1},
+  {id:'duel_streak3',icon:'🔫', name:'連勝の予感',           desc:'決闘モードで3連勝する',                   check:c=>c.duelStreak>=3},
+  {id:'duel_streak5',icon:'🔫', name:'無敗の番人',           desc:'決闘モードで5連勝する',                   check:c=>c.duelStreak>=5},
+  {id:'duel_streak10',icon:'🏆',name:'決闘王',               desc:'決闘モードで10連勝する',                  check:c=>c.duelStreak>=10},
+  {id:'duel_streak15',icon:'🏆',name:'無双の早撃ち',         desc:'決闘モードで15連勝する',                  check:c=>c.duelStreak>=15},
+  {id:'duel_streak20',icon:'🌟',name:'西部の伝説',           desc:'決闘モードで20連勝する',                  check:c=>c.duelStreak>=20},
+  {id:'duel_streak30',icon:'👑',name:'決闘神話',             desc:'決闘モードで30連勝する',                  check:c=>c.duelStreak>=30},
+
+  {id:'endless_3min', icon:'⏱️', name:'持久力のガンマン',     desc:'エンドレスモードで3分以上生存する',       check:c=>c.endlessSec>=180},
+  {id:'endless_5min', icon:'⏳', name:'不屈の精神',           desc:'エンドレスモードで5分以上生存する',       check:c=>c.endlessSec>=300},
+  {id:'endless_10min',icon:'⏳', name:'荒野の生存者',         desc:'エンドレスモードで10分以上生存する',      check:c=>c.endlessSec>=600},
+  {id:'endless_15min',icon:'🌵', name:'不死身のガンマン',     desc:'エンドレスモードで15分以上生存する',      check:c=>c.endlessSec>=900},
+  {id:'endless_20min',icon:'👑', name:'荒野の王者',           desc:'エンドレスモードで20分以上生存する',      check:c=>c.endlessSec>=1200},
+
+  {id:'prac_typing_1', icon:'📚', name:'練習の第一歩',         desc:'タイピング練習を1回クリアする',           check:c=>c.typingClears>=1},
+  {id:'prac_typing_5', icon:'📚', name:'練習の虫',             desc:'タイピング練習を累計5回クリアする',       check:c=>c.typingClears>=5},
+  {id:'prac_typing_15',icon:'📖', name:'練習マニア',           desc:'タイピング練習を累計15回クリアする',      check:c=>c.typingClears>=15},
+  {id:'prac_typing_30',icon:'🥋', name:'タイピング修行僧',     desc:'タイピング練習を累計30回クリアする',      check:c=>c.typingClears>=30},
+  {id:'prac_typing_50',icon:'🏆', name:'タイピング道場主',     desc:'タイピング練習を累計50回クリアする',      check:c=>c.typingClears>=50},
+
+  {id:'prac_sentence_1', icon:'📝', name:'文章練習デビュー', desc:'文章練習を1回クリアする',                 check:c=>c.sentenceClears>=1},
+  {id:'prac_sentence_10',icon:'✏️', name:'文章マスター',     desc:'文章練習を累計10回クリアする',            check:c=>c.sentenceClears>=10},
+
+  {id:'prac_kb_step1', icon:'⌨️', name:'キーボード練習スタート', desc:'キーボード練習のステップを1つクリアする',     check:c=>c.kbStepClears>=1},
+  {id:'prac_kb_step10',icon:'⌨️', name:'キー配置の達人',         desc:'キーボード練習のステップを累計10回クリアする',check:c=>c.kbStepClears>=10},
+  {id:'prac_kb_all',   icon:'👑', name:'キーボードマスター',     desc:'1回のプレイでキーボード練習の全ステップをクリアする',check:c=>!!c.kbAllCleared},
+
+  {id:'prac_all3',icon:'🌟', name:'練習の達人', desc:'タイピング・文章・キーボードの3つの練習をすべて1回以上クリアする', check:c=>c.typingClears>=1&&c.sentenceClears>=1&&c.kbStepClears>=1},
+
+  {id:'easy_clear',  icon:'🤠', name:'最初の一歩',           desc:'サバイバル・EASYでゲームをクリアする',    check:c=>c.mode==='survival'&&c.diff==='easy'&&c.hit>=1},
+  {id:'normal_clear',icon:'🔫', name:'一人前のガンマン',     desc:'サバイバル・NORMALでゲームをクリアする',  check:c=>c.mode==='survival'&&c.diff==='normal'&&c.hit>=1},
+  {id:'hard_clear',  icon:'💀', name:'修羅の道',             desc:'サバイバル・HARDでゲームをクリアする',    check:c=>c.mode==='survival'&&c.diff==='hard'&&c.hit>=1},
+  {id:'jp_easy_clear',icon:'🎌', name:'はじめての和風ガンマン',desc:'サバイバル・日本語EASYでゲームをクリアする',check:c=>c.mode==='survival'&&c.diff==='easy'&&c.lang==='jp'&&c.hit>=1},
+  {id:'jp_normal_clear',icon:'🏯',name:'和風の腕利き',         desc:'サバイバル・日本語NORMALでゲームをクリアする',check:c=>c.mode==='survival'&&c.diff==='normal'&&c.lang==='jp'&&c.hit>=1},
+  {id:'jp_hard_clear',icon:'🇯🇵',name:'侍ガンマン',          desc:'サバイバル・日本語HARDでゲームをクリアする',check:c=>c.mode==='survival'&&c.diff==='hard'&&c.lang==='jp'&&c.hit>=1},
+
+  {id:'daily_goal_1', icon:'🗓️', name:'今日の目標、達成！',   desc:'今日の目標を初めて達成する',              check:c=>c.dailyGoalsCompleted>=1},
+  {id:'daily_goal_10',icon:'📅', name:'コツコツガンマン',     desc:'今日の目標を累計10回達成する',            check:c=>c.dailyGoalsCompleted>=10},
+  {id:'daily_goal_30',icon:'🌅', name:'皆勤賞ガンマン',       desc:'今日の目標を累計30回達成する',            check:c=>c.dailyGoalsCompleted>=30},
+
+  {id:'completionist',icon:'🏅', name:'パーフェクトガンマン', desc:'他のすべての実績バッジを解除する',        check:c=>false, special:true},
+
+];
+
+function loadUnlockedAch(){
+  try{ return new Set(JSON.parse(localStorage.getItem(LS_ACH_KEY))||[]); }
+  catch(e){ return new Set(); }
+}
+function saveUnlockedAch(set){
+  try{ localStorage.setItem(LS_ACH_KEY, JSON.stringify([...set])); }catch(e){}
+}
+
+// ctx: {score,hit,miss,acc,wpm,level,diff,lang,duelStreak,endlessSec}
+function checkAchievements(ctx){
+  const stats = loadStats();
+  const prac  = loadPracStats();
+  const full = Object.assign({
+    bestCombo: stats.bestCombo||0,
+    bestWPM:   stats.bestWPM||0,
+    totalPlays:stats.totalPlays||0,
+    totalKeys: stats.totalKeys||0,
+    score:0, acc:null, hit:0, miss:0, level:0, diff:'', lang:'', mode:'',
+    duelStreak:0, endlessSec:0,
+    typingClears:  prac.typingClears||0,
+    sentenceClears:prac.sentenceClears||0,
+    kbStepClears:  prac.kbStepClears||0,
+    kbAllCleared:  false,
+    dailyGoalsCompleted: prac.dailyGoalsCompleted||0,
+  }, ctx||{});
+  full.shots = (full.hit||0) + (full.miss||0);
+
+  const unlocked = loadUnlockedAch();
+  const newly = [];
+  ACHIEVEMENTS.forEach(a=>{
+    if(unlocked.has(a.id)) return;
+    if(a.special) return; // 通常チェックの対象外（後段で個別判定）
+    try{ if(a.check(full)){ unlocked.add(a.id); newly.push(a); } }catch(e){}
+  });
+  // 🏅 レア称号：他の全バッジを解除したら最後に解除される特別バッジ
+  const completionist = ACHIEVEMENTS.find(a=>a.id==='completionist');
+  if(completionist && !unlocked.has('completionist')){
+    const othersTotal = ACHIEVEMENTS.length - 1;
+    if(unlocked.size >= othersTotal){
+      unlocked.add('completionist');
+      newly.push(completionist);
+    }
+  }
+  if(newly.length){
+    saveUnlockedAch(unlocked);
+    queueAchToasts(newly);
+  }
+  return newly;
+}
+
+// ── トースト通知 ──
+let achToastQueue = [];
+let achToastShowing = false;
+function queueAchToasts(list){
+  achToastQueue.push(...list);
+  processAchToastQueue();
+}
+function processAchToastQueue(){
+  if(achToastShowing || !achToastQueue.length) return;
+  const toastEl = document.getElementById('ach-toast');
+  if(!toastEl) return;
+  achToastShowing = true;
+  const a = achToastQueue.shift();
+  toastEl.innerHTML =
+    `<div class="ach-toast-icon">${a.icon}</div>`+
+    `<div><div class="ach-toast-label">🎉 やったね！実績解除 🎉</div>`+
+    `<div class="ach-toast-name">${a.name}</div>`+
+    `<div class="ach-toast-desc">${a.desc}</div></div>`;
+  toastEl.classList.remove('hidden');
+  void toastEl.offsetWidth;
+  toastEl.classList.add('show');
+  spawnAchConfetti();
+  try{ sfxLevelUp(); }catch(e){}
+  setTimeout(()=>{
+    toastEl.classList.remove('show');
+    setTimeout(()=>{
+      toastEl.classList.add('hidden');
+      achToastShowing = false;
+      processAchToastQueue();
+    }, 350);
+  }, 2600);
+}
+
+// ── 実績解除時の紙吹雪演出 ──
+function spawnAchConfetti(){
+  const emojis = ['🎉','⭐','✨','🌟','🎊'];
+  const count = 10;
+  for(let i=0;i<count;i++){
+    const el = document.createElement('div');
+    el.className = 'ach-confetti';
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    const startX = 10 + Math.random()*80; // vw
+    el.style.left = startX + 'vw';
+    const dur = 1.4 + Math.random()*0.8;
+    el.style.animationDuration = dur + 's';
+    el.style.fontSize = (0.9 + Math.random()*0.9) + 'rem';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), dur*1000 + 100);
+  }
+}
+
+// ── 実績画面描画 ──
+function renderAchScreen(){
+  const unlocked = loadUnlockedAch();
+  const grid = document.getElementById('ach-grid');
+  if(!grid) return;
+  grid.innerHTML = ACHIEVEMENTS.map(a=>{
+    const got = unlocked.has(a.id);
+    if(got){
+      return `<div class="ach-card got">`+
+        `<div class="ach-card-icon">${a.icon}</div>`+
+        `<div class="ach-card-name">${a.name}</div>`+
+        `<div class="ach-card-desc">${a.desc}</div>`+
+        `</div>`;
+    }
+    return `<div class="ach-card locked" data-id="${a.id}">`+
+      `<div class="ach-card-icon">❔</div>`+
+      `<div class="ach-card-name">？？？？？</div>`+
+      `<div class="ach-card-desc-prompt">未解除の実績です</div>`+
+      `<div class="ach-card-desc-hint">${a.desc}</div>`+
+      `<button type="button" class="ach-hint-btn">💡 ヒント</button>`+
+      `</div>`;
+  }).join('');
+  const pct = Math.round(unlocked.size/ACHIEVEMENTS.length*100);
+  document.getElementById('ach-progress-fill').style.width = pct+'%';
+  document.getElementById('ach-progress').textContent = `${unlocked.size} / ${ACHIEVEMENTS.length} 解除`;
+}
+
+// ── ヒントボタン（イベント委譲）──
+(function(){
+  const grid = document.getElementById('ach-grid');
+  if(!grid) return;
+  grid.addEventListener('click', e=>{
+    const btn = e.target.closest('.ach-hint-btn');
+    if(!btn) return;
+    const card = btn.closest('.ach-card');
+    if(!card) return;
+    card.classList.toggle('hint-shown');
+    btn.textContent = card.classList.contains('hint-shown') ? '💡 とじる' : '💡 ヒント';
+  });
+})();
+
+const scAch = document.getElementById('screen-achievements');
+document.getElementById('btn-achievements').addEventListener('click', ()=>{
+  scTitle.classList.add('hidden');
+  scAch.classList.remove('hidden');
+  renderAchScreen();
+});
+document.getElementById('ach-btn-close').addEventListener('click', ()=>{
+  scAch.classList.add('hidden');
+  scTitle.classList.remove('hidden');
+});
+// ════════════════════════════════════════
 
 function updateStats(gameResult) {
   const st = loadStats();
@@ -4345,11 +4936,11 @@ const TA_WORDS_JP = {
   ],
   hard: [
     {k:'しんかんせん',r:'SINKANSEN'},{k:'かくめいてき',r:'KAKUMEITEKI'},
-    {k:'でんこうせっか',r:'DENKOUSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
+    {k:'でんこうせっか',r:'DENKOSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
     {k:'さんかくけい',r:'SANKAKUKEI'},{k:'おんがくしつ',r:'ONGAKUSITU'},
     {k:'としょかん',r:'TOSYOKAN'},{k:'はくぶつかん',r:'HAKUBUTSUKAN'},
-    {k:'びじゅつかん',r:'BIZYUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
-    {k:'やきゅうじょう',r:'YAKYUUZYOU'},{k:'かんらんしゃ',r:'KANRANSYA'},
+    {k:'びじゅつかん',r:'BIZUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
+    {k:'やきゅうじょう',r:'YAKYUUZYO'},{k:'かんらんしゃ',r:'KANRANSYA'},
     {k:'ゆうえんち',r:'YUUENTI'},{k:'しんりがく',r:'SINRIGAKU'},
     {k:'にほんごにゅうりょく',r:'NIHONGONYUURYOKU'},
     {k:'けんきゅうしつ',r:'KENKYUUSITU'},{k:'さんすうのもんだい',r:'SANSUUNOMONDAI'},
@@ -4569,6 +5160,9 @@ function finishTimeAttack(){
   showNameModal(0, (playerName)=>{
     const entry={timeMs,name:playerName,diff:TA.diff,lang:TA.lang,acc,miss:TA.miss,ts:Date.now()};
     const{rank,list}=addTAScore(entry);
+    checkAchievements({hit:TA.hit,miss:TA.miss,acc,diff:TA.diff,lang:TA.lang});
+    addDailyProgress('keys', TA.hit+TA.miss);
+    addDailyProgress('plays', 1);
 
     document.getElementById('ta-result-title').textContent='⚡ CLEAR!';
     document.getElementById('ta-result-time').textContent=sec+'s';
@@ -4788,7 +5382,7 @@ function spawnBoss() {
   lane.appendChild(el);
 
   const t = {
-    id: BOSS.targetId, word, typed: '', kana, el,
+    id: BOSS.targetId, word, typed: '', el,
     advanceMs, startTime: Date.now(), expired: false,
     laneX, laneIdx: 2, baseH, baseW,
     isBoss: true,
@@ -4875,8 +5469,6 @@ onWordComplete = function(t) {
       t.word  = entry.word;
       t.typed = '';
       const kana = entry.kana || null;
-      t.kana = kana;
-      t._confirmedKana = 0;
 
       const wEl = t.el.querySelector('.target-word');
       if(wEl) wEl.innerHTML = `<span class="typed"></span><span class="cursor"></span><span class="remain">${t.word}</span>`;
@@ -5021,10 +5613,6 @@ const ROMA_VARIANTS = {
   'ZYA':'JA',  'JA':'ZYA',
   'ZYU':'JU',  'JU':'ZYU',
   'ZYO':'JO',  'JO':'ZYO',
-  'ZYE':'JE',  'JE':'ZYE',
-  // ち行・し行 拗音(エ段)
-  'TYE':'CHE', 'CHE':'TYE',
-  'SYE':'SHE', 'SHE':'SYE',
   // ん
   'NN':'N',  // NN → N (文末)
   // っ
@@ -5065,13 +5653,6 @@ const KANA_TO_ROMAS = {
 // 別表記も含めてチェックし、マッチすれば正解のローマ字に変換して返す
 // 返り値: { ok: bool, newWord: string, newTyped: string } | null
 function checkRomaVariant(word, typed, ch){
-  // 長音入力「-」: 次に期待される文字が母音(A/I/U/E/O)なら、その母音を打ったものとして扱う
-  // （ジェットコースター等のローマ字内「ー」を一般的なハイフン長音入力でも打てるようにする）
-  if(ch === '-'){
-    const nextCh = word[typed.length];
-    if(nextCh && 'AIUEO'.includes(nextCh)) ch = nextCh;
-  }
-
   // まず標準チェック
   if(word[typed.length] === ch){
     return { ok: true, word, typed: typed + ch };
@@ -5119,22 +5700,6 @@ function showGameClear(diff){
   lane.innerHTML=''; G.activeTargets=[];
   resetFlame(); resetBoss(); stopBGM(); hideQuitBtn();
 
-  // 統計
-  const total = G.shotsHit+G.shotsMissed;
-  const acc   = total>0?Math.round(G.shotsHit/total*100):100;
-  const elapsed = Math.floor((Date.now()-(G.surviveStart||Date.now()))/1000);
-  const m = Math.floor(elapsed/60), s = elapsed%60;
-  const finalWPM = getCurrentWPM();
-
-  // ★ ラスボス撃破クリア時もランキングへスコアを登録（以前は未登録だったバグを修正）
-  showNameModal(G.score, (playerName) => {
-    const entry = {score:G.score, level:G.level, acc, maxCombo:G.maxCombo,
-                   diff:G.diff, lang:G.lang, name:playerName, wpm:finalWPM, ts:Date.now()};
-    addScoreWithName(entry);
-    renderClearScreen();
-  });
-
-  function renderClearScreen(){
   // ファンファーレ
   try{
     const c=getACtx(), t=c.currentTime;
@@ -5148,6 +5713,11 @@ function showGameClear(diff){
     });
   }catch(e){}
 
+  // 統計
+  const total = G.shotsHit+G.shotsMissed;
+  const acc   = total>0?Math.round(G.shotsHit/total*100):100;
+  const elapsed = Math.floor((Date.now()-(G.surviveStart||Date.now()))/1000);
+  const m = Math.floor(elapsed/60), s = elapsed%60;
   // タイトル2（難易度表示）
   const t2=document.getElementById('clear-title2');
   if(t2) t2.textContent = diff==='normal' ? '— NORMAL MODE CLEAR! —' : '— EASY MODE CLEAR! —';
@@ -5186,7 +5756,6 @@ function showGameClear(diff){
   },3000);
 
   document.getElementById('screen-clear').classList.remove('hidden');
-  }
 }
 
 document.getElementById('clear-btn-retry').addEventListener('click',()=>{
@@ -5489,6 +6058,10 @@ function showSentComplete(){
   document.getElementById('sent-progress-fill').style.width='100%';
   document.getElementById('sent-complete').classList.remove('hidden');
   sfxLevelUp();
+  incPracStat('sentenceClears');
+  checkAchievements({});
+  addDailyProgress('plays', 1);
+  addDailyProgress('keys', SENT.wpmKeys||0);
 
   // 次カテゴリボタン表示制御
   const idx = SENT_CAT_ORDER.indexOf(SENT.cat);
@@ -5846,6 +6419,10 @@ function showKBComplete(){
   document.getElementById('kb-complete').classList.remove('hidden');
   sfxLevelUp();
   buildKBStepBar();
+  incPracStat('kbStepClears');
+  checkAchievements({kbAllCleared: KB.cleared.size >= KB_STEPS.length});
+  addDailyProgress('plays', 1);
+  addDailyProgress('keys', KB.hit);
 }
 
 document.getElementById('kb-btn-retry').addEventListener('click',()=>{
