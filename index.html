@@ -2497,7 +2497,7 @@ const JP_BY_LEVEL=[
    {k:'まつり',r:'MATURI'},{k:'さくら',r:'SAKURA'},{k:'こころ',r:'KOKORO'},
    {k:'ちから',r:'TIKARA'},{k:'ひかり',r:'HIKARI'},{k:'かがみ',r:'KAGAMI'},
    {k:'まもる',r:'MAMORU'},{k:'はやて',r:'HAYATE'},{k:'かすみ',r:'KASUMI'},
-   {k:'のぼる',r:'NOBORU'},{k:'いのち',r:'INOTI'},{k:'たたかい',r:'TATAKAHI'},
+   {k:'のぼる',r:'NOBORU'},{k:'いのち',r:'INOTI'},{k:'たたかい',r:'TATAKAI'},
    {k:'やくそく',r:'YAKUSOKU'},{k:'ともだち',r:'TOMODATI'},{k:'おとこ',r:'OTOKO'},
    {k:'おんな',r:'ONNA'},{k:'こども',r:'KODOMO'},{k:'おとな',r:'OTONA'},
    {k:'がっこう',r:'GAKKOU'},{k:'せんせい',r:'SENSEI'},{k:'しごと',r:'SIGOTO'},
@@ -2517,13 +2517,13 @@ const JP_BY_LEVEL=[
    {k:'かぶきざ',r:'KABUKIZA'},{k:'にほんご',r:'NIHONGO'},{k:'ひらがな',r:'HIRAGANA'}],
   // Lv9+: 長単語・難語
   [{k:'しんかんせん',r:'SINKANSEN'},{k:'かくめいてき',r:'KAKUMEITEKI'},
-   {k:'でんこうせっか',r:'DENKOSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
-   {k:'たつまき',r:'TATUMAKI'},{k:'みなみのかぜ',r:'MINAMIOKAZE'},
+   {k:'でんこうせっか',r:'DENKOUSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
+   {k:'たつまき',r:'TATUMAKI'},{k:'みなみのかぜ',r:'MINAMINOKAZE'},
    {k:'さんかくけい',r:'SANKAKUKEI'},{k:'しかくけい',r:'SIKAKUKEI'},
-   {k:'ほうかごてい',r:'HOUKAGOASOBI'},{k:'おんがくしつ',r:'ONGAKUSITU'},
+   {k:'ほうかごあそび',r:'HOUKAGOASOBI'},{k:'おんがくしつ',r:'ONGAKUSITU'},
    {k:'としょかん',r:'TOSYOKAN'},{k:'はくぶつかん',r:'HAKUBUTSUKAN'},
-   {k:'びじゅつかん',r:'BIZUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
-   {k:'やきゅうじょう',r:'YAKYUUZYO'},{k:'かんらんしゃ',r:'KANRANSYA'},
+   {k:'びじゅつかん',r:'BIZYUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
+   {k:'やきゅうじょう',r:'YAKYUUZYOU'},{k:'かんらんしゃ',r:'KANRANSYA'},
    {k:'ジェットコースター',r:'ZYETTOKOUSUTAA'},{k:'ゆうえんち',r:'YUUENTI'},
    {k:'ほんやくこんにゃく',r:'HONYAKUKONNNYAKU'},{k:'しんりがく',r:'SINRIGAKU'}],
 ];
@@ -2728,7 +2728,7 @@ hiddenInput.addEventListener('input',e=>{const raw=e.data||'';hiddenInput.value=
   if(scKeyboard&&!scKeyboard.classList.contains('hidden')){
     return; // keydownで処理済み
   }
-  const ch=raw.toUpperCase();if(!ch||!/[A-Z]/.test(ch))return;if(D.phase==='typing'){handleDuelChar(ch);return;}if(TA.phase==='playing'){handleTAChar(ch);return;}
+  const ch=raw.toUpperCase();if(!ch||!/[A-Z\-]/.test(ch))return;if(D.phase==='typing'){handleDuelChar(ch);return;}if(TA.phase==='playing'){handleTAChar(ch);return;}
   if(scSent&&!scSent.classList.contains('hidden')&&document.getElementById('sent-complete').classList.contains('hidden'))
     {handleSentChar(ch);return;}
   if(scKeyboard&&!scKeyboard.classList.contains('hidden')&&document.getElementById('kb-complete').classList.contains('hidden'))
@@ -2989,6 +2989,19 @@ function updateKanaProgress(t){
     const out = [], ka = [...kanaStr];
     let kp=0, rp=0;
     while(kp < ka.length){
+      // 促音(っ/ッ)は次の音の子音1文字分だけローマ字を消費（二重子音）
+      if(ka[kp]==='っ' || ka[kp]==='ッ'){
+        let dbl = '';
+        for(const [k2,r2] of KR){
+          if(k2==='ー'||k2==='っ'||k2==='ッ') continue;
+          const kl2 = [...k2].length;
+          if(ka.slice(kp+1,kp+1+kl2).join('') !== k2) continue;
+          dbl = r2[0]; break;
+        }
+        const len = dbl ? 1 : 0;
+        out.push({kana:ka[kp], romaStart:rp, romaEnd:rp+len});
+        rp += len; kp++; continue;
+      }
       let hit = false;
       for(const [k,r] of KR){
         const kl = [...k].length;
@@ -3112,7 +3125,7 @@ function updateDuelKanaProgress(typed,word,kana,kanaEl){
   if(!kanaEl||!kana) return;
   // updateKanaProgressと同じロジックをインライン展開
   const KR=[['きゃ','KYA'],['しゃ','SYA'],['ちゃ','TYA'],['にゃ','NYA'],['ひゃ','HYA'],['みゃ','MYA'],['りゃ','RYA'],['ぎゃ','GYA'],['じゃ','ZYA'],['びゃ','BYA'],['ぴゃ','PYA'],['あ','A'],['い','I'],['う','U'],['え','E'],['お','O'],['か','KA'],['き','KI'],['く','KU'],['け','KE'],['こ','KO'],['さ','SA'],['し','SI'],['す','SU'],['せ','SE'],['そ','SO'],['た','TA'],['ち','TI'],['つ','TSU'],['て','TE'],['と','TO'],['な','NA'],['に','NI'],['ぬ','NU'],['ね','NE'],['の','NO'],['は','HA'],['ひ','HI'],['ふ','HU'],['へ','HE'],['ほ','HO'],['ま','MA'],['み','MI'],['む','MU'],['め','ME'],['も','MO'],['や','YA'],['ゆ','YU'],['よ','YO'],['ら','RA'],['り','RI'],['る','RU'],['れ','RE'],['ろ','RO'],['わ','WA'],['を','WO'],['ん','NN'],['っ','XTU'],['が','GA'],['ぎ','GI'],['ぐ','GU'],['げ','GE'],['ご','GO'],['ざ','ZA'],['じ','ZI'],['ず','ZU'],['ぜ','ZE'],['ぞ','ZO'],['だ','DA'],['ぢ','DI'],['づ','DU'],['で','DE'],['ど','DO'],['ば','BA'],['び','BI'],['ぶ','BU'],['べ','BE'],['ぼ','BO'],['ぱ','PA'],['ぴ','PI'],['ぷ','PU'],['ぺ','PE'],['ぽ','PO'],['ア','A'],['イ','I'],['ウ','U'],['エ','E'],['オ','O'],['カ','KA'],['キ','KI'],['ク','KU'],['ケ','KE'],['コ','KO'],['サ','SA'],['シ','SI'],['ス','SU'],['セ','SE'],['ソ','SO'],['タ','TA'],['チ','TI'],['ツ','TSU'],['テ','TE'],['ト','TO'],['ナ','NA'],['ニ','NI'],['ヌ','NU'],['ネ','NE'],['ノ','NO'],['ハ','HA'],['ヒ','HI'],['フ','HU'],['ヘ','HE'],['ホ','HO'],['マ','MA'],['ミ','MI'],['ム','MU'],['メ','ME'],['モ','MO'],['ヤ','YA'],['ユ','YU'],['ヨ','YO'],['ラ','RA'],['リ','RI'],['ル','RU'],['レ','RE'],['ロ','RO'],['ワ','WA'],['ヲ','WO'],['ン','NN'],['ッ','XTU'],['ー','ー']];
-  function seg(ks,rs){const out=[],ka=[...ks];let kp=0,rp=0;while(kp<ka.length){if(ka[kp]==='ー'){const e=Math.min(rp+1,rs.length);out.push({kana:'ー',romaStart:rp,romaEnd:e});rp=e;kp++;continue;}let hit=false;for(const [k,r] of KR){const kl=[...k].length;if(ka.slice(kp,kp+kl).join('')!==k)continue;out.push({kana:k,romaStart:rp,romaEnd:rp+r.length});rp+=r.length;kp+=kl;hit=true;break;}if(!hit){out.push({kana:ka[kp],romaStart:rp,romaEnd:rp});kp++;}}return out;}
+  function seg(ks,rs){const out=[],ka=[...ks];let kp=0,rp=0;while(kp<ka.length){if(ka[kp]==='っ'||ka[kp]==='ッ'){let dbl='';for(const [k2,r2] of KR){if(k2==='ー'||k2==='っ'||k2==='ッ')continue;const kl2=[...k2].length;if(ka.slice(kp+1,kp+1+kl2).join('')!==k2)continue;dbl=r2[0];break;}const len=dbl?1:0;out.push({kana:ka[kp],romaStart:rp,romaEnd:rp+len});rp+=len;kp++;continue;}if(ka[kp]==='ー'){const e=Math.min(rp+1,rs.length);out.push({kana:'ー',romaStart:rp,romaEnd:e});rp=e;kp++;continue;}let hit=false;for(const [k,r] of KR){const kl=[...k].length;if(ka.slice(kp,kp+kl).join('')!==k)continue;out.push({kana:k,romaStart:rp,romaEnd:rp+r.length});rp+=r.length;kp+=kl;hit=true;break;}if(!hit){out.push({kana:ka[kp],romaStart:rp,romaEnd:rp});kp++;}}return out;}
   const tl=typed.length,segs=seg(kana,word);
   let html='';
   segs.forEach(({kana:ch,romaStart,romaEnd})=>{
@@ -4274,11 +4287,11 @@ const TA_WORDS_JP = {
   ],
   hard: [
     {k:'しんかんせん',r:'SINKANSEN'},{k:'かくめいてき',r:'KAKUMEITEKI'},
-    {k:'でんこうせっか',r:'DENKOSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
+    {k:'でんこうせっか',r:'DENKOUSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
     {k:'さんかくけい',r:'SANKAKUKEI'},{k:'おんがくしつ',r:'ONGAKUSITU'},
     {k:'としょかん',r:'TOSYOKAN'},{k:'はくぶつかん',r:'HAKUBUTSUKAN'},
-    {k:'びじゅつかん',r:'BIZUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
-    {k:'やきゅうじょう',r:'YAKYUUZYO'},{k:'かんらんしゃ',r:'KANRANSYA'},
+    {k:'びじゅつかん',r:'BIZYUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
+    {k:'やきゅうじょう',r:'YAKYUUZYOU'},{k:'かんらんしゃ',r:'KANRANSYA'},
     {k:'ゆうえんち',r:'YUUENTI'},{k:'しんりがく',r:'SINRIGAKU'},
     {k:'にほんごにゅうりょく',r:'NIHONGONYUURYOKU'},
     {k:'けんきゅうしつ',r:'KENKYUUSITU'},{k:'さんすうのもんだい',r:'SANSUUNOMONDAI'},
@@ -4948,6 +4961,10 @@ const ROMA_VARIANTS = {
   'ZYA':'JA',  'JA':'ZYA',
   'ZYU':'JU',  'JU':'ZYU',
   'ZYO':'JO',  'JO':'ZYO',
+  'ZYE':'JE',  'JE':'ZYE',
+  // ち行・し行 拗音(エ段)
+  'TYE':'CHE', 'CHE':'TYE',
+  'SYE':'SHE', 'SHE':'SYE',
   // ん
   'NN':'N',  // NN → N (文末)
   // っ
@@ -4988,6 +5005,13 @@ const KANA_TO_ROMAS = {
 // 別表記も含めてチェックし、マッチすれば正解のローマ字に変換して返す
 // 返り値: { ok: bool, newWord: string, newTyped: string } | null
 function checkRomaVariant(word, typed, ch){
+  // 長音入力「-」: 次に期待される文字が母音(A/I/U/E/O)なら、その母音を打ったものとして扱う
+  // （ジェットコースター等のローマ字内「ー」を一般的なハイフン長音入力でも打てるようにする）
+  if(ch === '-'){
+    const nextCh = word[typed.length];
+    if(nextCh && 'AIUEO'.includes(nextCh)) ch = nextCh;
+  }
+
   // まず標準チェック
   if(word[typed.length] === ch){
     return { ok: true, word, typed: typed + ch };
