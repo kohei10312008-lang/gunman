@@ -2139,6 +2139,34 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 </div>
 
           </div>
+        </div>
+
+        <div class="m-section">
+          <div class="m-section-title">🔀 ゆらぎ文字（表記ゆれ）対応</div>
+          <p style="font-size:0.78rem;color:#c0a070;line-height:1.7;margin-bottom:8px;">
+            日本語モードでは、下記の文字は<span class="m-hl">どちらの綴りで打ってもOK</span>です。<br>
+            自分の慣れている方で入力できます。
+          </p>
+          <div class="m-roma-table m-roma-table-3">
+            <div class="m-roma-head">し</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SI</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SHI</span></div>
+            <div class="m-roma-head">ち</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TI</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">CHI</span></div>
+            <div class="m-roma-head">つ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TSU</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TU</span></div>
+            <div class="m-roma-head">ふ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">HU</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">FU</span></div>
+            <div class="m-roma-head">じ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">ZI</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">JI</span></div>
+            <div class="m-roma-head">しゃ行</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SYA</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SHA</span></div>
+            <div class="m-roma-head">ちゃ行</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TYA</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">CHA</span></div>
+            <div class="m-roma-head">じゃ行</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">ZYA</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">JA</span></div>
+            <div class="m-roma-head">じぇ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">ZYE</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">JE</span></div>
+            <div class="m-roma-head">ちぇ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TYE</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">CHE</span></div>
+            <div class="m-roma-head">しぇ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SYE</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SHE</span></div>
+            <div class="m-roma-head">ん</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">NN</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">N</span></div>
+            <div class="m-roma-head">っ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">XTU</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">LTU</span></div>
+          </div>
+          <p style="font-size:0.78rem;color:#c0a070;line-height:1.7;margin:12px 0 4px;">
+            <span class="m-hl">長音「ー」</span>は、<span class="m-hl">ハイフン「-」キー</span>で打つこともできます。<br>
+            （例：「ジェットコースター」→ <span class="m-hl">jetto-suta-</span> でもOK／母音を繰り返す通常の打ち方でもOK）
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -2688,8 +2716,8 @@ function rafLoop(){if(G.phase!=='playing')return;const now=Date.now();const W=la
   const sc=0.45+(1.0-0.45)*Math.pow(pct,1.4);
   // 横位置: レーン中心
   const cx=(t.laneX/100)*W;
-  // 縦位置: 奥(top 38%)→手前(top 78%) ＝ 画面中央〜下に配置
-  const topPct=0.38+(0.78-0.38)*pct;
+  // 縦位置: 奥(top 28%)→手前(top 64%・太陽あたり) ＝ 炎エフェクト(下部24%)と重ならないよう全体を上げる
+  const topPct=0.28+(0.64-0.28)*pct;
   const ty=H*topPct;
   t.el.style.left=(cx-t.baseW*sc*0.5)+'px';
   t.el.style.top=(ty-t.baseH*sc)+'px';
