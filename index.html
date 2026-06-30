@@ -4788,7 +4788,7 @@ function spawnBoss() {
   lane.appendChild(el);
 
   const t = {
-    id: BOSS.targetId, word, typed: '', el,
+    id: BOSS.targetId, word, typed: '', kana, el,
     advanceMs, startTime: Date.now(), expired: false,
     laneX, laneIdx: 2, baseH, baseW,
     isBoss: true,
@@ -4875,6 +4875,8 @@ onWordComplete = function(t) {
       t.word  = entry.word;
       t.typed = '';
       const kana = entry.kana || null;
+      t.kana = kana;
+      t._confirmedKana = 0;
 
       const wEl = t.el.querySelector('.target-word');
       if(wEl) wEl.innerHTML = `<span class="typed"></span><span class="cursor"></span><span class="remain">${t.word}</span>`;
