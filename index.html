@@ -510,31 +510,32 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 /* ════════════════════════════
    PHASE 3: 炎エフェクト・ACC
 ════════════════════════════ */
-/* 画面端の炎コンテナ */
+/* 画面端の炎コンテナ（縦に伸ばさず、コンボが上がるほど横に列を増やす） */
 #flame-left, #flame-right {
   position: fixed;
   bottom: 0;
-  width: 90px;
-  height: 60vh;
+  width: auto;
+  max-width: 46vw;
+  height: 24vh;
   z-index: 90;
   pointer-events: none;
   display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
-  gap: 0;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 3px;
   opacity: 0;
   transition: opacity 0.6s ease;
 }
-#flame-left  { left: 0; }
-#flame-right { right: 0; transform: scaleX(-1); }
+#flame-left  { left: 0; justify-content: flex-start; }
+#flame-right { right: 0; justify-content: flex-start; transform: scaleX(-1); }
 #flame-left.active, #flame-right.active { opacity: 1; }
 
-/* 炎パーティクル */
+/* 炎パーティクル（1列分） */
 .flame-col {
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
-  width: 100%;
+  width: 42px;
 }
 @keyframes flameDance {
   0%,100% { transform: scaleX(1) translateY(0) rotate(-2deg); opacity: 0.9; }
@@ -559,13 +560,13 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 .flame-lv3 { filter: drop-shadow(0 0 14px rgba(255,0,0,1));    font-size: 3rem; }
 
 /* ACC表示 */
+/* ACC表示（中央下から左上・HPバーの下へ移動し、視認性を上げて大きく） */
 #acc-display {
   position: absolute;
-  bottom: calc(27% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+  top: 96px;
+  left: 14px;
   font-family: 'Courier Prime', monospace;
-  font-size: 0.78rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 2px;
   color: var(--smoke);
@@ -1397,22 +1398,23 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 /* 中断ボタン（全モード共通・HUD右下） */
 #btn-quit-game {
   position: fixed;
-  bottom: 18px;
-  right: 18px;
+  top: 96px;
+  right: 20px;
+  bottom: auto;
   z-index: 350;
   font-family: 'Rye', serif;
-  font-size: 0.68rem;
-  color: rgba(160,128,96,0.6);
-  background: rgba(0,0,0,0.45);
-  border: 1px solid rgba(90,58,16,0.5);
+  font-size: 0.78rem;
+  color: var(--sand);
+  background: rgba(0,0,0,0.7);
+  border: 1.5px solid var(--smoke);
   border-radius: 4px;
-  padding: 5px 10px;
+  padding: 6px 14px;
   cursor: pointer;
   letter-spacing: 1px;
   transition: all 0.2s;
   display: none;
 }
-#btn-quit-game:hover { color: var(--sand); border-color: var(--sand); background: rgba(0,0,0,0.7); }
+#btn-quit-game:hover { color: var(--gold); border-color: var(--gold); background: rgba(0,0,0,0.85); }
 #btn-quit-game.visible { display: block; }
 
 /* 確認ダイアログ */
@@ -2275,6 +2277,8 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
     <button class="prac-cat" data-cat="foods">食べ物<span>EN 食べ物</span></button>
     <button class="prac-cat" data-cat="nature">自然<span>EN 自然語</span></button>
     <button class="prac-cat" data-cat="western">西部劇<span>EN 西部劇語</span></button>
+    <button class="prac-cat" data-cat="school">学校<span>EN 学校語</span></button>
+    <button class="prac-cat" data-cat="space">宇宙<span>EN 宇宙語</span></button>
   </div>
 
   <!-- 1問表示エリア -->
@@ -2570,7 +2574,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
         <div class="m-section">
           <div class="m-section-title">🌐 言語モード</div>
           <div class="m-cards">
-            <div class="m-card"><div class="m-card-title">🔤 ENGLISH</div><p>英単語をアルファベットで入力。Lv1は1文字からスタート。Lv4以降は動物・食べ物・西部劇語もミックス。</p></div>
+            <div class="m-card"><div class="m-card-title">🔤 ENGLISH</div><p>英単語をアルファベットで入力。Lv1は1文字からスタート。Lv4以降は動物・食べ物・自然・西部劇・学校・宇宙語もミックス。</p></div>
             <div class="m-card"><div class="m-card-title">🇯🇵 日本語</div><p>ひらがな表示→<span class="m-hl">ローマ字</span>で入力。<br>Lv10でローマ字が薄く、Lv11+で消える（かなのみモード）。</p></div>
           </div>
         </div>
@@ -2746,6 +2750,33 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   <div class="m-roma-head"></div> <div class="m-roma-item m-roma-dak"><span class="m-hl">ぇ</span><span class="m-roma-r">XE</span></div> <div class="m-roma-item m-roma-dak"><span class="m-hl">ぉ</span><span class="m-roma-r">XO</span></div> <div class="m-roma-item m-roma-empty m-roma-empty"></div>
   <div class="m-roma-head">小拗</div> <div class="m-roma-item m-roma-dak"><span class="m-hl">ゃ</span><span class="m-roma-r">XYA</span></div> <div class="m-roma-item m-roma-dak"><span class="m-hl">ゅ</span><span class="m-roma-r">XYU</span></div> <div class="m-roma-item m-roma-dak"><span class="m-hl">ょ</span><span class="m-roma-r">XYO</span></div>
 </div>
+
+        <div class="m-section">
+          <div class="m-section-title">🔀 ゆらぎ文字（表記ゆれ）対応</div>
+          <p style="font-size:0.78rem;color:#c0a070;line-height:1.7;margin-bottom:8px;">
+            日本語モードでは、下記の文字は<span class="m-hl">どちらの綴りで打ってもOK</span>です。<br>
+            自分の慣れている方で入力できます。
+          </p>
+          <div class="m-roma-table m-roma-table-3">
+            <div class="m-roma-head">し</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SI</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SHI</span></div>
+            <div class="m-roma-head">ち</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TI</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">CHI</span></div>
+            <div class="m-roma-head">つ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TSU</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TU</span></div>
+            <div class="m-roma-head">ふ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">HU</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">FU</span></div>
+            <div class="m-roma-head">じ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">ZI</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">JI</span></div>
+            <div class="m-roma-head">しゃ行</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SYA</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SHA</span></div>
+            <div class="m-roma-head">ちゃ行</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TYA</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">CHA</span></div>
+            <div class="m-roma-head">じゃ行</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">ZYA</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">JA</span></div>
+            <div class="m-roma-head">じぇ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">ZYE</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">JE</span></div>
+            <div class="m-roma-head">ちぇ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">TYE</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">CHE</span></div>
+            <div class="m-roma-head">しぇ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SYE</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">SHE</span></div>
+            <div class="m-roma-head">ん</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">NN</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">N</span></div>
+            <div class="m-roma-head">っ</div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">XTU</span></div> <div class="m-roma-item m-roma-dak"><span class="m-roma-r">LTU</span></div>
+          </div>
+          <p style="font-size:0.78rem;color:#c0a070;line-height:1.7;margin:12px 0 4px;">
+            <span class="m-hl">長音「ー」</span>は、<span class="m-hl">ハイフン「-」キー</span>で打つこともできます。<br>
+            （例：「ジェットコースター」→ <span class="m-hl">jetto-suta-</span> でもOK／母音を繰り返す通常の打ち方でもOK）
+          </p>
+        </div>
 
           </div>
       </div>
@@ -3042,6 +3073,28 @@ const WORD_CATS = {
             'PARDON','POSSE','RODEO','RUSTLER','SADDLE','SALOON','SHERIFF','SILVER','SQUINT','STETSON',
             'STOMP','STRAP','STRAW','STEED','TEXAS','TRAIL','TRAMP','TROVE','TWANG','VARMINT',
             'WAGON','WRATH','YODEL','BANDIT','BOUNTY','BRONCO','CANYON','CATTLE','CORRAL','COWBOY'],
+  school:  ['PEN','BAG','MAP','ART','GYM','LAB','RUG','DUE','JOB','TOY',
+            'DESK','BOOK','QUIZ','TEST','MATH','READ','WORD','FACT','RULE','PLAN',
+            'TEAM','ROOM','HALL','GATE','YARD','CLUB','CODE','EXAM','NOTE','GLUE',
+            'BELL','DOOR','WALL','LINE','PAGE','LIST','MARK',
+            'CHALK','GRADE','CLASS','PAPER','RULER','STUDY','TEACH','LEARN','SCORE','MUSIC',
+            'PENCIL','RECESS','LOCKER','SCHOOL','ANSWER','LESSON','FRIEND','RECORD','NOTICE','CRAYON',
+            'MARKER','FOLDER','POSTER',
+            'LIBRARY','SUBJECT','TEACHER','STUDENT','PROJECT','HALLWAY','HISTORY','SCIENCE','ENGLISH',
+            'HOMEWORK','SEMESTER','ASSEMBLY','BACKPACK','NOTEBOOK',
+            'CAFETERIA','CHEMISTRY','CLASSROOM',
+            'UNIVERSITY','DICTIONARY','GRADUATION'],
+  space:   ['SUN','SKY','GAS','ORB','RAY','ARC','JET','POD','HUB','ION',
+            'MOON','MARS','STAR','VOID','WARP','DUST','BEAM','DISK','HALO','RING',
+            'ZERO','SUIT','DOME','PORT','CREW','DOCK','GATE','FUEL','CORE','SHIP',
+            'VENT','GLOW','MASS','TIME','YEAR','DAWN','BELT',
+            'EARTH','VENUS','PLUTO','SPACE','ORBIT','COMET','LUNAR','SOLAR','ALIEN','ROBOT',
+            'SATURN','URANUS','GALAXY','ROCKET','METEOR','NEBULA','COSMOS','MODULE','HELMET','ENGINE',
+            'VOYAGE','DEBRIS','IMPACT',
+            'MERCURY','JUPITER','CAPSULE','GRAVITY','LANDING','MISSION','STATION','SUNSPOT','HORIZON',
+            'ASTEROID','STARDUST','GALACTIC','ROTATION','MAGNETIC',
+            'ASTRONAUT','SATELLITE','TELESCOPE',
+            'SPACECRAFT','WEIGHTLESS','ATMOSPHERE'],
 };
 function getWordPool(lv){
   // EASYはLv9まで1〜3文字、Lv10以降4文字以上解禁
@@ -3090,7 +3143,7 @@ const JP_BY_LEVEL=[
    {k:'いえ',r:'IE'},{k:'みち',r:'MITI'},{k:'いろ',r:'IRO'},{k:'かお',r:'KAO'},
    {k:'あめ',r:'AME'},{k:'ゆき',r:'YUKI'},{k:'はる',r:'HARU'},{k:'なつ',r:'NATU'},
    {k:'あき',r:'AKI'},{k:'ふゆ',r:'HUYU'},{k:'はな',r:'HANA'},{k:'くさ',r:'KUSA'},
-   {k:'まち',r:'MATI'},{k:'ふね',r:'HUNE'},{k:'くるま',r:'KURUMA'},{k:'でんしゃ',r:'DENSYA'}],
+   {k:'まち',r:'MATI'},{k:'ふね',r:'HUNE'},{k:'くるま',r:'KURUMA'},{k:'でんしゃ',r:'DENSYA'},{k:'たこ',r:'TAKO'},{k:'いか',r:'IKA'},{k:'くち',r:'KUTI'},{k:'はし',r:'HASI'},{k:'みみ',r:'MIMI'},{k:'あし',r:'ASI'},{k:'せき',r:'SEKI'},{k:'いけ',r:'IKE'},{k:'たね',r:'TANE'},{k:'うた',r:'UTA'}],
   // Lv3: 3文字（自然・動物・食べ物）
   [{k:'ほし',r:'HOSI'},{k:'てら',r:'TERA'},{k:'いし',r:'ISI'},{k:'にわ',r:'NIWA'},
    {k:'むし',r:'MUSI'},{k:'かみ',r:'KAMI'},{k:'いわ',r:'IWA'},{k:'たき',r:'TAKI'},
@@ -3101,19 +3154,19 @@ const JP_BY_LEVEL=[
    {k:'いちご',r:'ITIGO'},{k:'ぶどう',r:'BUDOU'},{k:'なし',r:'NASI'},
    {k:'にんじん',r:'NINZIN'},{k:'たまねぎ',r:'TAMANEGI'},{k:'きゅうり',r:'KYUURI'},
    {k:'とまと',r:'TOMATO'},{k:'じゃがいも',r:'ZYAGAIMO'},{k:'かぼちゃ',r:'KABOTYA'},
-   {k:'ほうれん',r:'HOUREN'},{k:'はくさい',r:'HAKUSAI'}],
+   {k:'ほうれん',r:'HOUREN'},{k:'はくさい',r:'HAKUSAI'},{k:'けむり',r:'KEMURI'},{k:'たいこ',r:'TAIKO'},{k:'みなと',r:'MINATO'},{k:'ふくろ',r:'HUKURO'},{k:'たまご',r:'TAMAGO'},{k:'すいか',r:'SUIKA'},{k:'めだか',r:'MEDAKA'},{k:'こおり',r:'KOORI'},{k:'とけい',r:'TOKEI'},{k:'さんぽ',r:'SANPO'}],
   // Lv4-5: 4〜5文字（文化・生活）
   [{k:'かたな',r:'KATANA'},{k:'さむらい',r:'SAMURAI'},{k:'にんじゃ',r:'NINZYA'},
    {k:'まつり',r:'MATURI'},{k:'さくら',r:'SAKURA'},{k:'こころ',r:'KOKORO'},
    {k:'ちから',r:'TIKARA'},{k:'ひかり',r:'HIKARI'},{k:'かがみ',r:'KAGAMI'},
    {k:'まもる',r:'MAMORU'},{k:'はやて',r:'HAYATE'},{k:'かすみ',r:'KASUMI'},
-   {k:'のぼる',r:'NOBORU'},{k:'いのち',r:'INOTI'},{k:'たたかい',r:'TATAKAHI'},
+   {k:'のぼる',r:'NOBORU'},{k:'いのち',r:'INOTI'},{k:'たたかい',r:'TATAKAI'},
    {k:'やくそく',r:'YAKUSOKU'},{k:'ともだち',r:'TOMODATI'},{k:'おとこ',r:'OTOKO'},
    {k:'おんな',r:'ONNA'},{k:'こども',r:'KODOMO'},{k:'おとな',r:'OTONA'},
    {k:'がっこう',r:'GAKKOU'},{k:'せんせい',r:'SENSEI'},{k:'しごと',r:'SIGOTO'},
    {k:'たべもの',r:'TABEMONO'},{k:'のみもの',r:'NOMIMONO'},{k:'あさごはん',r:'ASAGOHAN'},
    {k:'ひるごはん',r:'HIRUGOHAN'},{k:'ばんごはん',r:'BANGOHAN'},{k:'おちゃ',r:'OTYA'},
-   {k:'おかし',r:'OKASI'},{k:'おすし',r:'OSUSI'},{k:'ラーメン',r:'RAAMEN'}],
+   {k:'おかし',r:'OKASI'},{k:'おすし',r:'OSUSI'},{k:'ラーメン',r:'RAAMEN'},{k:'げんかん',r:'GENKAN'},{k:'おべんとう',r:'OBENTOU'},{k:'れいぞうこ',r:'REIZOUKO'},{k:'せんたくき',r:'SENTAKUKI'},{k:'じてんしゃ',r:'ZITENSYA'},{k:'えんぴつ',r:'ENPITSU'},{k:'けしごむ',r:'KESIGOMU'},{k:'らんどせる',r:'RANDOSERU'},{k:'ほいくえん',r:'HOIKUEN'},{k:'すべりだい',r:'SUBERIDAI'}],
   // Lv6-8: 長め（自然・文化・抽象語）
   [{k:'たいよう',r:'TAIYOU'},{k:'かみなり',r:'KAMINARI'},{k:'しぜん',r:'SIZEN'},
    {k:'たびびと',r:'TABIBITO'},{k:'むらさき',r:'MURASAKI'},{k:'うずまき',r:'UZUMAKI'},
@@ -3124,18 +3177,18 @@ const JP_BY_LEVEL=[
    {k:'むずかしい',r:'MUZUKASII'},{k:'やさしい',r:'YASASII'},{k:'たのしい',r:'TANOSII'},
    {k:'さびしい',r:'SABISII'},{k:'あたらしい',r:'ATARASII'},{k:'ふるさと',r:'HURUSATO'},
    {k:'おまつり',r:'OMATURI'},{k:'はなび',r:'HANABI'},{k:'おみこし',r:'OMIKOSI'},
-   {k:'かぶきざ',r:'KABUKIZA'},{k:'にほんご',r:'NIHONGO'},{k:'ひらがな',r:'HIRAGANA'}],
+   {k:'かぶきざ',r:'KABUKIZA'},{k:'にほんご',r:'NIHONGO'},{k:'ひらがな',r:'HIRAGANA'},{k:'つきあかり',r:'TSUKIAKARI'},{k:'ほしぞら',r:'HOSIZORA'},{k:'あまのがわ',r:'AMANOGAWA'},{k:'しゃぼんだま',r:'SYABONDAMA'},{k:'たんぽぽ',r:'TANPOPO'},{k:'かたつむり',r:'KATATSUMURI'},{k:'てんとうむし',r:'TENTOUMUSI'},{k:'かまきり',r:'KAMAKIRI'},{k:'くわがた',r:'KUWAGATA'},{k:'かぶとむし',r:'KABUTOMUSI'}],
   // Lv9+: 長単語・難語
   [{k:'しんかんせん',r:'SINKANSEN'},{k:'かくめいてき',r:'KAKUMEITEKI'},
-   {k:'でんこうせっか',r:'DENKOSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
-   {k:'たつまき',r:'TATUMAKI'},{k:'みなみのかぜ',r:'MINAMIOKAZE'},
+   {k:'でんこうせっか',r:'DENKOUSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
+   {k:'たつまき',r:'TATUMAKI'},{k:'みなみのかぜ',r:'MINAMINOKAZE'},
    {k:'さんかくけい',r:'SANKAKUKEI'},{k:'しかくけい',r:'SIKAKUKEI'},
-   {k:'ほうかごてい',r:'HOUKAGOASOBI'},{k:'おんがくしつ',r:'ONGAKUSITU'},
+   {k:'ほうかごあそび',r:'HOUKAGOASOBI'},{k:'おんがくしつ',r:'ONGAKUSITU'},
    {k:'としょかん',r:'TOSYOKAN'},{k:'はくぶつかん',r:'HAKUBUTSUKAN'},
-   {k:'びじゅつかん',r:'BIZUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
-   {k:'やきゅうじょう',r:'YAKYUUZYO'},{k:'かんらんしゃ',r:'KANRANSYA'},
+   {k:'びじゅつかん',r:'BIZYUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
+   {k:'やきゅうじょう',r:'YAKYUUZYOU'},{k:'かんらんしゃ',r:'KANRANSYA'},
    {k:'ジェットコースター',r:'ZYETTOKOUSUTAA'},{k:'ゆうえんち',r:'YUUENTI'},
-   {k:'ほんやくこんにゃく',r:'HONYAKUKONNNYAKU'},{k:'しんりがく',r:'SINRIGAKU'}],
+   {k:'うんどうかい',r:'UNDOUKAI'},{k:'しんりがく',r:'SINRIGAKU'},{k:'たいいくかん',r:'TAIIKUKAN'},{k:'ほけんしつ',r:'HOKENSITSU'},{k:'しょくいんしつ',r:'SYOKUINSITSU'},{k:'うんどうじょう',r:'UNDOUZYOU'},{k:'すいぞくかん',r:'SUIZOKUKAN'},{k:'どうぶつえん',r:'DOUBUTSUEN'},{k:'しょうぼうしゃ',r:'SYOUBOUSYA'},{k:'きゅうきゅうしゃ',r:'KYUUKYUUSYA'},{k:'ゆうびんきょく',r:'YUUBINKYOKU'}],
 ];
 function getJPPool(lv){
   // EASYはLv9まで1〜2文字、Lv10以降3文字以上解禁
@@ -3272,8 +3325,8 @@ function rafLoop(){if(G.phase!=='playing')return;const now=Date.now();const W=la
   const sc=0.45+(1.0-0.45)*Math.pow(pct,1.4);
   // 横位置: レーン中心
   const cx=(t.laneX/100)*W;
-  // 縦位置: 奥(top 38%)→手前(top 78%) ＝ 画面中央〜下に配置
-  const topPct=0.38+(0.78-0.38)*pct;
+  // 縦位置: 奥(top 28%)→手前(top 64%・太陽あたり) ＝ 炎エフェクト(下部24%)と重ならないよう全体を上げる
+  const topPct=0.28+(0.64-0.28)*pct;
   const ty=H*topPct;
   t.el.style.left=(cx-t.baseW*sc*0.5)+'px';
   t.el.style.top=(ty-t.baseH*sc)+'px';
@@ -3339,7 +3392,7 @@ hiddenInput.addEventListener('input',e=>{const raw=e.data||'';hiddenInput.value=
   if(scKeyboard&&!scKeyboard.classList.contains('hidden')){
     return; // keydownで処理済み
   }
-  const ch=raw.toUpperCase();if(!ch||!/[A-Z]/.test(ch))return;if(D.phase==='typing'){handleDuelChar(ch);return;}if(TA.phase==='playing'){handleTAChar(ch);return;}
+  const ch=raw.toUpperCase();if(!ch||!/[A-Z\-]/.test(ch))return;if(D.phase==='typing'){handleDuelChar(ch);return;}if(TA.phase==='playing'){handleTAChar(ch);return;}
   if(scSent&&!scSent.classList.contains('hidden')&&document.getElementById('sent-complete').classList.contains('hidden'))
     {handleSentChar(ch);return;}
   if(scKeyboard&&!scKeyboard.classList.contains('hidden')&&document.getElementById('kb-complete').classList.contains('hidden'))
@@ -3641,6 +3694,19 @@ function updateKanaProgress(t){
     const out = [], ka = [...kanaStr];
     let kp=0, rp=0;
     while(kp < ka.length){
+      // 促音(っ/ッ)は次の音の子音1文字分だけローマ字を消費（二重子音）
+      if(ka[kp]==='っ' || ka[kp]==='ッ'){
+        let dbl = '';
+        for(const [k2,r2] of KR){
+          if(k2==='ー'||k2==='っ'||k2==='ッ') continue;
+          const kl2 = [...k2].length;
+          if(ka.slice(kp+1,kp+1+kl2).join('') !== k2) continue;
+          dbl = r2[0]; break;
+        }
+        const len = dbl ? 1 : 0;
+        out.push({kana:ka[kp], romaStart:rp, romaEnd:rp+len});
+        rp += len; kp++; continue;
+      }
       let hit = false;
       for(const [k,r] of KR){
         const kl = [...k].length;
@@ -3765,7 +3831,7 @@ function updateDuelKanaProgress(typed,word,kana,kanaEl){
   if(!kanaEl||!kana) return;
   // updateKanaProgressと同じロジックをインライン展開
   const KR=[['きゃ','KYA'],['しゃ','SYA'],['ちゃ','TYA'],['にゃ','NYA'],['ひゃ','HYA'],['みゃ','MYA'],['りゃ','RYA'],['ぎゃ','GYA'],['じゃ','ZYA'],['びゃ','BYA'],['ぴゃ','PYA'],['あ','A'],['い','I'],['う','U'],['え','E'],['お','O'],['か','KA'],['き','KI'],['く','KU'],['け','KE'],['こ','KO'],['さ','SA'],['し','SI'],['す','SU'],['せ','SE'],['そ','SO'],['た','TA'],['ち','TI'],['つ','TSU'],['て','TE'],['と','TO'],['な','NA'],['に','NI'],['ぬ','NU'],['ね','NE'],['の','NO'],['は','HA'],['ひ','HI'],['ふ','HU'],['へ','HE'],['ほ','HO'],['ま','MA'],['み','MI'],['む','MU'],['め','ME'],['も','MO'],['や','YA'],['ゆ','YU'],['よ','YO'],['ら','RA'],['り','RI'],['る','RU'],['れ','RE'],['ろ','RO'],['わ','WA'],['を','WO'],['ん','NN'],['っ','XTU'],['が','GA'],['ぎ','GI'],['ぐ','GU'],['げ','GE'],['ご','GO'],['ざ','ZA'],['じ','ZI'],['ず','ZU'],['ぜ','ZE'],['ぞ','ZO'],['だ','DA'],['ぢ','DI'],['づ','DU'],['で','DE'],['ど','DO'],['ば','BA'],['び','BI'],['ぶ','BU'],['べ','BE'],['ぼ','BO'],['ぱ','PA'],['ぴ','PI'],['ぷ','PU'],['ぺ','PE'],['ぽ','PO'],['ア','A'],['イ','I'],['ウ','U'],['エ','E'],['オ','O'],['カ','KA'],['キ','KI'],['ク','KU'],['ケ','KE'],['コ','KO'],['サ','SA'],['シ','SI'],['ス','SU'],['セ','SE'],['ソ','SO'],['タ','TA'],['チ','TI'],['ツ','TSU'],['テ','TE'],['ト','TO'],['ナ','NA'],['ニ','NI'],['ヌ','NU'],['ネ','NE'],['ノ','NO'],['ハ','HA'],['ヒ','HI'],['フ','HU'],['ヘ','HE'],['ホ','HO'],['マ','MA'],['ミ','MI'],['ム','MU'],['メ','ME'],['モ','MO'],['ヤ','YA'],['ユ','YU'],['ヨ','YO'],['ラ','RA'],['リ','RI'],['ル','RU'],['レ','RE'],['ロ','RO'],['ワ','WA'],['ヲ','WO'],['ン','NN'],['ッ','XTU'],['ー','ー']];
-  function seg(ks,rs){const out=[],ka=[...ks];let kp=0,rp=0;while(kp<ka.length){if(ka[kp]==='ー'){const e=Math.min(rp+1,rs.length);out.push({kana:'ー',romaStart:rp,romaEnd:e});rp=e;kp++;continue;}let hit=false;for(const [k,r] of KR){const kl=[...k].length;if(ka.slice(kp,kp+kl).join('')!==k)continue;out.push({kana:k,romaStart:rp,romaEnd:rp+r.length});rp+=r.length;kp+=kl;hit=true;break;}if(!hit){out.push({kana:ka[kp],romaStart:rp,romaEnd:rp});kp++;}}return out;}
+  function seg(ks,rs){const out=[],ka=[...ks];let kp=0,rp=0;while(kp<ka.length){if(ka[kp]==='っ'||ka[kp]==='ッ'){let dbl='';for(const [k2,r2] of KR){if(k2==='ー'||k2==='っ'||k2==='ッ')continue;const kl2=[...k2].length;if(ka.slice(kp+1,kp+1+kl2).join('')!==k2)continue;dbl=r2[0];break;}const len=dbl?1:0;out.push({kana:ka[kp],romaStart:rp,romaEnd:rp+len});rp+=len;kp++;continue;}if(ka[kp]==='ー'){const e=Math.min(rp+1,rs.length);out.push({kana:'ー',romaStart:rp,romaEnd:e});rp=e;kp++;continue;}let hit=false;for(const [k,r] of KR){const kl=[...k].length;if(ka.slice(kp,kp+kl).join('')!==k)continue;out.push({kana:k,romaStart:rp,romaEnd:rp+r.length});rp+=r.length;kp+=kl;hit=true;break;}if(!hit){out.push({kana:ka[kp],romaStart:rp,romaEnd:rp});kp++;}}return out;}
   const tl=typed.length,segs=seg(kana,word);
   let html='';
   segs.forEach(({kana:ch,romaStart,romaEnd})=>{
@@ -4046,6 +4112,16 @@ const PRAC_CATS = {
     jp: [],
     label:'西部劇（Western）'
   },
+  school: {
+    en: WORD_CATS.school.map(w=>({word:w,kana:null})),
+    jp: [],
+    label:'学校（School）'
+  },
+  space: {
+    en: WORD_CATS.space.map(w=>({word:w,kana:null})),
+    jp: [],
+    label:'宇宙（Space）'
+  },
 };
 
 // ── PRACTICE 状態 ──
@@ -4057,7 +4133,7 @@ const P = {
   total: 0,
   hit: 0,
   miss: 0,
-  catOrder: ['lv1','lv2','lv3','lv4','lv5','kana50','dakuten','handakuten','youon','animals','foods','nature','western'],
+  catOrder: ['lv1','lv2','lv3','lv4','lv5','kana50','dakuten','handakuten','youon','animals','foods','nature','western','school','space'],
 };
 
 const scPrac = document.getElementById('screen-practice');
@@ -4111,7 +4187,7 @@ function buildPracGrid(){
   updatePracStats();
 
   const kanaOnlyCats = ['kana50','dakuten','handakuten','youon'];
-  const enOnlyCats   = ['animals','foods','nature','western'];
+  const enOnlyCats   = ['animals','foods','nature','western','school','space'];
   const lang = (kanaOnlyCats.includes(P.cat)||enOnlyCats.includes(P.cat)) ? 'en' : P.lang;
   const pool = PRAC_CATS[P.cat][lang];
   if(!pool || pool.length===0){
@@ -4362,32 +4438,35 @@ function updateFlameEffect(combo) {
   if (!_flameActive || lv !== _flameLevel) {
     _flameLevel  = lv;
     _flameActive = true;
-    buildFlameColumn(flL, lv);
-    buildFlameColumn(flR, lv);
+    buildFlameColumns(flL, lv);
+    buildFlameColumns(flR, lv);
     flL.classList.add('active');
     flR.classList.add('active');
   }
 }
 
-function buildFlameColumn(container, lv) {
+function buildFlameColumns(container, lv) {
   container.innerHTML = '';
-  const col = document.createElement('div');
-  col.className = 'flame-col';
-  // レベルに応じた高さ・密度
-  const count = lv === 3 ? 14 : lv === 2 ? 10 : 7;
+  // 縦に高く伸ばすのではなく、コンボレベルが上がるほど「横に列」を増やす
+  const cols    = lv === 3 ? 3 : lv === 2 ? 2 : 1;
+  const perCol  = lv === 3 ? 6 : lv === 2 ? 6 : 5;
   const lvClass = `flame-lv${lv}`;
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div');
-    p.className = `flame-particle ${lvClass}`;
-    // 下ほど大きく・上ほど小さく
-    const scale = 1 - (i / count) * 0.5;
-    const spd   = (0.6 + Math.random() * 0.6).toFixed(2);
-    const dly   = (Math.random() * 0.4).toFixed(2);
-    p.style.cssText = `--spd:${spd}s;--dly:${dly}s;transform:scale(${scale.toFixed(2)});`;
-    p.textContent = lv === 3 ? '🌋' : '🔥';
-    col.appendChild(p);
+  for (let c = 0; c < cols; c++) {
+    const col = document.createElement('div');
+    col.className = 'flame-col';
+    for (let i = 0; i < perCol; i++) {
+      const p = document.createElement('div');
+      p.className = `flame-particle ${lvClass}`;
+      // 下ほど大きく・上ほど小さく
+      const scale = 1 - (i / perCol) * 0.5;
+      const spd   = (0.6 + Math.random() * 0.6).toFixed(2);
+      const dly   = (Math.random() * 0.4).toFixed(2);
+      p.style.cssText = `--spd:${spd}s;--dly:${dly}s;transform:scale(${scale.toFixed(2)});`;
+      p.textContent = lv === 3 ? '🌋' : '🔥';
+      col.appendChild(p);
+    }
+    container.appendChild(col);
   }
-  container.appendChild(col);
 }
 
 function resetFlame() {
@@ -5480,11 +5559,11 @@ const TA_WORDS_JP = {
   ],
   hard: [
     {k:'しんかんせん',r:'SINKANSEN'},{k:'かくめいてき',r:'KAKUMEITEKI'},
-    {k:'でんこうせっか',r:'DENKOSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
+    {k:'でんこうせっか',r:'DENKOUSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
     {k:'さんかくけい',r:'SANKAKUKEI'},{k:'おんがくしつ',r:'ONGAKUSITU'},
     {k:'としょかん',r:'TOSYOKAN'},{k:'はくぶつかん',r:'HAKUBUTSUKAN'},
-    {k:'びじゅつかん',r:'BIZUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
-    {k:'やきゅうじょう',r:'YAKYUUZYO'},{k:'かんらんしゃ',r:'KANRANSYA'},
+    {k:'びじゅつかん',r:'BIZYUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
+    {k:'やきゅうじょう',r:'YAKYUUZYOU'},{k:'かんらんしゃ',r:'KANRANSYA'},
     {k:'ゆうえんち',r:'YUUENTI'},{k:'しんりがく',r:'SINRIGAKU'},
     {k:'にほんごにゅうりょく',r:'NIHONGONYUURYOKU'},
     {k:'けんきゅうしつ',r:'KENKYUUSITU'},{k:'さんすうのもんだい',r:'SANSUUNOMONDAI'},
@@ -5929,7 +6008,7 @@ function spawnBoss() {
   lane.appendChild(el);
 
   const t = {
-    id: BOSS.targetId, word, typed: '', el,
+    id: BOSS.targetId, word, typed: '', kana, el,
     advanceMs, startTime: Date.now(), expired: false,
     laneX, laneIdx: 2, baseH, baseW,
     isBoss: true,
@@ -6019,6 +6098,8 @@ onWordComplete = function(t) {
       t.word  = entry.word;
       t.typed = '';
       const kana = entry.kana || null;
+      t.kana = kana;
+      t._confirmedKana = 0;
 
       const wEl = t.el.querySelector('.target-word');
       if(wEl) wEl.innerHTML = `<span class="typed"></span><span class="cursor"></span><span class="remain">${t.word}</span>`;
@@ -6163,6 +6244,10 @@ const ROMA_VARIANTS = {
   'ZYA':'JA',  'JA':'ZYA',
   'ZYU':'JU',  'JU':'ZYU',
   'ZYO':'JO',  'JO':'ZYO',
+  'ZYE':'JE',  'JE':'ZYE',
+  // ち行・し行 拗音(エ段)
+  'TYE':'CHE', 'CHE':'TYE',
+  'SYE':'SHE', 'SHE':'SYE',
   // ん
   'NN':'N',  // NN → N (文末)
   // っ
@@ -6203,6 +6288,13 @@ const KANA_TO_ROMAS = {
 // 別表記も含めてチェックし、マッチすれば正解のローマ字に変換して返す
 // 返り値: { ok: bool, newWord: string, newTyped: string } | null
 function checkRomaVariant(word, typed, ch){
+  // 長音入力「-」: 次に期待される文字が母音(A/I/U/E/O)なら、その母音を打ったものとして扱う
+  // （ジェットコースター等のローマ字内「ー」を一般的なハイフン長音入力でも打てるようにする）
+  if(ch === '-'){
+    const nextCh = word[typed.length];
+    if(nextCh && 'AIUEO'.includes(nextCh)) ch = nextCh;
+  }
+
   // まず標準チェック
   if(word[typed.length] === ch){
     return { ok: true, word, typed: typed + ch };
@@ -6250,6 +6342,31 @@ function showGameClear(diff){
   lane.innerHTML=''; G.activeTargets=[];
   resetFlame(); resetBoss(); stopBGM(); hideQuitBtn();
 
+  // 統計
+  const total = G.shotsHit+G.shotsMissed;
+  const acc   = total>0?Math.round(G.shotsHit/total*100):100;
+  const elapsed = Math.floor((Date.now()-(G.surviveStart||Date.now()))/1000);
+  const m = Math.floor(elapsed/60), s = elapsed%60;
+  const finalWPM = getCurrentWPM();
+
+  // 統計・実績・今日の目標を反映（通常のゲームオーバーと同じ処理）
+  updateStats({score:G.score,hit:G.shotsHit,miss:G.shotsMissed,
+               keys:_wpmKeyCount,wpm:finalWPM,combo:G.maxCombo});
+  checkAchievements({score:G.score,hit:G.shotsHit,miss:G.shotsMissed,
+               acc,wpm:finalWPM,level:G.level,diff:G.diff,lang:G.lang,
+               mode:'survival'});
+  addDailyProgress('keys', _wpmKeyCount);
+  addDailyProgress('plays', 1);
+
+  // ★ ラスボス撃破クリア時もランキングへスコアを登録（以前は未登録だったバグを修正）
+  showNameModal(G.score, (playerName) => {
+    const entry = {score:G.score, level:G.level, acc, maxCombo:G.maxCombo,
+                   diff:G.diff, lang:G.lang, name:playerName, wpm:finalWPM, ts:Date.now()};
+    addScoreWithName(entry);
+    renderClearScreen();
+  });
+
+  function renderClearScreen(){
   // ファンファーレ
   try{
     const c=getACtx(), t=c.currentTime;
@@ -6263,11 +6380,6 @@ function showGameClear(diff){
     });
   }catch(e){}
 
-  // 統計
-  const total = G.shotsHit+G.shotsMissed;
-  const acc   = total>0?Math.round(G.shotsHit/total*100):100;
-  const elapsed = Math.floor((Date.now()-(G.surviveStart||Date.now()))/1000);
-  const m = Math.floor(elapsed/60), s = elapsed%60;
   // タイトル2（難易度表示）
   const t2=document.getElementById('clear-title2');
   if(t2) t2.textContent = diff==='normal' ? '— NORMAL MODE CLEAR! —' : '— EASY MODE CLEAR! —';
@@ -6306,6 +6418,7 @@ function showGameClear(diff){
   },3000);
 
   document.getElementById('screen-clear').classList.remove('hidden');
+  }
 }
 
 document.getElementById('clear-btn-retry').addEventListener('click',()=>{
