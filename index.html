@@ -998,7 +998,38 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   background: linear-gradient(160deg,#2a1808,#160a02);
   box-shadow: 0 0 12px rgba(212,162,39,0.15);
 }
+/* レア度別カラー（獲得済みカードの枠・光彩） */
+.ach-card.got.rarity-common {
+  border-color: #b8b8b8;
+  box-shadow: 0 0 12px rgba(200,200,200,0.18);
+}
+.ach-card.got.rarity-rare {
+  border-color: #4fa8ff;
+  box-shadow: 0 0 14px rgba(79,168,255,0.28);
+}
+.ach-card.got.rarity-epic {
+  border-color: #ffb020;
+  box-shadow: 0 0 16px rgba(255,176,32,0.35);
+}
+.ach-card.got.rarity-legendary {
+  border-color: #fff060;
+  box-shadow: 0 0 20px rgba(255,240,96,0.45);
+}
 .ach-card.locked { opacity: 0.55; }
+.ach-card-rarity {
+  display: inline-block;
+  font-family: 'Rye', serif;
+  font-size: 0.56rem;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 9px;
+  margin-bottom: 6px;
+  border: 1px solid currentColor;
+}
+.ach-card-rarity.rarity-common    { color: #b8b8b8; }
+.ach-card-rarity.rarity-rare      { color: #4fa8ff; }
+.ach-card-rarity.rarity-epic      { color: #ffb020; }
+.ach-card-rarity.rarity-legendary { color: #fff060; }
 .ach-card-icon {
   font-size: 1.9rem;
   line-height: 1;
@@ -1100,53 +1131,109 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   padding: 9px 16px;
 }
 
-/* 実績解除トースト通知 */
-#ach-toast {
+/* バッジ獲得フルスクリーン演出（ジャジャーン演出） */
+#ach-reveal-overlay {
   position: fixed;
-  top: 18px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-30px);
-  z-index: 900;
+  inset: 0;
+  z-index: 930;
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: linear-gradient(135deg, #2a1808, #160a02);
-  border: 2px solid var(--gold);
-  border-radius: 8px;
-  padding: 10px 22px 10px 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 20px rgba(212,162,39,0.35);
+  justify-content: center;
+  background: rgba(0,0,0,0.78);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  max-width: 92vw;
+  transition: opacity 0.22s ease;
+  cursor: pointer;
 }
-#ach-toast.hidden { display: none; }
-#ach-toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+#ach-reveal-overlay.hidden { display: none; }
+#ach-reveal-overlay.show { opacity: 1; pointer-events: auto; }
+#ach-reveal-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,255,255,0) 62%);
+  opacity: 0;
 }
-.ach-toast-icon {
-  font-size: 2.1rem;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+#ach-reveal-overlay.show #ach-reveal-flash {
+  animation: achRevealFlash 0.45s ease-out forwards;
 }
-.ach-toast-label {
+@keyframes achRevealFlash {
+  0%   { opacity: 0.95; }
+  100% { opacity: 0; }
+}
+#ach-reveal-card {
+  position: relative;
+  text-align: center;
+  padding: 34px 30px 26px;
+  border-radius: 14px;
+  max-width: min(90vw, 380px);
+  opacity: 0;
+  transform: scale(0.2) rotate(-10deg);
+}
+#ach-reveal-overlay.show #ach-reveal-card {
+  animation: achRevealPop 0.55s cubic-bezier(0.17,0.89,0.32,1.49) forwards;
+}
+@keyframes achRevealPop {
+  0%   { transform: scale(0.2) rotate(-10deg); opacity: 0; }
+  55%  { transform: scale(1.14) rotate(2deg);  opacity: 1; }
+  78%  { transform: scale(0.95) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg);     opacity: 1; }
+}
+#ach-reveal-card.rarity-common {
+  background: linear-gradient(160deg,#2a2418,#14100a);
+  border: 3px solid #b8b8b8;
+  box-shadow: 0 0 34px rgba(200,200,200,0.3), 0 15px 40px rgba(0,0,0,0.6);
+}
+#ach-reveal-card.rarity-rare {
+  background: linear-gradient(160deg,#141c2a,#0a0e16);
+  border: 3px solid #4fa8ff;
+  box-shadow: 0 0 44px rgba(79,168,255,0.45), 0 15px 40px rgba(0,0,0,0.6);
+}
+#ach-reveal-card.rarity-epic {
+  background: linear-gradient(160deg,#2a1808,#160a02);
+  border: 3px solid #ffb020;
+  box-shadow: 0 0 58px rgba(255,176,32,0.55), 0 15px 40px rgba(0,0,0,0.65);
+}
+#ach-reveal-rarity {
   font-family: 'Rye', serif;
-  font-size: 0.62rem;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.rarity-common #ach-reveal-rarity { color: #cfcfcf; }
+.rarity-rare   #ach-reveal-rarity { color: #7fc0ff; }
+.rarity-epic   #ach-reveal-rarity { color: #ffd060; }
+#ach-reveal-icon {
+  font-size: 3.6rem;
+  line-height: 1;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 14px rgba(255,255,255,0.35));
+  animation: achCompleteBounce 1.2s ease-in-out infinite;
+}
+#ach-reveal-label {
+  font-family: 'Rye', serif;
+  font-size: 0.7rem;
   color: #ff9940;
   letter-spacing: 2px;
+  margin-bottom: 6px;
 }
-.ach-toast-name {
+#ach-reveal-name {
   font-family: 'Rye', serif;
-  font-size: 1rem;
+  font-size: 1.25rem;
   color: var(--gold);
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   text-shadow: 1px 1px 0 #000;
-  white-space: nowrap;
+  margin-bottom: 8px;
 }
-.ach-toast-desc {
-  font-size: 0.65rem;
+#ach-reveal-desc {
+  font-size: 0.75rem;
+  color: var(--sand);
+  line-height: 1.5;
+}
+#ach-reveal-tap-hint {
+  font-size: 0.6rem;
   color: var(--smoke);
-  margin-top: 1px;
+  margin-top: 16px;
+  letter-spacing: 1px;
 }
 /* ════ 実績バッジ機能ここまで ════ */
 
@@ -1206,13 +1293,6 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 /* ════ 今日の目標ここまで ════ */
 
 /* ════ 実績トースト演出強化 ════ */
-@keyframes achToastBounce {
-  0%   { opacity:0; transform:translateX(-50%) translateY(-40px) scale(0.7); }
-  55%  { opacity:1; transform:translateX(-50%) translateY(4px) scale(1.06); }
-  75%  { transform:translateX(-50%) translateY(-2px) scale(0.99); }
-  100% { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
-}
-#ach-toast.show { animation: achToastBounce 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards; }
 .ach-confetti {
   position: fixed;
   top: -20px;
@@ -2001,7 +2081,19 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 </div>
 
 <div id="flash"></div>
-<div id="ach-toast" class="hidden"></div>
+
+<!-- バッジ獲得フルスクリーン演出（ジャジャーン演出・レア度別カラー） -->
+<div id="ach-reveal-overlay" class="hidden">
+  <div id="ach-reveal-flash"></div>
+  <div id="ach-reveal-card" class="rarity-common">
+    <div id="ach-reveal-rarity"></div>
+    <div id="ach-reveal-icon"></div>
+    <div id="ach-reveal-label">🎉 実績解除！ 🎉</div>
+    <div id="ach-reveal-name"></div>
+    <div id="ach-reveal-desc"></div>
+    <div id="ach-reveal-tap-hint">タップで次へ</div>
+  </div>
+</div>
 
 <!-- 全バッジコンプリート特別演出 -->
 <div id="ach-complete-overlay" class="hidden">
@@ -4615,102 +4707,111 @@ const ACH_CATEGORIES = [
   {id:'practice', icon:'📚', label:'練習モード',             hint:'タイピング/文章/キーボード練習で解除'},
 ];
 
+// ── レア度定義（バッジ一覧の色分け・獲得演出に使用）──
+const ACH_RARITY = {
+  common:    {label:'コモン',   medal:'🥉', order:1},
+  rare:      {label:'レア',     medal:'🥈', order:2},
+  epic:      {label:'エピック', medal:'🥇', order:3},
+  legendary: {label:'レジェンド',medal:'🏆', order:4},
+};
+function getRarity(a){ return ACH_RARITY[a.rarity] ? a.rarity : 'common'; }
+
 const ACHIEVEMENTS = [
   // ── 🎯 サバイバル/エンドレス 共通 ──
-  {id:'score_1000',  icon:'🥉', name:'駆け出しガンマン',     desc:'1ゲームで1,000点以上を獲得する',          check:c=>c.score>=1000, cat:'core', progress:s=>({current:s.score,target:1000})},
-  {id:'score_10000', icon:'🥈', name:'凄腕ガンマン',         desc:'1ゲームで10,000点以上を獲得する',         check:c=>c.score>=10000, cat:'core', progress:s=>({current:s.score,target:10000})},
-  {id:'score_50000', icon:'🥇', name:'伝説のガンマン',       desc:'1ゲームで50,000点以上を獲得する',         check:c=>c.score>=50000, cat:'core', progress:s=>({current:s.score,target:50000})},
-  {id:'score_100000',icon:'👑', name:'ゴーストタウンの覇者', desc:'1ゲームで100,000点以上を獲得する',        check:c=>c.score>=100000, cat:'core', progress:s=>({current:s.score,target:100000})},
-  {id:'score_200000',icon:'☀️', name:'西部の太陽',           desc:'1ゲームで200,000点以上を獲得する',        check:c=>c.score>=200000, cat:'core', progress:s=>({current:s.score,target:200000})},
+  {id:'score_1000',  icon:'🥉', name:'駆け出しガンマン',     desc:'1ゲームで1,000点以上を獲得する',          check:c=>c.score>=1000, cat:'core', rarity:'common', progress:s=>({current:s.score,target:1000})},
+  {id:'score_10000', icon:'🥈', name:'凄腕ガンマン',         desc:'1ゲームで10,000点以上を獲得する',         check:c=>c.score>=10000, cat:'core', rarity:'common', progress:s=>({current:s.score,target:10000})},
+  {id:'score_50000', icon:'🥇', name:'伝説のガンマン',       desc:'1ゲームで50,000点以上を獲得する',         check:c=>c.score>=50000, cat:'core', rarity:'rare', progress:s=>({current:s.score,target:50000})},
+  {id:'score_100000',icon:'👑', name:'ゴーストタウンの覇者', desc:'1ゲームで100,000点以上を獲得する',        check:c=>c.score>=100000, cat:'core', rarity:'rare', progress:s=>({current:s.score,target:100000})},
+  {id:'score_200000',icon:'☀️', name:'西部の太陽',           desc:'1ゲームで200,000点以上を獲得する',        check:c=>c.score>=200000, cat:'core', rarity:'epic', progress:s=>({current:s.score,target:200000})},
 
-  {id:'combo_5',     icon:'🔥', name:'コンボ入門',           desc:'5コンボを達成する',                       check:c=>c.bestCombo>=5, cat:'core', progress:s=>({current:s.bestCombo,target:5})},
-  {id:'combo_10',    icon:'🔥', name:'連続射撃',             desc:'10コンボを達成する',                      check:c=>c.bestCombo>=10, cat:'core', progress:s=>({current:s.bestCombo,target:10})},
-  {id:'combo_20',    icon:'💥', name:'弾丸ライダー',         desc:'20コンボを達成する',                      check:c=>c.bestCombo>=20, cat:'core', progress:s=>({current:s.bestCombo,target:20})},
-  {id:'combo_30',    icon:'⚡', name:'マシンガンフィンガー', desc:'30コンボを達成する',                      check:c=>c.bestCombo>=30, cat:'core', progress:s=>({current:s.bestCombo,target:30})},
+  {id:'combo_5',     icon:'🔥', name:'コンボ入門',           desc:'5コンボを達成する',                       check:c=>c.bestCombo>=5, cat:'core', rarity:'common', progress:s=>({current:s.bestCombo,target:5})},
+  {id:'combo_10',    icon:'🔥', name:'連続射撃',             desc:'10コンボを達成する',                      check:c=>c.bestCombo>=10, cat:'core', rarity:'common', progress:s=>({current:s.bestCombo,target:10})},
+  {id:'combo_20',    icon:'💥', name:'弾丸ライダー',         desc:'20コンボを達成する',                      check:c=>c.bestCombo>=20, cat:'core', rarity:'rare', progress:s=>({current:s.bestCombo,target:20})},
+  {id:'combo_30',    icon:'⚡', name:'マシンガンフィンガー', desc:'30コンボを達成する',                      check:c=>c.bestCombo>=30, cat:'core', rarity:'epic', progress:s=>({current:s.bestCombo,target:30})},
 
-  {id:'acc_95',      icon:'🎯', name:'凄腕の狙撃手',         desc:'20発以上撃って正確率95%以上でクリアする', check:c=>c.acc!=null&&c.shots>=20&&c.acc>=95, cat:'common'},
+  {id:'acc_95',      icon:'🎯', name:'凄腕の狙撃手',         desc:'20発以上撃って正確率95%以上でクリアする', check:c=>c.acc!=null&&c.shots>=20&&c.acc>=95, cat:'common', rarity:'rare'},
 
-  {id:'plays_1',     icon:'🤠', name:'初陣',                 desc:'初めてゲームをプレイする',                check:c=>c.totalPlays>=1, cat:'common', progress:s=>({current:s.totalPlays,target:1})},
-  {id:'plays_10',    icon:'🤠', name:'常連ガンマン',         desc:'累計10プレイする',                        check:c=>c.totalPlays>=10, cat:'common', progress:s=>({current:s.totalPlays,target:10})},
-  {id:'plays_50',    icon:'🌵', name:'西部の住人',           desc:'累計50プレイする',                        check:c=>c.totalPlays>=50, cat:'common', progress:s=>({current:s.totalPlays,target:50})},
-  {id:'plays_100',   icon:'🏜️', name:'ガンスリンガーの魂',   desc:'累計100プレイする',                       check:c=>c.totalPlays>=100, cat:'common', progress:s=>({current:s.totalPlays,target:100})},
+  {id:'plays_1',     icon:'🤠', name:'初陣',                 desc:'初めてゲームをプレイする',                check:c=>c.totalPlays>=1, cat:'common', rarity:'common', progress:s=>({current:s.totalPlays,target:1})},
+  {id:'plays_10',    icon:'🤠', name:'常連ガンマン',         desc:'累計10プレイする',                        check:c=>c.totalPlays>=10, cat:'common', rarity:'common', progress:s=>({current:s.totalPlays,target:10})},
+  {id:'plays_50',    icon:'🌵', name:'西部の住人',           desc:'累計50プレイする',                        check:c=>c.totalPlays>=50, cat:'common', rarity:'rare', progress:s=>({current:s.totalPlays,target:50})},
+  {id:'plays_100',   icon:'🏜️', name:'ガンスリンガーの魂',   desc:'累計100プレイする',                       check:c=>c.totalPlays>=100, cat:'common', rarity:'epic', progress:s=>({current:s.totalPlays,target:100})},
 
-  {id:'keys_1000',   icon:'⌨️', name:'千本ノック',           desc:'累計1,000打鍵する',                       check:c=>c.totalKeys>=1000, cat:'common', progress:s=>({current:s.totalKeys,target:1000})},
-  {id:'keys_5000',   icon:'⌨️', name:'指慣らし完了',         desc:'累計5,000打鍵する',                       check:c=>c.totalKeys>=5000, cat:'common', progress:s=>({current:s.totalKeys,target:5000})},
-  {id:'keys_10000',  icon:'🔩', name:'鋼の指',               desc:'累計10,000打鍵する',                      check:c=>c.totalKeys>=10000, cat:'common', progress:s=>({current:s.totalKeys,target:10000})},
-  {id:'keys_30000',  icon:'🔩', name:'打鍵職人',             desc:'累計30,000打鍵する',                      check:c=>c.totalKeys>=30000, cat:'common', progress:s=>({current:s.totalKeys,target:30000})},
-  {id:'keys_50000',  icon:'🦾', name:'打鍵の鬼',             desc:'累計50,000打鍵する',                      check:c=>c.totalKeys>=50000, cat:'common', progress:s=>({current:s.totalKeys,target:50000})},
-  {id:'keys_100000', icon:'🦾', name:'十万打鍵の証',         desc:'累計100,000打鍵する',                     check:c=>c.totalKeys>=100000, cat:'common', progress:s=>({current:s.totalKeys,target:100000})},
-  {id:'keys_300000', icon:'🏆', name:'打鍵マスター',         desc:'累計300,000打鍵する',                     check:c=>c.totalKeys>=300000, cat:'common', progress:s=>({current:s.totalKeys,target:300000})},
-  {id:'keys_500000', icon:'👑', name:'伝説の早撃ち指',       desc:'累計500,000打鍵する',                     check:c=>c.totalKeys>=500000, cat:'common', progress:s=>({current:s.totalKeys,target:500000})},
+  {id:'keys_1000',   icon:'⌨️', name:'千本ノック',           desc:'累計1,000打鍵する',                       check:c=>c.totalKeys>=1000, cat:'common', rarity:'common', progress:s=>({current:s.totalKeys,target:1000})},
+  {id:'keys_5000',   icon:'⌨️', name:'指慣らし完了',         desc:'累計5,000打鍵する',                       check:c=>c.totalKeys>=5000, cat:'common', rarity:'common', progress:s=>({current:s.totalKeys,target:5000})},
+  {id:'keys_10000',  icon:'🔩', name:'鋼の指',               desc:'累計10,000打鍵する',                      check:c=>c.totalKeys>=10000, cat:'common', rarity:'common', progress:s=>({current:s.totalKeys,target:10000})},
+  {id:'keys_30000',  icon:'🔩', name:'打鍵職人',             desc:'累計30,000打鍵する',                      check:c=>c.totalKeys>=30000, cat:'common', rarity:'rare', progress:s=>({current:s.totalKeys,target:30000})},
+  {id:'keys_50000',  icon:'🦾', name:'打鍵の鬼',             desc:'累計50,000打鍵する',                      check:c=>c.totalKeys>=50000, cat:'common', rarity:'rare', progress:s=>({current:s.totalKeys,target:50000})},
+  {id:'keys_100000', icon:'🦾', name:'十万打鍵の証',         desc:'累計100,000打鍵する',                     check:c=>c.totalKeys>=100000, cat:'common', rarity:'rare', progress:s=>({current:s.totalKeys,target:100000})},
+  {id:'keys_300000', icon:'🏆', name:'打鍵マスター',         desc:'累計300,000打鍵する',                     check:c=>c.totalKeys>=300000, cat:'common', rarity:'epic', progress:s=>({current:s.totalKeys,target:300000})},
+  {id:'keys_500000', icon:'👑', name:'伝説の早撃ち指',       desc:'累計500,000打鍵する',                     check:c=>c.totalKeys>=500000, cat:'common', rarity:'epic', progress:s=>({current:s.totalKeys,target:500000})},
 
-  {id:'level_10',    icon:'⭐', name:'レベル10到達',         desc:'1ゲームでレベル10に到達する',             check:c=>c.level>=10, cat:'core', progress:s=>({current:s.level,target:10})},
-  {id:'level_20',    icon:'🌟', name:'レベル20到達',         desc:'1ゲームでレベル20に到達する',             check:c=>c.level>=20, cat:'core', progress:s=>({current:s.level,target:20})},
+  {id:'level_10',    icon:'⭐', name:'レベル10到達',         desc:'1ゲームでレベル10に到達する',             check:c=>c.level>=10, cat:'core', rarity:'common', progress:s=>({current:s.level,target:10})},
+  {id:'level_20',    icon:'🌟', name:'レベル20到達',         desc:'1ゲームでレベル20に到達する',             check:c=>c.level>=20, cat:'core', rarity:'rare', progress:s=>({current:s.level,target:20})},
 
   // ── 🤠 サバイバルモード ──
-  {id:'easy_clear',  icon:'🤠', name:'最初の一歩',           desc:'サバイバル・EASYでゲームをクリアする',    check:c=>c.mode==='survival'&&c.diff==='easy'&&c.hit>=1, cat:'survival'},
-  {id:'normal_clear',icon:'🔫', name:'一人前のガンマン',     desc:'サバイバル・NORMALでゲームをクリアする',  check:c=>c.mode==='survival'&&c.diff==='normal'&&c.hit>=1, cat:'survival'},
-  {id:'hard_clear',  icon:'💀', name:'修羅の道',             desc:'サバイバル・HARDでゲームをクリアする',    check:c=>c.mode==='survival'&&c.diff==='hard'&&c.hit>=1, cat:'survival'},
-  {id:'jp_easy_clear',icon:'🎌', name:'はじめての和風ガンマン',desc:'サバイバル・日本語EASYでゲームをクリアする',check:c=>c.mode==='survival'&&c.diff==='easy'&&c.lang==='jp'&&c.hit>=1, cat:'survival'},
-  {id:'jp_normal_clear',icon:'🏯',name:'和風の腕利き',         desc:'サバイバル・日本語NORMALでゲームをクリアする',check:c=>c.mode==='survival'&&c.diff==='normal'&&c.lang==='jp'&&c.hit>=1, cat:'survival'},
-  {id:'jp_hard_clear',icon:'🇯🇵',name:'侍ガンマン',          desc:'サバイバル・日本語HARDでゲームをクリアする',check:c=>c.mode==='survival'&&c.diff==='hard'&&c.lang==='jp'&&c.hit>=1, cat:'survival'},
+  {id:'easy_clear',  icon:'🤠', name:'最初の一歩',           desc:'サバイバル・EASYでゲームをクリアする',    check:c=>c.mode==='survival'&&c.diff==='easy'&&c.hit>=1, cat:'survival', rarity:'common'},
+  {id:'normal_clear',icon:'🔫', name:'一人前のガンマン',     desc:'サバイバル・NORMALでゲームをクリアする',  check:c=>c.mode==='survival'&&c.diff==='normal'&&c.hit>=1, cat:'survival', rarity:'common'},
+  {id:'hard_clear',  icon:'💀', name:'修羅の道',             desc:'サバイバル・HARDでゲームをクリアする',    check:c=>c.mode==='survival'&&c.diff==='hard'&&c.hit>=1, cat:'survival', rarity:'rare'},
+  {id:'jp_easy_clear',icon:'🎌', name:'はじめての和風ガンマン',desc:'サバイバル・日本語EASYでゲームをクリアする',check:c=>c.mode==='survival'&&c.diff==='easy'&&c.lang==='jp'&&c.hit>=1, cat:'survival', rarity:'common'},
+  {id:'jp_normal_clear',icon:'🏯',name:'和風の腕利き',         desc:'サバイバル・日本語NORMALでゲームをクリアする',check:c=>c.mode==='survival'&&c.diff==='normal'&&c.lang==='jp'&&c.hit>=1, cat:'survival', rarity:'rare'},
+  {id:'jp_hard_clear',icon:'🇯🇵',name:'侍ガンマン',          desc:'サバイバル・日本語HARDでゲームをクリアする',check:c=>c.mode==='survival'&&c.diff==='hard'&&c.lang==='jp'&&c.hit>=1, cat:'survival', rarity:'epic'},
 
   // ── ♾️ エンドレスモード ──
-  {id:'endless_3min', icon:'⏱️', name:'持久力のガンマン',     desc:'エンドレスモードで3分以上生存する',       check:c=>c.endlessSec>=180, cat:'endless', progress:s=>({current:s.endlessSec,target:180})},
-  {id:'endless_5min', icon:'⏳', name:'不屈の精神',           desc:'エンドレスモードで5分以上生存する',       check:c=>c.endlessSec>=300, cat:'endless', progress:s=>({current:s.endlessSec,target:300})},
-  {id:'endless_10min',icon:'⏳', name:'荒野の生存者',         desc:'エンドレスモードで10分以上生存する',      check:c=>c.endlessSec>=600, cat:'endless', progress:s=>({current:s.endlessSec,target:600})},
-  {id:'endless_15min',icon:'🌵', name:'不死身のガンマン',     desc:'エンドレスモードで15分以上生存する',      check:c=>c.endlessSec>=900, cat:'endless', progress:s=>({current:s.endlessSec,target:900})},
-  {id:'endless_20min',icon:'👑', name:'荒野の王者',           desc:'エンドレスモードで20分以上生存する',      check:c=>c.endlessSec>=1200, cat:'endless', progress:s=>({current:s.endlessSec,target:1200})},
+  {id:'endless_3min', icon:'⏱️', name:'持久力のガンマン',     desc:'エンドレスモードで3分以上生存する',       check:c=>c.endlessSec>=180, cat:'endless', rarity:'common', progress:s=>({current:s.endlessSec,target:180})},
+  {id:'endless_5min', icon:'⏳', name:'不屈の精神',           desc:'エンドレスモードで5分以上生存する',       check:c=>c.endlessSec>=300, cat:'endless', rarity:'common', progress:s=>({current:s.endlessSec,target:300})},
+  {id:'endless_10min',icon:'⏳', name:'荒野の生存者',         desc:'エンドレスモードで10分以上生存する',      check:c=>c.endlessSec>=600, cat:'endless', rarity:'rare', progress:s=>({current:s.endlessSec,target:600})},
+  {id:'endless_15min',icon:'🌵', name:'不死身のガンマン',     desc:'エンドレスモードで15分以上生存する',      check:c=>c.endlessSec>=900, cat:'endless', rarity:'rare', progress:s=>({current:s.endlessSec,target:900})},
+  {id:'endless_20min',icon:'👑', name:'荒野の王者',           desc:'エンドレスモードで20分以上生存する',      check:c=>c.endlessSec>=1200, cat:'endless', rarity:'epic', progress:s=>({current:s.endlessSec,target:1200})},
 
   // ── ⚡ タイムアタックモード ──
-  {id:'ta_clear_1',  icon:'⚡', name:'早撃ちデビュー',        desc:'タイムアタックを1回クリアする',           check:c=>c.taClears>=1, cat:'timeattack', progress:s=>({current:s.taClears,target:1})},
-  {id:'ta_clear_10', icon:'⚡', name:'早撃ちの常連',          desc:'タイムアタックを累計10回クリアする',      check:c=>c.taClears>=10, cat:'timeattack', progress:s=>({current:s.taClears,target:10})},
-  {id:'ta_clear_30', icon:'🏆', name:'早撃ち王',              desc:'タイムアタックを累計30回クリアする',      check:c=>c.taClears>=30, cat:'timeattack', progress:s=>({current:s.taClears,target:30})},
+  {id:'ta_clear_1',  icon:'⚡', name:'早撃ちデビュー',        desc:'タイムアタックを1回クリアする',           check:c=>c.taClears>=1, cat:'timeattack', rarity:'common', progress:s=>({current:s.taClears,target:1})},
+  {id:'ta_clear_10', icon:'⚡', name:'早撃ちの常連',          desc:'タイムアタックを累計10回クリアする',      check:c=>c.taClears>=10, cat:'timeattack', rarity:'common', progress:s=>({current:s.taClears,target:10})},
+  {id:'ta_clear_30', icon:'🏆', name:'早撃ち王',              desc:'タイムアタックを累計30回クリアする',      check:c=>c.taClears>=30, cat:'timeattack', rarity:'rare', progress:s=>({current:s.taClears,target:30})},
 
-  {id:'ta_count5',   icon:'🔫', name:'5問チャレンジ制覇',     desc:'タイムアタック「5問」モードをクリアする', check:c=>c.mode==='timeattack'&&c.taCount===5, cat:'timeattack'},
-  {id:'ta_count10',  icon:'🔫', name:'10問チャレンジ制覇',    desc:'タイムアタック「10問」モードをクリアする',check:c=>c.mode==='timeattack'&&c.taCount===10, cat:'timeattack'},
-  {id:'ta_count20',  icon:'🔫', name:'20問チャレンジ制覇',    desc:'タイムアタック「20問」モードをクリアする',check:c=>c.mode==='timeattack'&&c.taCount===20, cat:'timeattack'},
-  {id:'ta_count30',  icon:'🏆', name:'30問チャレンジ制覇',    desc:'タイムアタック「30問」モードをクリアする',check:c=>c.mode==='timeattack'&&c.taCount===30, cat:'timeattack'},
+  {id:'ta_count5',   icon:'🔫', name:'5問チャレンジ制覇',     desc:'タイムアタック「5問」モードをクリアする', check:c=>c.mode==='timeattack'&&c.taCount===5, cat:'timeattack', rarity:'common'},
+  {id:'ta_count10',  icon:'🔫', name:'10問チャレンジ制覇',    desc:'タイムアタック「10問」モードをクリアする',check:c=>c.mode==='timeattack'&&c.taCount===10, cat:'timeattack', rarity:'common'},
+  {id:'ta_count20',  icon:'🔫', name:'20問チャレンジ制覇',    desc:'タイムアタック「20問」モードをクリアする',check:c=>c.mode==='timeattack'&&c.taCount===20, cat:'timeattack', rarity:'rare'},
+  {id:'ta_count30',  icon:'🏆', name:'30問チャレンジ制覇',    desc:'タイムアタック「30問」モードをクリアする',check:c=>c.mode==='timeattack'&&c.taCount===30, cat:'timeattack', rarity:'rare'},
 
-  {id:'ta_hard',     icon:'💀', name:'早撃ちの修羅',          desc:'タイムアタック・HARDでクリアする',        check:c=>c.mode==='timeattack'&&c.diff==='hard', cat:'timeattack'},
-  {id:'ta_jp',       icon:'🇯🇵',name:'和風早撃ち',            desc:'タイムアタック・日本語モードでクリアする',check:c=>c.mode==='timeattack'&&c.lang==='jp', cat:'timeattack'},
+  {id:'ta_hard',     icon:'💀', name:'早撃ちの修羅',          desc:'タイムアタック・HARDでクリアする',        check:c=>c.mode==='timeattack'&&c.diff==='hard', cat:'timeattack', rarity:'rare'},
+  {id:'ta_jp',       icon:'🇯🇵',name:'和風早撃ち',            desc:'タイムアタック・日本語モードでクリアする',check:c=>c.mode==='timeattack'&&c.lang==='jp', cat:'timeattack', rarity:'rare'},
 
-  {id:'ta_speed_3s', icon:'⏱️', name:'スピードガンマン',      desc:'平均3秒/問以内でタイムアタックをクリアする', check:c=>c.mode==='timeattack'&&c.taAvgMs!=null&&c.taAvgMs<=3000, cat:'timeattack'},
-  {id:'ta_speed_2s', icon:'💨', name:'疾風の早撃ち',          desc:'平均2秒/問以内でタイムアタックをクリアする', check:c=>c.mode==='timeattack'&&c.taAvgMs!=null&&c.taAvgMs<=2000, cat:'timeattack'},
-  {id:'ta_speed_1_2s',icon:'🌟',name:'光速の的当て',          desc:'平均1.2秒/問以内でタイムアタックをクリアする',check:c=>c.mode==='timeattack'&&c.taAvgMs!=null&&c.taAvgMs<=1200, cat:'timeattack'},
+  {id:'ta_speed_3s', icon:'⏱️', name:'スピードガンマン',      desc:'平均3秒/問以内でタイムアタックをクリアする', check:c=>c.mode==='timeattack'&&c.taAvgMs!=null&&c.taAvgMs<=3000, cat:'timeattack', rarity:'common'},
+  {id:'ta_speed_2s', icon:'💨', name:'疾風の早撃ち',          desc:'平均2秒/問以内でタイムアタックをクリアする', check:c=>c.mode==='timeattack'&&c.taAvgMs!=null&&c.taAvgMs<=2000, cat:'timeattack', rarity:'rare'},
+  {id:'ta_speed_1_2s',icon:'🌟',name:'光速の的当て',          desc:'平均1.2秒/問以内でタイムアタックをクリアする',check:c=>c.mode==='timeattack'&&c.taAvgMs!=null&&c.taAvgMs<=1200, cat:'timeattack', rarity:'epic'},
 
   // ── 🔫 決闘モード ──
-  {id:'duel_win1',   icon:'🤝', name:'決闘の初勝利',         desc:'決闘モードで1勝以上する',                 check:c=>c.duelStreak>=1, cat:'duel', progress:s=>({current:s.duelStreak,target:1})},
-  {id:'duel_streak3',icon:'🔫', name:'連勝の予感',           desc:'決闘モードで3連勝する',                   check:c=>c.duelStreak>=3, cat:'duel', progress:s=>({current:s.duelStreak,target:3})},
-  {id:'duel_streak5',icon:'🔫', name:'無敗の番人',           desc:'決闘モードで5連勝する',                   check:c=>c.duelStreak>=5, cat:'duel', progress:s=>({current:s.duelStreak,target:5})},
-  {id:'duel_streak10',icon:'🏆',name:'決闘王',               desc:'決闘モードで10連勝する',                  check:c=>c.duelStreak>=10, cat:'duel', progress:s=>({current:s.duelStreak,target:10})},
-  {id:'duel_streak15',icon:'🏆',name:'無双の早撃ち',         desc:'決闘モードで15連勝する',                  check:c=>c.duelStreak>=15, cat:'duel', progress:s=>({current:s.duelStreak,target:15})},
-  {id:'duel_streak20',icon:'🌟',name:'西部の伝説',           desc:'決闘モードで20連勝する',                  check:c=>c.duelStreak>=20, cat:'duel', progress:s=>({current:s.duelStreak,target:20})},
-  {id:'duel_streak30',icon:'👑',name:'決闘神話',             desc:'決闘モードで30連勝する',                  check:c=>c.duelStreak>=30, cat:'duel', progress:s=>({current:s.duelStreak,target:30})},
+  {id:'duel_win1',   icon:'🤝', name:'決闘の初勝利',         desc:'決闘モードで1勝以上する',                 check:c=>c.duelStreak>=1, cat:'duel', rarity:'common', progress:s=>({current:s.duelStreak,target:1})},
+  {id:'duel_streak3',icon:'🔫', name:'連勝の予感',           desc:'決闘モードで3連勝する',                   check:c=>c.duelStreak>=3, cat:'duel', rarity:'common', progress:s=>({current:s.duelStreak,target:3})},
+  {id:'duel_streak5',icon:'🔫', name:'無敗の番人',           desc:'決闘モードで5連勝する',                   check:c=>c.duelStreak>=5, cat:'duel', rarity:'common', progress:s=>({current:s.duelStreak,target:5})},
+  {id:'duel_streak10',icon:'🏆',name:'決闘王',               desc:'決闘モードで10連勝する',                  check:c=>c.duelStreak>=10, cat:'duel', rarity:'rare', progress:s=>({current:s.duelStreak,target:10})},
+  {id:'duel_streak15',icon:'🏆',name:'無双の早撃ち',         desc:'決闘モードで15連勝する',                  check:c=>c.duelStreak>=15, cat:'duel', rarity:'rare', progress:s=>({current:s.duelStreak,target:15})},
+  {id:'duel_streak20',icon:'🌟',name:'西部の伝説',           desc:'決闘モードで20連勝する',                  check:c=>c.duelStreak>=20, cat:'duel', rarity:'epic', progress:s=>({current:s.duelStreak,target:20})},
+  {id:'duel_streak30',icon:'👑',name:'決闘神話',             desc:'決闘モードで30連勝する',                  check:c=>c.duelStreak>=30, cat:'duel', rarity:'epic', progress:s=>({current:s.duelStreak,target:30})},
 
   // ── 📚 練習モード ──
-  {id:'prac_typing_1', icon:'📚', name:'練習の第一歩',         desc:'タイピング練習を1回クリアする',           check:c=>c.typingClears>=1, cat:'practice', progress:s=>({current:s.typingClears,target:1})},
-  {id:'prac_typing_5', icon:'📚', name:'練習の虫',             desc:'タイピング練習を累計5回クリアする',       check:c=>c.typingClears>=5, cat:'practice', progress:s=>({current:s.typingClears,target:5})},
-  {id:'prac_typing_15',icon:'📖', name:'練習マニア',           desc:'タイピング練習を累計15回クリアする',      check:c=>c.typingClears>=15, cat:'practice', progress:s=>({current:s.typingClears,target:15})},
-  {id:'prac_typing_30',icon:'🥋', name:'タイピング修行僧',     desc:'タイピング練習を累計30回クリアする',      check:c=>c.typingClears>=30, cat:'practice', progress:s=>({current:s.typingClears,target:30})},
-  {id:'prac_typing_50',icon:'🏆', name:'タイピング道場主',     desc:'タイピング練習を累計50回クリアする',      check:c=>c.typingClears>=50, cat:'practice', progress:s=>({current:s.typingClears,target:50})},
+  {id:'prac_typing_1', icon:'📚', name:'練習の第一歩',         desc:'タイピング練習を1回クリアする',           check:c=>c.typingClears>=1, cat:'practice', rarity:'common', progress:s=>({current:s.typingClears,target:1})},
+  {id:'prac_typing_5', icon:'📚', name:'練習の虫',             desc:'タイピング練習を累計5回クリアする',       check:c=>c.typingClears>=5, cat:'practice', rarity:'common', progress:s=>({current:s.typingClears,target:5})},
+  {id:'prac_typing_15',icon:'📖', name:'練習マニア',           desc:'タイピング練習を累計15回クリアする',      check:c=>c.typingClears>=15, cat:'practice', rarity:'rare', progress:s=>({current:s.typingClears,target:15})},
+  {id:'prac_typing_30',icon:'🥋', name:'タイピング修行僧',     desc:'タイピング練習を累計30回クリアする',      check:c=>c.typingClears>=30, cat:'practice', rarity:'rare', progress:s=>({current:s.typingClears,target:30})},
+  {id:'prac_typing_50',icon:'🏆', name:'タイピング道場主',     desc:'タイピング練習を累計50回クリアする',      check:c=>c.typingClears>=50, cat:'practice', rarity:'epic', progress:s=>({current:s.typingClears,target:50})},
 
-  {id:'prac_sentence_1', icon:'📝', name:'文章練習デビュー', desc:'文章練習を1回クリアする',                 check:c=>c.sentenceClears>=1, cat:'practice', progress:s=>({current:s.sentenceClears,target:1})},
-  {id:'prac_sentence_10',icon:'✏️', name:'文章マスター',     desc:'文章練習を累計10回クリアする',            check:c=>c.sentenceClears>=10, cat:'practice', progress:s=>({current:s.sentenceClears,target:10})},
+  {id:'prac_sentence_1', icon:'📝', name:'文章練習デビュー', desc:'文章練習を1回クリアする',                 check:c=>c.sentenceClears>=1, cat:'practice', rarity:'common', progress:s=>({current:s.sentenceClears,target:1})},
+  {id:'prac_sentence_10',icon:'✏️', name:'文章マスター',     desc:'文章練習を累計10回クリアする',            check:c=>c.sentenceClears>=10, cat:'practice', rarity:'rare', progress:s=>({current:s.sentenceClears,target:10})},
 
-  {id:'prac_kb_step1', icon:'⌨️', name:'キーボード練習スタート', desc:'キーボード練習のステップを1つクリアする',     check:c=>c.kbStepClears>=1, cat:'practice', progress:s=>({current:s.kbStepClears,target:1})},
-  {id:'prac_kb_step10',icon:'⌨️', name:'キー配置の達人',         desc:'キーボード練習のステップを累計10回クリアする',check:c=>c.kbStepClears>=10, cat:'practice', progress:s=>({current:s.kbStepClears,target:10})},
-  {id:'prac_kb_all',   icon:'👑', name:'キーボードマスター',     desc:'1回のプレイでキーボード練習の全ステップをクリアする',check:c=>!!c.kbAllCleared, cat:'practice'},
+  {id:'prac_kb_step1', icon:'⌨️', name:'キーボード練習スタート', desc:'キーボード練習のステップを1つクリアする',     check:c=>c.kbStepClears>=1, cat:'practice', rarity:'common', progress:s=>({current:s.kbStepClears,target:1})},
+  {id:'prac_kb_step10',icon:'⌨️', name:'キー配置の達人',         desc:'キーボード練習のステップを累計10回クリアする',check:c=>c.kbStepClears>=10, cat:'practice', rarity:'rare', progress:s=>({current:s.kbStepClears,target:10})},
+  {id:'prac_kb_all',   icon:'👑', name:'キーボードマスター',     desc:'1回のプレイでキーボード練習の全ステップをクリアする',check:c=>!!c.kbAllCleared, cat:'practice', rarity:'epic'},
 
-  {id:'prac_all3',icon:'🌟', name:'練習の達人', desc:'タイピング・文章・キーボードの3つの練習をすべて1回以上クリアする', check:c=>c.typingClears>=1&&c.sentenceClears>=1&&c.kbStepClears>=1, cat:'practice',
+  {id:'prac_all3',icon:'🌟', name:'練習の達人', desc:'タイピング・文章・キーボードの3つの練習をすべて1回以上クリアする', check:c=>c.typingClears>=1&&c.sentenceClears>=1&&c.kbStepClears>=1, cat:'practice', rarity:'rare',
     progress:s=>({current:[s.typingClears>=1,s.sentenceClears>=1,s.kbStepClears>=1].filter(Boolean).length,target:3})},
 
   // ── 🌟 共通 ──
-  {id:'daily_goal_1', icon:'🗓️', name:'今日の目標、達成！',   desc:'今日の目標を初めて達成する',              check:c=>c.dailyGoalsCompleted>=1, cat:'common', progress:s=>({current:s.dailyGoalsCompleted,target:1})},
-  {id:'daily_goal_10',icon:'📅', name:'コツコツガンマン',     desc:'今日の目標を累計10回達成する',            check:c=>c.dailyGoalsCompleted>=10, cat:'common', progress:s=>({current:s.dailyGoalsCompleted,target:10})},
-  {id:'daily_goal_30',icon:'🌅', name:'皆勤賞ガンマン',       desc:'今日の目標を累計30回達成する',            check:c=>c.dailyGoalsCompleted>=30, cat:'common', progress:s=>({current:s.dailyGoalsCompleted,target:30})},
+  {id:'daily_goal_1', icon:'🗓️', name:'今日の目標、達成！',   desc:'今日の目標を初めて達成する',              check:c=>c.dailyGoalsCompleted>=1, cat:'common', rarity:'common', progress:s=>({current:s.dailyGoalsCompleted,target:1})},
+  {id:'daily_goal_10',icon:'📅', name:'コツコツガンマン',     desc:'今日の目標を累計10回達成する',            check:c=>c.dailyGoalsCompleted>=10, cat:'common', rarity:'rare', progress:s=>({current:s.dailyGoalsCompleted,target:10})},
+  {id:'daily_goal_30',icon:'🌅', name:'皆勤賞ガンマン',       desc:'今日の目標を累計30回達成する',            check:c=>c.dailyGoalsCompleted>=30, cat:'common', rarity:'epic', progress:s=>({current:s.dailyGoalsCompleted,target:30})},
 
-  {id:'completionist',icon:'🏅', name:'パーフェクトガンマン', desc:'他のすべての実績バッジを解除する',        check:c=>false, special:true, cat:'common',
+  {id:'completionist',icon:'🏅', name:'パーフェクトガンマン', desc:'他のすべての実績バッジを解除する',        check:c=>false, special:true, cat:'common', rarity:'legendary',
     progress:s=>({current:s.unlockedCount,target:s.totalAchMinusOne})},
 
 ];
@@ -4819,16 +4920,17 @@ function checkAchievements(ctx){
     const now = Date.now();
     newly.forEach(a=>{ ts[a.id]=now; });
     saveAchTimestamps(ts);
-    queueAchToasts(newly);
+    const normalNewly = newly.filter(a=>a.id!=='completionist');
+    if(normalNewly.length) queueAchToasts(normalNewly);
     if(newly.some(a=>a.id==='completionist')){
-      // 通常トーストが表示され終わる頃に特別演出を出す
-      setTimeout(showCompletionistCelebration, 1200);
+      // 通常演出が表示され終わる頃に特別演出を出す
+      setTimeout(showCompletionistCelebration, normalNewly.length ? 1400 : 200);
     }
   }
   return newly;
 }
 
-// ── トースト通知 ──
+// ── バッジ獲得フルスクリーン演出（ジャジャーン演出・レア度別）──
 let achToastQueue = [];
 let achToastShowing = false;
 function queueAchToasts(list){
@@ -4837,28 +4939,43 @@ function queueAchToasts(list){
 }
 function processAchToastQueue(){
   if(achToastShowing || !achToastQueue.length) return;
-  const toastEl = document.getElementById('ach-toast');
-  if(!toastEl) return;
+  const overlay = document.getElementById('ach-reveal-overlay');
+  const card    = document.getElementById('ach-reveal-card');
+  if(!overlay || !card) return;
   achToastShowing = true;
   const a = achToastQueue.shift();
-  toastEl.innerHTML =
-    `<div class="ach-toast-icon">${a.icon}</div>`+
-    `<div><div class="ach-toast-label">🎉 やったね！実績解除 🎉</div>`+
-    `<div class="ach-toast-name">${a.name}</div>`+
-    `<div class="ach-toast-desc">${a.desc}</div></div>`;
-  toastEl.classList.remove('hidden');
-  void toastEl.offsetWidth;
-  toastEl.classList.add('show');
+  const rarity = getRarity(a);
+  const rmeta  = ACH_RARITY[rarity];
+
+  card.className = 'rarity-' + rarity;
+  document.getElementById('ach-reveal-rarity').textContent = `${rmeta.medal} ${rmeta.label}`;
+  document.getElementById('ach-reveal-icon').textContent = a.icon;
+  document.getElementById('ach-reveal-name').textContent = a.name;
+  document.getElementById('ach-reveal-desc').textContent = a.desc;
+
+  overlay.classList.remove('hidden');
+  void overlay.offsetWidth;
+  overlay.classList.add('show');
+
+  // レア度が高いほど紙吹雪を豪華に
   spawnAchConfetti();
+  if(rarity==='rare' || rarity==='epic' || rarity==='legendary') setTimeout(spawnAchConfetti, 300);
+  if(rarity==='epic' || rarity==='legendary') setTimeout(spawnAchConfetti, 600);
+
   try{ sfxLevelUp(); }catch(e){}
-  setTimeout(()=>{
-    toastEl.classList.remove('show');
+
+  const dismiss = ()=>{
+    if(!achToastShowing) return;
+    overlay.classList.remove('show');
+    overlay.removeEventListener('click', dismiss);
     setTimeout(()=>{
-      toastEl.classList.add('hidden');
+      overlay.classList.add('hidden');
       achToastShowing = false;
       processAchToastQueue();
-    }, 350);
-  }, 2600);
+    }, 300);
+  };
+  overlay.addEventListener('click', dismiss);
+  setTimeout(dismiss, 2600);
 }
 
 // ── 実績解除時の紙吹雪演出 ──
@@ -4929,12 +5046,16 @@ function renderAchScreen(){
     } else {
       cardsHtml = items.map(a=>{
         const got = unlocked.has(a.id);
+        const rarity = getRarity(a);
+        const rmeta  = ACH_RARITY[rarity];
+        const rarityTag = `<div class="ach-card-rarity rarity-${rarity}">${rmeta.medal} ${rmeta.label}</div>`;
         if(got){
           const ts = timestamps[a.id];
           const isNew = ts && (now-ts < 86400000);
           const dateStr = ts ? formatAchDate(ts) : '';
-          return `<div class="ach-card got">`+
+          return `<div class="ach-card got rarity-${rarity}">`+
             (isNew ? `<div class="ach-new-tag">NEW!</div>` : '')+
+            rarityTag+
             `<div class="ach-card-icon">${a.icon}</div>`+
             `<div class="ach-card-name">${a.name}</div>`+
             `<div class="ach-card-desc">${a.desc}</div>`+
@@ -4953,7 +5074,8 @@ function renderAchScreen(){
             `<div class="ach-progress-mini-text">${curDisp.toLocaleString()} / ${tgt.toLocaleString()}</div>`+
             `</div>`;
         }
-        return `<div class="ach-card locked" data-id="${a.id}">`+
+        return `<div class="ach-card locked rarity-${rarity}" data-id="${a.id}">`+
+          rarityTag+
           `<div class="ach-card-icon">❔</div>`+
           `<div class="ach-card-name">？？？？？</div>`+
           `<div class="ach-card-desc-prompt">未解除の実績です</div>`+
