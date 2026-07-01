@@ -1227,6 +1227,80 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 }
 /* ════ 実績トースト演出強化ここまで ════ */
 
+/* ════ 全バッジコンプリート特別演出 ════ */
+#ach-complete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(40,20,0,0.92), rgba(4,2,0,0.97));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+#ach-complete-overlay.hidden { display: none; }
+#ach-complete-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+#ach-complete-card {
+  text-align: center;
+  padding: 40px 32px;
+  border: 3px solid var(--gold);
+  border-radius: 16px;
+  background: linear-gradient(160deg,#2a1808,#160a02);
+  box-shadow: 0 0 60px rgba(255,200,0,0.45), 0 20px 60px rgba(0,0,0,0.7);
+  max-width: min(92vw, 420px);
+  transform: scale(0.7);
+  transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+#ach-complete-overlay.show #ach-complete-card { transform: scale(1); }
+#ach-complete-icon {
+  font-size: 4.2rem;
+  line-height: 1;
+  margin-bottom: 10px;
+  animation: achCompleteBounce 1.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 18px rgba(255,200,0,0.7));
+}
+@keyframes achCompleteBounce {
+  0%,100% { transform: translateY(0) rotate(-4deg); }
+  50%     { transform: translateY(-10px) rotate(4deg); }
+}
+#ach-complete-title {
+  font-family: 'Rye', serif;
+  font-size: clamp(1.6rem,6vw,2.4rem);
+  color: #fff060;
+  letter-spacing: 3px;
+  text-shadow: 0 0 14px #fff060, 0 0 34px #ffae00, 3px 3px 0 #5a3000;
+  animation: newRecordPulse 1s ease-in-out infinite;
+  margin-bottom: 8px;
+}
+#ach-complete-sub {
+  font-size: 0.85rem;
+  color: var(--sand);
+  margin-bottom: 14px;
+  letter-spacing: 0.5px;
+}
+#ach-complete-name {
+  font-family: 'Rye', serif;
+  font-size: 1.1rem;
+  color: var(--gold);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+#ach-complete-count {
+  font-size: 0.72rem;
+  color: var(--smoke);
+  margin-bottom: 22px;
+}
+#ach-complete-close {
+  font-size: 0.85rem;
+  padding: 10px 26px;
+}
+/* ════ 全バッジコンプリート特別演出ここまで ════ */
+
 /* ENDLESSモード: タイム表示を金色に */
 #time-display.endless-time {
   color: var(--gold);
@@ -1928,6 +2002,18 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 
 <div id="flash"></div>
 <div id="ach-toast" class="hidden"></div>
+
+<!-- 全バッジコンプリート特別演出 -->
+<div id="ach-complete-overlay" class="hidden">
+  <div id="ach-complete-card">
+    <div id="ach-complete-icon">🏅</div>
+    <div id="ach-complete-title">ALL COMPLETE!</div>
+    <div id="ach-complete-sub">🎉 すべての実績バッジを解除しました！ 🎉</div>
+    <div id="ach-complete-name">パーフェクトガンマン</div>
+    <div id="ach-complete-count"></div>
+    <button type="button" id="ach-complete-close" class="btn">✕ とじる</button>
+  </div>
+</div>
 <!-- 中断ボタン -->
 <button id="btn-quit-game">← やめる</button>
 <!-- 中断確認ダイアログ -->
@@ -4734,6 +4820,10 @@ function checkAchievements(ctx){
     newly.forEach(a=>{ ts[a.id]=now; });
     saveAchTimestamps(ts);
     queueAchToasts(newly);
+    if(newly.some(a=>a.id==='completionist')){
+      // 通常トーストが表示され終わる頃に特別演出を出す
+      setTimeout(showCompletionistCelebration, 1200);
+    }
   }
   return newly;
 }
@@ -4788,6 +4878,28 @@ function spawnAchConfetti(){
     setTimeout(()=>el.remove(), dur*1000 + 100);
   }
 }
+
+// ── 全バッジコンプリート特別演出 ──
+function showCompletionistCelebration(){
+  const overlay = document.getElementById('ach-complete-overlay');
+  if(!overlay) return;
+  document.getElementById('ach-complete-count').textContent =
+    `🏆 全${ACHIEVEMENTS.length}バッジ 制覇！`;
+  overlay.classList.remove('hidden');
+  void overlay.offsetWidth;
+  overlay.classList.add('show');
+  try{ sfxLevelUp(); }catch(e){}
+  // 通常より豪華に紙吹雪を降らせる
+  spawnAchConfetti();
+  setTimeout(spawnAchConfetti, 350);
+  setTimeout(spawnAchConfetti, 700);
+  setTimeout(spawnAchConfetti, 1100);
+}
+document.getElementById('ach-complete-close')?.addEventListener('click', ()=>{
+  const overlay = document.getElementById('ach-complete-overlay');
+  overlay.classList.remove('show');
+  setTimeout(()=>overlay.classList.add('hidden'), 400);
+});
 
 // ── 実績画面描画 ──
 let achFilter = 'all'; // 'all' | 'unlocked' | 'locked'
