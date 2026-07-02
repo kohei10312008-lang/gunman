@@ -159,6 +159,9 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 .rk-row.rk-top1{color:#ffd700}
 .rk-row.rk-top2{color:#c0c0c0}
 .rk-row.rk-top3{color:#cd7f32}
+.rk-diff-easy{color:#60dd40}
+.rk-diff-normal{color:var(--gold)}
+.rk-diff-hard{color:#ff5040}
 .rk-col{flex:1;text-align:center}
 .rk-no{flex:0 0 42px;font-family:'Rye',serif}
 .rk-score{flex:0 0 90px;font-weight:700;font-size:0.82rem}
@@ -2203,7 +2206,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
       <span class="rk-col rk-no">RANK</span>
       <span class="rk-name">NAME</span>
       <span class="rk-col rk-score">SCORE</span>
-      <span class="rk-col rk-meta">LV / ACC</span>
+      <span class="rk-col rk-meta">DIFF / LV / ACC</span>
     </div>
     <div id="title-ranking-list"></div>
     <div id="title-ranking-note" style="display:none;"></div>
@@ -2229,7 +2232,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
       <span class="rk-col rk-no">RANK</span>
       <span class="rk-name">NAME</span>
       <span class="rk-col rk-score">SCORE</span>
-      <span class="rk-col rk-meta">LV / ACC / COMBO</span>
+      <span class="rk-col rk-meta">DIFF / LV / ACC / COMBO</span>
     </div>
     <div id="ranking-list"></div>
   </div>
@@ -4630,7 +4633,7 @@ function renderRankingFull(list, myEntry, containerId) {
       <span class="rk-col rk-no">${md[i]||('#'+(i+1))}${isMe?' ◀':''}</span>
       <span class="rk-name">${name}</span>
       <span class="rk-col rk-score">${e.score.toLocaleString()}</span>
-      <span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} LV${e.level} ${e.acc}%</span>
+      <span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} <b class="rk-diff-${e.diff}">${e.diff.toUpperCase()}</b> LV${e.level} ${e.acc}% ×${e.maxCombo||0}</span>
     </div>`;
   }).join('');
 }
@@ -4647,7 +4650,7 @@ function renderTitleRankTab(mode){
   if(note){ note.style.display='none'; note.textContent=''; }
 
   if(mode==='endless'){
-    header.innerHTML = `<span class="rk-col rk-no">RANK</span><span class="rk-name">NAME</span><span class="rk-col rk-score">TIME</span><span class="rk-col rk-meta">LV / ACC / 撃破</span>`;
+    header.innerHTML = `<span class="rk-col rk-no">RANK</span><span class="rk-name">NAME</span><span class="rk-col rk-score">TIME</span><span class="rk-col rk-meta">DIFF / LV / ACC / 撃破</span>`;
     renderEndlessRanking(loadEndlessRanking(), null, 'title-ranking-list');
   } else if(mode==='duel'){
     header.innerHTML = `<span class="rk-col rk-no">RANK</span><span class="rk-col rk-score">STREAK</span><span class="rk-col rk-meta">DIFF / LEVEL</span><span class="rk-col rk-date">DATE</span>`;
@@ -4662,7 +4665,7 @@ function renderTitleRankTab(mode){
       note.textContent = `表示中の設定： ${TA.lang==='jp'?'🇯🇵 日本語':'🔤 English'} / ${TA.diff.toUpperCase()} / ${TA.count}問（設定を変えるとランキングも変わります）`;
     }
   } else { // survival
-    header.innerHTML = `<span class="rk-col rk-no">RANK</span><span class="rk-name">NAME</span><span class="rk-col rk-score">SCORE</span><span class="rk-col rk-meta">LV / ACC</span>`;
+    header.innerHTML = `<span class="rk-col rk-no">RANK</span><span class="rk-name">NAME</span><span class="rk-col rk-score">SCORE</span><span class="rk-col rk-meta">DIFF / LV / ACC / COMBO</span>`;
     renderRankingFull(loadRanking(), null, 'title-ranking-list');
   }
 }
@@ -5540,7 +5543,7 @@ function renderEndlessRanking(list,myEntry,containerId){
       <span class="rk-col rk-no">${md[i]||('#'+(i+1))}${isMe?' ◀':''}</span>
       <span class="rk-name">${(e.name||'ANON').slice(0,8)}</span>
       <span class="rk-col rk-score">${time}</span>
-      <span class="rk-col rk-meta">Lv${e.level} ${e.acc}% ${e.shotsHit}撃破</span>
+      <span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} <b class="rk-diff-${e.diff}">${(e.diff||'').toUpperCase()}</b> Lv${e.level} ${e.acc}% ${e.shotsHit}撃破</span>
     </div>`;
   }).join('');
 }
