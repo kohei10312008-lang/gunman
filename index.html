@@ -110,6 +110,12 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 
 /* SCREENS */
 .screen{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(12,6,2,0.93);text-align:center}
+.profile-card{background:linear-gradient(160deg,#241205,#160a02);border:2px solid #5a3a10;border-radius:6px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.12s;font-family:inherit;text-align:left;width:100%;color:#fff}
+.profile-card:hover{border-color:var(--gold)}
+.profile-card .pc-name{font-size:0.95rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px}
+.profile-card .pc-avatar{width:34px;height:34px;border-radius:50%;background:#3a2408;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.profile-card .pc-del{color:var(--smoke);font-size:0.7rem;padding:5px 10px;border-radius:50px;background:rgba(255,255,255,0.06);letter-spacing:1px}
+.profile-card .pc-del:hover{color:#ff6050;background:rgba(255,80,60,0.15)}
 .screen.hidden{display:none !important}
 .screen h1{font-family:'Rye',serif;font-size:clamp(2rem,6vw,4rem);color:var(--gold);text-shadow:3px 3px 0 #5a3000,6px 6px 14px rgba(0,0,0,0.8);letter-spacing:4px;margin-bottom:0.3em}
 .screen .sub{color:var(--smoke);font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:1.8rem}
@@ -2221,6 +2227,26 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
     <button class="btn secondary" id="btn-stats" >📊 統計</button>
     <button class="btn secondary" id="btn-achievements">🏆 実績</button>
   </div>
+  <div style="display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap;">
+    <button class="btn secondary" id="btn-profile" style="font-size:0.68rem;padding:8px 12px;">👤 <span id="profile-name-label">プロフィール</span></button>
+    <button class="btn secondary" id="btn-export" style="font-size:0.68rem;padding:8px 12px;">📤 書き出す</button>
+    <button class="btn secondary" id="btn-import" style="font-size:0.68rem;padding:8px 12px;">📥 読み込む</button>
+    <input type="file" id="import-file-input" accept=".json" style="display:none;">
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="screen hidden" id="screen-profile">
+  <div id="profile-back-row" style="display:none;width:min(420px,90vw);margin-bottom:8px;">
+    <button class="btn secondary" id="profile-back-btn" style="font-size:0.75rem;padding:8px 14px;">← もどる</button>
+  </div>
+  <h1 style="font-size:1.5rem;" id="profile-screen-title">だれが使う？</h1>
+  <p class="sub" style="margin-bottom:16px;font-size:0.78rem;" id="profile-screen-hint">端末を共有していても、成績・実績・ランキングを人ごとに分けて記録できます</p>
+  <div id="profile-list" style="display:flex;flex-direction:column;gap:10px;width:min(420px,90vw);"></div>
+  <div style="display:flex;gap:8px;width:min(420px,90vw);margin-top:16px;">
+    <input type="text" id="new-profile-name" placeholder="名前（10文字まで）" maxlength="10" style="flex:1;padding:12px;border-radius:6px;border:1px solid #5a3a10;background:#1a0e04;color:#fff;font-family:inherit;font-size:0.95rem;">
+    <button class="btn" id="profile-create-btn" style="padding:0 18px;">作成</button>
+  </div>
 </div>
 
 <!-- RESULT -->
@@ -3272,10 +3298,147 @@ const scTitle=document.getElementById('screen-title');
 const scResult=document.getElementById('screen-result');
 const scManual=document.getElementById('screen-manual');
 
+// ═══ プロフィール管理（同一端末で複数人利用） ═══
+const PROFILES_KEY='gunman_profiles_v1', ACTIVE_PROFILE_KEY='gunman_active_profile_v1';
+let activeProfileId=null;
+function lsGetRaw(key,def){try{const v=JSON.parse(localStorage.getItem(key));return v===null||v===undefined?def:v;}catch(e){return def;}}
+function lsSetRaw(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch(e){}}
+// すべてのゲームデータ用キーはこのヘルパーを通して「::プロフィールID」を付与し、プロフィールごとに分離保存する
+function profileKey(base){return `${base}::${activeProfileId||'default'}`;}
+function loadProfiles(){return lsGetRaw(PROFILES_KEY,[]);}
+function saveProfiles(p){lsSetRaw(PROFILES_KEY,p);}
+function getActiveProfileId(){return lsGetRaw(ACTIVE_PROFILE_KEY,null);}
+function setActiveProfileId(id){lsSetRaw(ACTIVE_PROFILE_KEY,id);activeProfileId=id;}
+const PROFILE_AVATARS=['🤠','🔫','🐎','🌵','⭐','🏜️','🦅','🐺','💥','🎯','🎩','🥃'];
+function avatarForName(name){let h=0;for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;return PROFILE_AVATARS[h%PROFILE_AVATARS.length];}
+function createProfile(name){
+  name=(name||'').trim().slice(0,10);
+  if(!name)return null;
+  const profiles=loadProfiles();
+  if(profiles.some(p=>p.name===name)){alert('同じ名前のプロフィールがすでにあります。');return null;}
+  const id='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+  profiles.push({id,name,createdAt:new Date().toISOString()});
+  saveProfiles(profiles);
+  return id;
+}
+// ═══ 旧データ（プロフィール導入前）の引き継ぎ ═══
+// プロフィール機能を追加する前は「プロフィールIDなし」のキー名で保存されていたため、
+// 初めてプロフィールを作る時だけ、そのデータを新しいプロフィールに自動コピーする
+const LEGACY_LS_KEYS=['gunman_typer_scores_v1','gunman_duel_scores_v1','gunman_player_name','gunman_stats_v1','gunman_ach_v1','gunman_prac_stats_v1','gunman_daily_v1','gunman_ach_ts_v1','gunman_ach_seen_v1','gunman_endless_v1'];
+const LEGACY_TA_PREFIX='gunman_timeattack_v1_';
+function hasLegacyData(){
+  if(LEGACY_LS_KEYS.some(k=>localStorage.getItem(k)!==null)) return true;
+  return Object.keys(localStorage).some(k=>k.startsWith(LEGACY_TA_PREFIX) && !k.includes('::'));
+}
+function migrateLegacyDataToProfile(profileId){
+  LEGACY_LS_KEYS.forEach(k=>{
+    const v=localStorage.getItem(k);
+    if(v!==null) localStorage.setItem(`${k}::${profileId}`, v);
+  });
+  Object.keys(localStorage).filter(k=>k.startsWith(LEGACY_TA_PREFIX) && !k.includes('::')).forEach(k=>{
+    localStorage.setItem(`${k}::${profileId}`, localStorage.getItem(k));
+  });
+}
+function deleteProfileById(id){
+  let profiles=loadProfiles();
+  const p=profiles.find(x=>x.id===id);
+  if(!p)return;
+  if(!confirm(`「${p.name}」のデータを削除します。統計・実績・ランキングもすべて消えます。よろしいですか？`))return;
+  const suffix='::'+id;
+  Object.keys(localStorage).filter(k=>k.endsWith(suffix)).forEach(k=>localStorage.removeItem(k));
+  profiles=profiles.filter(x=>x.id!==id);
+  saveProfiles(profiles);
+  if(activeProfileId===id){ setActiveProfileId(null); }
+  renderProfileList();
+}
+function selectProfile(id){
+  setActiveProfileId(id);
+  updateProfileLabel();
+  document.getElementById('screen-profile').classList.add('hidden');
+  const scIntroEl=document.getElementById('screen-intro');
+  if(!scIntroEl.dataset.introDone){
+    scIntroEl.classList.remove('hidden');
+  } else {
+    scTitle.classList.remove('hidden');
+    renderTitleRanking();
+  }
+}
+function renderProfileList(){
+  const profiles=loadProfiles();
+  const list=document.getElementById('profile-list');
+  if(!list)return;
+  if(profiles.length===0){
+    list.innerHTML='<div style="padding:10px;color:var(--smoke);font-size:0.8rem;">まだプロフィールがありません。下の欄から作成してください。</div>';
+    return;
+  }
+  list.innerHTML=profiles.map(p=>`
+    <button class="profile-card" onclick="selectProfile('${p.id}')">
+      <span class="pc-name"><span class="pc-avatar">${avatarForName(p.name)}</span>${p.name}${p.id===activeProfileId?' <span style="color:var(--gold);font-size:0.7rem;">(使用中)</span>':''}</span>
+      <span class="pc-del" onclick="event.stopPropagation();deleteProfileById('${p.id}')">削除</span>
+    </button>`).join('');
+}
+function goProfileScreen(isFirstRun){
+  document.getElementById('profile-back-row').style.display=isFirstRun?'none':'flex';
+  document.getElementById('profile-screen-title').textContent=isFirstRun?'だれが使う？':'プロフィールを切りかえる';
+  const hint=document.getElementById('profile-screen-hint');
+  if(hint){
+    hint.textContent=(isFirstRun && hasLegacyData())
+      ? '以前のプレイデータが見つかりました。最初に作るプロフィールに自動で引き継がれます。'
+      : '端末を共有していても、成績・実績・ランキングを人ごとに分けて記録できます';
+  }
+  renderProfileList();
+  scTitle.classList.add('hidden');
+  document.getElementById('screen-intro').classList.add('hidden');
+  document.getElementById('screen-profile').classList.remove('hidden');
+}
+function updateProfileLabel(){
+  const profiles=loadProfiles();
+  const p=profiles.find(x=>x.id===activeProfileId);
+  const el=document.getElementById('profile-name-label');
+  if(el) el.textContent=p?p.name:'プロフィール';
+}
+function exportProfileData(){
+  const profiles=loadProfiles();
+  const p=profiles.find(x=>x.id===activeProfileId);
+  const suffix='::'+(activeProfileId||'default');
+  const data={};
+  Object.keys(localStorage).filter(k=>k.endsWith(suffix)).forEach(k=>{
+    data[k.slice(0,-suffix.length)]=localStorage.getItem(k);
+  });
+  const payload={app:'typing_gunman',profileName:p?p.name:'プロフィール',exportedAt:new Date().toISOString(),data};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const dateStr=new Date().toISOString().slice(0,10);
+  a.href=url;
+  a.download=`gunman_typer_${payload.profileName}_${dateStr}.json`;
+  document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(url);
+}
+function importProfileData(file){
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    let payload;
+    try{ payload=JSON.parse(e.target.result); }catch(err){ alert('ファイルの読み込みに失敗しました。'); return; }
+    if(!payload||payload.app!=='typing_gunman'||!payload.data){ alert('このアプリのデータファイルではないようです。'); return; }
+    const profiles=loadProfiles();
+    const cur=profiles.find(x=>x.id===activeProfileId);
+    const curName=cur?cur.name:'プロフィール';
+    if(!confirm(`「${curName}」のデータを、書き出したファイル（${payload.profileName||'不明'}）の内容で上書きします。よろしいですか？`))return;
+    const suffix='::'+(activeProfileId||'default');
+    Object.keys(payload.data).forEach(base=>{
+      localStorage.setItem(base+suffix, payload.data[base]);
+    });
+    alert('読み込みが完了しました。ページを再読み込みします。');
+    location.reload();
+  };
+  reader.readAsText(file);
+}
+
 // ═══ RANKING ═══
 const LS_KEY='gunman_typer_scores_v1';
-function loadRanking(){try{return JSON.parse(localStorage.getItem(LS_KEY))||[];}catch(e){return[];}}
-function saveRanking(l){try{localStorage.setItem(LS_KEY,JSON.stringify(l));}catch(e){}}
+function loadRanking(){try{return JSON.parse(localStorage.getItem(profileKey(LS_KEY)))||[];}catch(e){return[];}}
+function saveRanking(l){try{localStorage.setItem(profileKey(LS_KEY),JSON.stringify(l));}catch(e){}}
 function addScore(entry){const l=loadRanking();l.push(entry);l.sort((a,b)=>b.score-a.score);const t=l.slice(0,10);const rank=t.findIndex(e=>e===entry)+1;const isNew=rank===1&&(l.length===1||entry.score>(l[1]?.score??0));saveRanking(t);return{rank,isNew,list:t};}
 function renderRanking(list,my){const c=document.getElementById('ranking-list');if(!list.length){c.innerHTML='<div style="padding:10px;text-align:center;color:#666">NO DATA YET</div>';return;}const md=['🥇','🥈','🥉'];c.innerHTML=list.map((e,i)=>{const me=e===my;const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${me?' rk-new':''}`;const d=new Date(e.ts);const dt=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return`<div class="${cls}"><span class="rk-col rk-no">${md[i]||('#'+(i+1))}${me?' ◀':''}</span><span class="rk-col rk-score">${e.score.toLocaleString()}</span><span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} LV${e.level} ${e.acc}% ×${e.maxCombo}</span><span class="rk-col rk-date">${dt}</span></div>`;}).join('');}
 function renderTitleRanking(){const l=loadRanking();const el=document.getElementById('title-ranking');if(!l.length){el.innerHTML='<span style="color:#555">— NO RECORDS YET —</span>';return;}const md=['🥇','🥈','🥉'];el.innerHTML=l.slice(0,3).map((e,i)=>`<span class="title-rank-item"><span class="tr-medal">${md[i]}</span><span class="tr-score">${e.score.toLocaleString()}</span> ${e.diff.toUpperCase()}</span>`).join('');}
@@ -3302,6 +3465,38 @@ document.getElementById('btn-start').addEventListener('click',()=>{
 document.getElementById('btn-retry').addEventListener('click',startCountdown);
 document.getElementById('btn-title').addEventListener('click',()=>{scResult.classList.add('hidden');scTitle.classList.remove('hidden');renderTitleRanking();});
 document.getElementById('btn-manual').addEventListener('click',()=>{scTitle.classList.add('hidden');scManual.classList.remove('hidden');activateManualTab('basic');});
+document.getElementById('btn-profile').addEventListener('click',()=>goProfileScreen(false));
+document.getElementById('profile-back-btn').addEventListener('click',()=>{
+  document.getElementById('screen-profile').classList.add('hidden');
+  scTitle.classList.remove('hidden');
+  renderTitleRanking();
+});
+document.getElementById('profile-create-btn').addEventListener('click',()=>{
+  const input=document.getElementById('new-profile-name');
+  const isFirstEver=loadProfiles().length===0;
+  const shouldMigrate=isFirstEver && hasLegacyData();
+  const id=createProfile(input.value);
+  if(id){
+    if(shouldMigrate) migrateLegacyDataToProfile(id);
+    input.value='';
+    selectProfile(id);
+    if(shouldMigrate){
+      setTimeout(()=>alert('以前のプレイデータ（ランキング・実績・統計など）をこのプロフィールに引き継ぎました！'),400);
+    }
+  }
+});
+document.getElementById('new-profile-name').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ document.getElementById('profile-create-btn').click(); }
+});
+document.getElementById('btn-export').addEventListener('click',exportProfileData);
+document.getElementById('btn-import').addEventListener('click',()=>{
+  document.getElementById('import-file-input').click();
+});
+document.getElementById('import-file-input').addEventListener('change',(e)=>{
+  const file=e.target.files[0];
+  if(file) importProfileData(file);
+  e.target.value='';
+});
 document.getElementById('manual-close-btn').addEventListener('click',()=>{scManual.classList.add('hidden');scTitle.classList.remove('hidden');});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!scManual.classList.contains('hidden')){scManual.classList.add('hidden');scTitle.classList.remove('hidden');}});
 document.querySelectorAll('.m-tab').forEach(b=>{b.addEventListener('click',()=>activateManualTab(b.dataset.tab));});
@@ -3823,8 +4018,8 @@ function sfxKanaConfirm(){
     o.start(t); o.stop(t+0.13);
   }catch(e){}
 }
-function loadDuelRanking(){try{return JSON.parse(localStorage.getItem(LS_DUEL))||[];}catch(e){return[];}}
-function saveDuelRanking(l){try{localStorage.setItem(LS_DUEL,JSON.stringify(l));}catch(e){}}
+function loadDuelRanking(){try{return JSON.parse(localStorage.getItem(profileKey(LS_DUEL)))||[];}catch(e){return[];}}
+function saveDuelRanking(l){try{localStorage.setItem(profileKey(LS_DUEL),JSON.stringify(l));}catch(e){}}
 function addDuelScore(entry){const l=loadDuelRanking();l.push(entry);l.sort((a,b)=>b.streak-a.streak);const t=l.slice(0,10);const rank=t.findIndex(e=>e===entry)+1;saveDuelRanking(t);return{rank,list:t};}
 function renderDuelRanking(list,my,containerId='duel-ranking-list'){const el=document.getElementById(containerId);if(!list.length){el.innerHTML='<div style="padding:8px;text-align:center;color:#555">NO DATA YET</div>';return;}const md=['🥇','🥈','🥉'];el.innerHTML=list.map((e,i)=>{const me=e===my;const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${me?' rk-new':''}`;const d=new Date(e.ts);const dt=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return`<div class="${cls}"><span class="rk-col rk-no">${md[i]||('#'+(i+1))}${me?' ◀':''}</span><span class="rk-col rk-score">${e.streak}連勝</span><span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} LV${e.level||1}</span><span class="rk-col rk-date">${dt}</span></div>`;}).join('');}
 function getDuelWord(){const lv=D.level-1;if(D.lang==='jp'){const p=getJPPool(D.level);const e=p[Math.floor(Math.random()*p.length)];return{word:e.r,kana:e.k};}const p=DUEL_WORDS_BY_LV[Math.min(lv,DUEL_WORDS_BY_LV.length-1)];return{word:p[Math.floor(Math.random()*p.length)],kana:''};}
@@ -3909,6 +4104,17 @@ window.addEventListener('DOMContentLoaded', function() {
   const iFlash=$('intro-flash'),iCurt=$('intro-curtain');
   const iEnemy=$('intro-enemy'),iPlayer=$('intro-player-char');
 
+  // ═══ プロフィール判定（起動時）═══
+  // プロフィールが無い/見つからない場合はイントロを止めてプロフィール選択画面を出す
+  activeProfileId = getActiveProfileId();
+  const _profiles = loadProfiles();
+  if(!activeProfileId || !_profiles.some(p=>p.id===activeProfileId)){
+    scIntro.classList.add('hidden');
+    goProfileScreen(true);
+  } else {
+    updateProfileLabel();
+  }
+
   // フェードユーティリティ
   const fade=(el,op,ms,delay=0)=>{
     el.style.transition=`opacity ${ms}ms ease ${delay}ms`;
@@ -3934,6 +4140,7 @@ window.addEventListener('DOMContentLoaded', function() {
     iCurt.style.opacity='1';
     setTimeout(()=>{
       scIntro.classList.add('hidden');
+      scIntro.dataset.introDone='1';
       scTitle.classList.remove('hidden');
       renderTitleRanking();
     },370);
@@ -4578,10 +4785,10 @@ function resetAccDisplay() {
 // ── 名前の永続保存 ──
 const LS_NAME_KEY = 'gunman_player_name';
 function getSavedName() {
-  return localStorage.getItem(LS_NAME_KEY) || '';
+  return localStorage.getItem(profileKey(LS_NAME_KEY)) || '';
 }
 function savePlayerName(name) {
-  if (name) localStorage.setItem(LS_NAME_KEY, name.toUpperCase().slice(0,8));
+  if (name) localStorage.setItem(profileKey(LS_NAME_KEY), name.toUpperCase().slice(0,8));
 }
 
 // ── 名前入力モーダル ──
@@ -4671,7 +4878,7 @@ function renderTitleRankTab(mode){
     renderDuelRanking(loadDuelRanking(), null, 'title-ranking-list');
   } else if(mode==='ta'){
     header.innerHTML = `<span class="rk-col rk-no">RANK</span><span class="rk-name">NAME</span><span class="rk-col rk-score">TIME</span><span class="rk-col rk-meta">DIFF / ACC</span>`;
-    const key = `${LS_TA_KEY}_${TA.count}_${TA.diff}_${TA.lang}`;
+    const key = getTAKey();
     let list; try{ list = JSON.parse(localStorage.getItem(key))||[]; }catch(e){ list=[]; }
     renderTARanking(list, null, 'title-ranking-list');
     if(note){
@@ -4739,7 +4946,7 @@ const LS_STATS_KEY = 'gunman_stats_v1';
 
 function loadStats() {
   try {
-    return JSON.parse(localStorage.getItem(LS_STATS_KEY)) || {
+    return JSON.parse(localStorage.getItem(profileKey(LS_STATS_KEY))) || {
       totalPlays:   0,
       totalKeys:    0,
       totalHit:     0,
@@ -4754,7 +4961,7 @@ function loadStats() {
 }
 
 function saveStats(st) {
-  try { localStorage.setItem(LS_STATS_KEY, JSON.stringify(st)); } catch(e) {}
+  try { localStorage.setItem(profileKey(LS_STATS_KEY), JSON.stringify(st)); } catch(e) {}
 }
 
 // ════════════════════════════════════════
@@ -4765,11 +4972,11 @@ const LS_ACH_KEY = 'gunman_ach_v1';
 // ── 練習モード累計クリア回数（バッジ判定用）──
 const LS_PRAC_KEY = 'gunman_prac_stats_v1';
 function loadPracStats(){
-  try{ return Object.assign({typingClears:0,sentenceClears:0,kbStepClears:0,taClears:0}, JSON.parse(localStorage.getItem(LS_PRAC_KEY))||{}); }
+  try{ return Object.assign({typingClears:0,sentenceClears:0,kbStepClears:0,taClears:0}, JSON.parse(localStorage.getItem(profileKey(LS_PRAC_KEY)))||{}); }
   catch(e){ return {typingClears:0,sentenceClears:0,kbStepClears:0,taClears:0}; }
 }
 function savePracStats(p){
-  try{ localStorage.setItem(LS_PRAC_KEY, JSON.stringify(p)); }catch(e){}
+  try{ localStorage.setItem(profileKey(LS_PRAC_KEY), JSON.stringify(p)); }catch(e){}
 }
 function incPracStat(key){
   const p = loadPracStats();
@@ -4815,14 +5022,14 @@ function dayOfYear(d){
 // 今日の目標を取得（日付が変わっていれば新しい目標を生成）
 function ensureDailyGoal(){
   let st;
-  try{ st = JSON.parse(localStorage.getItem(LS_DAILY_KEY)); }catch(e){ st = null; }
+  try{ st = JSON.parse(localStorage.getItem(profileKey(LS_DAILY_KEY))); }catch(e){ st = null; }
   const today = todayStr();
   if(!st || st.date !== today){
     const idx = dayOfYear(new Date()) % DAILY_GOAL_POOL.length;
     const goal = DAILY_GOAL_POOL[idx];
     st = { date: today, type: goal.type, icon: goal.icon, label: goal.label,
            target: goal.target, unit: goal.unit, progress: 0, claimed: false };
-    try{ localStorage.setItem(LS_DAILY_KEY, JSON.stringify(st)); }catch(e){}
+    try{ localStorage.setItem(profileKey(LS_DAILY_KEY), JSON.stringify(st)); }catch(e){}
   }
   return st;
 }
@@ -4834,7 +5041,7 @@ function addDailyProgress(type, amount){
   if(st.type !== type) return;
   const wasDone = st.progress >= st.target;
   st.progress += amount;
-  try{ localStorage.setItem(LS_DAILY_KEY, JSON.stringify(st)); }catch(e){}
+  try{ localStorage.setItem(profileKey(LS_DAILY_KEY), JSON.stringify(st)); }catch(e){}
   if(!wasDone && st.progress >= st.target){
     onDailyGoalAchieved();
   }
@@ -4987,30 +5194,30 @@ const ACHIEVEMENTS = [
 
 
 function loadUnlockedAch(){
-  try{ return new Set(JSON.parse(localStorage.getItem(LS_ACH_KEY))||[]); }
+  try{ return new Set(JSON.parse(localStorage.getItem(profileKey(LS_ACH_KEY)))||[]); }
   catch(e){ return new Set(); }
 }
 function saveUnlockedAch(set){
-  try{ localStorage.setItem(LS_ACH_KEY, JSON.stringify([...set])); }catch(e){}
+  try{ localStorage.setItem(profileKey(LS_ACH_KEY), JSON.stringify([...set])); }catch(e){}
 }
 
 // ── バッジ解除日時（NEW!タグ・獲得日表示用）──
 const LS_ACH_TS_KEY = 'gunman_ach_ts_v1';
 function loadAchTimestamps(){
-  try{ return JSON.parse(localStorage.getItem(LS_ACH_TS_KEY))||{}; }
+  try{ return JSON.parse(localStorage.getItem(profileKey(LS_ACH_TS_KEY)))||{}; }
   catch(e){ return {}; }
 }
 function saveAchTimestamps(obj){
-  try{ localStorage.setItem(LS_ACH_TS_KEY, JSON.stringify(obj)); }catch(e){}
+  try{ localStorage.setItem(profileKey(LS_ACH_TS_KEY), JSON.stringify(obj)); }catch(e){}
 }
 // ── バッジ「既読」管理（詳細表示済みのNEW!バッジを記録）──
 const LS_ACH_SEEN_KEY = 'gunman_ach_seen_v1';
 function loadAchSeen(){
-  try{ return new Set(JSON.parse(localStorage.getItem(LS_ACH_SEEN_KEY))||[]); }
+  try{ return new Set(JSON.parse(localStorage.getItem(profileKey(LS_ACH_SEEN_KEY)))||[]); }
   catch(e){ return new Set(); }
 }
 function saveAchSeen(set){
-  try{ localStorage.setItem(LS_ACH_SEEN_KEY, JSON.stringify([...set])); }catch(e){}
+  try{ localStorage.setItem(profileKey(LS_ACH_SEEN_KEY), JSON.stringify([...set])); }catch(e){}
 }
 function formatAchDate(ts){
   const d = new Date(ts);
@@ -5528,10 +5735,10 @@ function drawScoreGraph(history) {
 const LS_ENDLESS_KEY = 'gunman_endless_v1';
 
 function loadEndlessRanking(){
-  try{ return JSON.parse(localStorage.getItem(LS_ENDLESS_KEY))||[]; }catch(e){ return []; }
+  try{ return JSON.parse(localStorage.getItem(profileKey(LS_ENDLESS_KEY)))||[]; }catch(e){ return []; }
 }
 function saveEndlessRanking(l){
-  try{ localStorage.setItem(LS_ENDLESS_KEY,JSON.stringify(l)); }catch(e){}
+  try{ localStorage.setItem(profileKey(LS_ENDLESS_KEY),JSON.stringify(l)); }catch(e){}
 }
 function addEndlessScore(entry){
   const list=loadEndlessRanking();
@@ -5668,7 +5875,7 @@ document.addEventListener('keydown', e => {
 //  ⚡ TIME ATTACK モード
 // ════════════════════════════════════════
 const LS_TA_KEY = 'gunman_timeattack_v1';
-function getTAKey(){ return `${LS_TA_KEY}_${TA.count}_${TA.diff}_${TA.lang}`; }
+function getTAKey(){ return profileKey(`${LS_TA_KEY}_${TA.count}_${TA.diff}_${TA.lang}`); }
 
 // タイムアタック用固定単語リスト（難易度別・30語固定）
 const TA_WORDS = {
@@ -5769,7 +5976,7 @@ function openTimeAttackSetup(){
   renderTASetupRanking();
 }
 function renderTASetupRanking(){
-  const key  = `${LS_TA_KEY}_${TA.count}_${G.diff}_${G.lang}`;
+  const key  = profileKey(`${LS_TA_KEY}_${TA.count}_${G.diff}_${G.lang}`);
   let list; try{ list=JSON.parse(localStorage.getItem(key))||[]; }catch(e){ list=[]; }
   const el = document.getElementById('ta-setup-ranking-list');
   if(!el) return;
