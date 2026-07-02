@@ -3240,6 +3240,15 @@ const DIFF={
   normal:{spawnMs:5000,advanceSec:18,maxT:2,hp:7,lvEvery:7},   // 旧EASY
   hard:  {spawnMs:3200,advanceSec:12,maxT:3,hp:4,lvEvery:7},   // 旧NORMAL
 };
+// ═══ 難易度別スコア倍率（EASYを基準1.0とし、NORMAL/HARDほど高得点）═══
+// 同じレベル・同じ正確率でも、難易度が高いほどポイントが高くなるようにする
+const DIFF_SCORE_MULT={easy:1, normal:1.15, hard:1.35};
+// ═══ 単語の長さに応じた制限時間ボーナス ═══
+// 6文字を超える分だけ、1文字ごとに時間を追加する（長い単語ほど自動で持ち時間が伸びる）
+// これにより「Lv9以降で単語が急に長くなるのに持ち時間は変わらない」という難易度急上昇を緩和する
+function wordTimeBonusMs(word){
+  return Math.max(0, (word?.length||0) - 6) * 220;
+}
 const LANES=[10,27,45,63,80];
 
 // ═══ STATE ═══
@@ -3376,7 +3385,7 @@ function rafLoop(){if(G.phase!=='playing')return;const now=Date.now();const W=la
 // ═══ SPAWN ═══
 function spawnTarget(){if(G.phase!=='playing')return;const cfg=DIFF[G.diff];const isJP=G.lang==='jp';const id=G.nextId++;const svgIdx=Math.floor(Math.random()*TARGET_SVGS.length);let laneIdx;do{laneIdx=Math.floor(Math.random()*LANES.length);}while(G.activeTargets.length>0&&G.activeTargets[G.activeTargets.length-1].laneIdx===laneIdx&&Math.random()<0.6);const laneX=LANES[laneIdx];let word,kana=null;if(isJP){const p=getJPPool(G.level);const e=p[Math.floor(Math.random()*p.length)];word=e.r;kana=e.k;}else{const p=getWordPool(G.level);word=p[Math.floor(Math.random()*p.length)];}// EASY/NORMALはレベルによる加速を抑制
 const lvSpeedup=G.diff==='easy'?60:G.diff==='normal'?100:200;
-const advanceMs=Math.max(G.diff==='easy'?7000:G.diff==='normal'?5000:3500,cfg.advanceSec*1000-(G.level-1)*lvSpeedup);const baseH=360;const baseW=Math.round(baseH*0.6);const el=document.createElement('div');el.className='target-wrap walking';el.dataset.id=id;el.style.position='absolute';el.style.top='0px';el.style.left='0px';el.style.transformOrigin='center bottom';const wHTML=isJP?`<div class="target-kana">${kana}</div><div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`:`<div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`;el.innerHTML=`<div>${TARGET_SVGS[svgIdx](baseH)}</div><div class="target-timer"><div class="target-timer-bar"></div></div>${wHTML}`;lane.appendChild(el);// JP: ローマ字表示レベル適用
+const advanceMs=Math.max(G.diff==='easy'?7000:G.diff==='normal'?5000:3500,cfg.advanceSec*1000-(G.level-1)*lvSpeedup)+wordTimeBonusMs(word);const baseH=360;const baseW=Math.round(baseH*0.6);const el=document.createElement('div');el.className='target-wrap walking';el.dataset.id=id;el.style.position='absolute';el.style.top='0px';el.style.left='0px';el.style.transformOrigin='center bottom';const wHTML=isJP?`<div class="target-kana">${kana}</div><div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`:`<div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`;el.innerHTML=`<div>${TARGET_SVGS[svgIdx](baseH)}</div><div class="target-timer"><div class="target-timer-bar"></div></div>${wHTML}`;lane.appendChild(el);// JP: ローマ字表示レベル適用
 if(isJP){
   applyRomaVisibility(el, G.level);
   // HARDのJP: ローマ字エリアを最初から非表示
@@ -3530,7 +3539,8 @@ function onWordComplete(t){
   t.expired=true;G.shotsHit++;G.combo++;_wpmKeyCount+=t.word.length;if(G.combo>G.maxCombo)G.maxCombo=G.combo;const bonus=G.combo>=5?3:G.combo>=3?2:1;// 文字数の2乗で差をつける（長い単語ほど大幅に高得点）
       const wordLen=t.word.length;
       const accRatio=G.shotsHit/(G.shotsHit+G.shotsMissed);const accMult=getAccMult(accRatio,G.diff);// 正確率が低いほど得点倍率が下がる（難易度別・同レベルでもミスが少ない方が高得点）
-      const pts=Math.round((wordLen*wordLen*8 + G.level*10)*bonus*accMult);G.score+=pts;const cfg=DIFF[G.diff];if(G.shotsHit>0&&G.shotsHit%cfg.lvEvery===0){G.level++;sfxLevelUp();showPop(t.el,`LV.${G.level} UP! ⭐`,'#ffd040');if(G.lang==='jp')showKanaNotify(G.level);
+      const diffMult=DIFF_SCORE_MULT[G.diff]||1;// 難易度が高いほど基礎点を上乗せ（同レベル・同ACCでもHARDが高得点）
+      const pts=Math.round((wordLen*wordLen*8 + G.level*10)*bonus*accMult*diffMult);G.score+=pts;const cfg=DIFF[G.diff];if(G.shotsHit>0&&G.shotsHit%cfg.lvEvery===0){G.level++;sfxLevelUp();showPop(t.el,`LV.${G.level} UP! ⭐`,'#ffd040');if(G.lang==='jp')showKanaNotify(G.level);
     if(G.level>=5&&!BOSS.active&&!G.endless){startBGM('G');}clearInterval(G.spawnTimer);G.spawnTimer=setInterval(()=>{const c=DIFF[G.diff];if(!BOSS.active&&G.activeTargets.length<c.maxT+Math.floor(G.level/4))spawnTarget();},Math.max(G.diff==='easy'?2500:G.diff==='normal'?1500:900,cfg.spawnMs-(G.level-1)*(G.diff==='easy'?80:G.diff==='normal'?100:150)));}updateHUD();maybeShowNewRecord();sfxGunshot(G.combo);shootEffect(t,pts);player.classList.remove('player-shoot');void player.offsetWidth;player.classList.add('player-shoot');setTimeout(()=>player.classList.remove('player-shoot'),250);t.el.classList.remove('walking');t.el.classList.add('shot');setTimeout(()=>{t.el.remove();removeTarget(t.id);},580);}
 
 // ═══ SHOOT EFFECT ═══
@@ -6128,7 +6138,7 @@ function spawnBoss() {
   const laneW  = lane.offsetWidth || window.innerWidth;
   const startX = laneW + 20;
   const advanceMs = Math.max(3500,
-    DIFF[G.diff].advanceSec * 1000 * 1.4 - (G.level - 1) * 200);
+    DIFF[G.diff].advanceSec * 1000 * 1.4 - (G.level - 1) * 200) + wordTimeBonusMs(word);
 
   const el = document.createElement('div');
   el.className    = 'target-wrap walking is-boss';
@@ -6203,7 +6213,8 @@ onWordComplete = function(t) {
 
       const accRatio = G.shotsHit/(G.shotsHit+G.shotsMissed);
       const accMult  = getAccMult(accRatio, G.diff); // 正確率が低いほど得点倍率が下がる（難易度別）
-      const pts = Math.round((t.word.length * 10 + G.level * 5) * 5 * accMult); // ×5ボーナス
+      const diffMult = DIFF_SCORE_MULT[G.diff]||1; // 難易度が高いほど基礎点を上乗せ
+      const pts = Math.round((t.word.length * 10 + G.level * 5) * 5 * accMult * diffMult); // ×5ボーナス
       G.score += pts;
       updateHUD();
       maybeShowNewRecord();
@@ -6318,7 +6329,7 @@ spawnTarget = function() {
   const advanceMs = Math.max(
     G.diff==='easy'?7000:G.diff==='normal'?5000:3500,
     cfg.advanceSec*1000-(G.level-1)*lvSpeedup
-  );
+  ) + wordTimeBonusMs(word);
   const baseH = 360, baseW = Math.round(baseH*0.6);
 
   const el = document.createElement('div');
