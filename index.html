@@ -35,6 +35,9 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 #intro-flash{background:#fff}
 #intro-curtain{background:#000}
 #intro-skip{position:absolute;bottom:20px;right:20px;font-size:0.65rem;color:rgba(160,128,96,0.45);letter-spacing:2px;font-family:'Courier Prime',monospace}
+#intro-start-gate{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:#000;color:#ffd080;font-family:'Rye',serif;font-size:clamp(0.95rem,3.2vw,1.35rem);letter-spacing:2px;text-align:center;padding:0 20px;text-shadow:0 0 12px rgba(255,180,80,0.7);cursor:pointer;animation:introGatePulse 1.6s ease-in-out infinite;transition:opacity 0.3s ease}
+#intro-start-gate.hidden{display:none}
+@keyframes introGatePulse{0%,100%{opacity:0.55}50%{opacity:1}}
 
 /* SCENE */
 #scene{position:relative;width:100vw;height:100vh;background:linear-gradient(to bottom,#0d0805 0%,#2a1205 28%,#7a3a10 52%,#c4935a 68%,#e8b870 73%,#c4935a 76%,#8b4a20 84%,#3a1a08 91%,#1a0a04 100%);overflow:hidden}
@@ -2044,6 +2047,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   <div id="intro-flash"></div>
   <div id="intro-curtain"></div>
   <div id="intro-skip">CLICK / ENTER TO SKIP</div>
+  <div id="intro-start-gate">🔫 タップ / クリック / Enterでスタート</div>
 </div>
 
 <!-- SCENE -->
@@ -3894,9 +3898,6 @@ window.addEventListener('DOMContentLoaded', function() {
       renderTitleRanking();
     },370);
   };
-  scIntro.addEventListener('click',finish,{once:true});
-  document.addEventListener('keydown',function skipIntro(e){if(['Enter','Escape',' '].includes(e.key)){document.removeEventListener('keydown',skipIntro);finish();}});
-
   // ── イントロ用 超強化銃声 ──
   const boom=()=>{try{
     const c=getACtx(),t=c.currentTime;
@@ -3960,45 +3961,72 @@ window.addEventListener('DOMContentLoaded', function() {
   // イントロBGM: なし（バキューンSEのみ）
 
   // タイムライン
-  T(()=>fade(iBg,1,1400),200);
-  T(()=>{
-    iSun.style.transition='opacity 900ms ease, transform 1s cubic-bezier(0.34,1.3,0.64,1)';
-    void iSun.offsetHeight;
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{iSun.style.opacity='1';iSun.style.transform='translateX(-50%) scale(1)';}));
-    fade(iHrz,1,800,200);
-  },1000);
-  T(()=>popIn(iTtl,700),1800);
-  T(()=>fade(iSub,1,500),2400);
-  T(()=>fade(iGuns,1,600),2800);
-  T(()=>{fade(iTtl,0,300);fade(iSub,0,300);},3800);
-  T(()=>{fade(iEyes,1,400);fade(iSt,1,500);},4100);
-  T(()=>{fade(iSt,0,300);fade(iEyes,0,300);},5600);
-  T(()=>{
-    iDr.style.opacity='0';iDr.style.transform='translateX(-50%) scale(2.2)';
-    iDr.style.transition='opacity 0.3s ease, transform 0.35s cubic-bezier(0.34,1.5,0.64,1)';
-    void iDr.offsetHeight;
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{iDr.style.opacity='1';iDr.style.transform='translateX(-50%) scale(1)';}));
-  },6000);
-  T(()=>{
-    unlockAudio(); boom();
-    iML.style.opacity=iMR.style.opacity='1';
-    setTimeout(()=>{iML.style.transition=iMR.style.transition='opacity 0.3s';iML.style.opacity=iMR.style.opacity='0';},80);
-    iPlayer.style.transition='transform 0.25s ease';
-    iEnemy.style.transition='transform 0.25s ease';
-    iPlayer.style.transform='translateX(-30px) rotate(-8deg)';
-    iEnemy.style.transform='scaleX(-1) translateX(-30px) rotate(-8deg)';
-    setTimeout(()=>{iPlayer.style.transform='';iEnemy.style.transform='scaleX(-1)';},300);
-    iFlash.style.transition='opacity 0.05s';iFlash.style.opacity='1';
-    setTimeout(()=>{iFlash.style.transition='opacity 0.5s ease';iFlash.style.opacity='0';},60);
-    setTimeout(()=>{
-      iHole.style.transition='opacity 0.15s ease, transform 0.2s cubic-bezier(0.34,1.5,0.64,1)';
-      iHole.style.transform='translate(-50%,-50%) scale(1.3)';iHole.style.opacity='1';
-      setTimeout(()=>{iHole.style.transform='translate(-50%,-50%) scale(1)';},220);
-    },100);
-  },6500);
-  T(()=>{fade(iDr,0,350);setTimeout(()=>fade(iHole,0,400),150);},7200);
-  T(()=>{iCurt.style.transition='opacity 0.55s ease';iCurt.style.opacity='1';},7800);
-  T(finish,8450);
+  const beginTimeline=()=>{
+    T(()=>fade(iBg,1,1400),200);
+    T(()=>{
+      iSun.style.transition='opacity 900ms ease, transform 1s cubic-bezier(0.34,1.3,0.64,1)';
+      void iSun.offsetHeight;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{iSun.style.opacity='1';iSun.style.transform='translateX(-50%) scale(1)';}));
+      fade(iHrz,1,800,200);
+    },1000);
+    T(()=>popIn(iTtl,700),1800);
+    T(()=>fade(iSub,1,500),2400);
+    T(()=>fade(iGuns,1,600),2800);
+    T(()=>{fade(iTtl,0,300);fade(iSub,0,300);},3800);
+    T(()=>{fade(iEyes,1,400);fade(iSt,1,500);},4100);
+    T(()=>{fade(iSt,0,300);fade(iEyes,0,300);},5600);
+    T(()=>{
+      iDr.style.opacity='0';iDr.style.transform='translateX(-50%) scale(2.2)';
+      iDr.style.transition='opacity 0.3s ease, transform 0.35s cubic-bezier(0.34,1.5,0.64,1)';
+      void iDr.offsetHeight;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{iDr.style.opacity='1';iDr.style.transform='translateX(-50%) scale(1)';}));
+    },6000);
+    T(()=>{
+      unlockAudio(); boom();
+      iML.style.opacity=iMR.style.opacity='1';
+      setTimeout(()=>{iML.style.transition=iMR.style.transition='opacity 0.3s';iML.style.opacity=iMR.style.opacity='0';},80);
+      iPlayer.style.transition='transform 0.25s ease';
+      iEnemy.style.transition='transform 0.25s ease';
+      iPlayer.style.transform='translateX(-30px) rotate(-8deg)';
+      iEnemy.style.transform='scaleX(-1) translateX(-30px) rotate(-8deg)';
+      setTimeout(()=>{iPlayer.style.transform='';iEnemy.style.transform='scaleX(-1)';},300);
+      iFlash.style.transition='opacity 0.05s';iFlash.style.opacity='1';
+      setTimeout(()=>{iFlash.style.transition='opacity 0.5s ease';iFlash.style.opacity='0';},60);
+      setTimeout(()=>{
+        iHole.style.transition='opacity 0.15s ease, transform 0.2s cubic-bezier(0.34,1.5,0.64,1)';
+        iHole.style.transform='translate(-50%,-50%) scale(1.3)';iHole.style.opacity='1';
+        setTimeout(()=>{iHole.style.transform='translate(-50%,-50%) scale(1)';},220);
+      },100);
+    },6500);
+    T(()=>{fade(iDr,0,350);setTimeout(()=>fade(iHole,0,400),150);},7200);
+    T(()=>{iCurt.style.transition='opacity 0.55s ease';iCurt.style.opacity='1';},7800);
+    T(finish,8450);
+  };
+
+  // ── スタートゲート ──
+  // ブラウザの自動再生ポリシー対策：ユーザーの本物の操作（クリック/タップ/キー入力）で
+  // AudioContextを解放してからタイムラインを開始することで、銃声とマズルフラッシュの
+  // タイミングがズレる（音がタイトル画面に移ってから鳴る）不具合を防ぐ。
+  const iGate=$('intro-start-gate');
+  let introStarted=false;
+  const startIntro=(e)=>{
+    if(e && e.type==='keydown' && !['Enter','Escape',' '].includes(e.key)) return;
+    if(introStarted) return;
+    introStarted=true;
+    unlockAudio();
+    if(iGate){
+      iGate.style.animation='none';
+      iGate.style.opacity='0';
+      setTimeout(()=>iGate.classList.add('hidden'),260);
+    }
+    document.removeEventListener('keydown',startIntro);
+    beginTimeline();
+    // タイムライン開始後はクリック/キー入力でスキップ
+    scIntro.addEventListener('click',finish,{once:true});
+    document.addEventListener('keydown',function skipIntro(e2){if(['Enter','Escape',' '].includes(e2.key)){document.removeEventListener('keydown',skipIntro);finish();}});
+  };
+  scIntro.addEventListener('click',startIntro,{once:true});
+  document.addEventListener('keydown',startIntro);
 });
 
 
