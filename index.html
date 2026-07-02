@@ -138,6 +138,17 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 .title-rank-item{white-space:nowrap}
 .title-rank-item .tr-score{color:var(--gold);font-weight:700}
 
+/* モードラベル（どのモードのランキングか明示） */
+.rk-mode-label{font-family:'Rye',serif;font-size:0.76rem;color:var(--gold);letter-spacing:2px;text-align:center;margin:2px 0 6px}
+
+/* タイトル画面：モード切替タブ */
+#title-rank-tabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:4px 0 6px}
+.title-rank-tab{font-family:'Rye',serif;font-size:0.65rem;letter-spacing:0.5px;color:var(--sand);background:transparent;border:1.5px solid var(--smoke);border-radius:12px;padding:4px 10px;cursor:pointer;transition:all 0.14s}
+.title-rank-tab:hover{border-color:var(--gold);color:var(--gold)}
+.title-rank-tab.active{border-color:var(--gold);color:var(--bg);background:linear-gradient(135deg,var(--gold),#9a6a00);font-weight:700}
+#title-ranking-header{display:flex;background:#2a1608;padding:5px 8px;color:var(--smoke);text-transform:uppercase;border-bottom:1px solid #5a3a10}
+#title-ranking-note{font-size:0.6rem;color:var(--smoke);text-align:center;margin-top:6px;letter-spacing:0.5px;line-height:1.5}
+
 /* RANKING */
 #ranking-wrap{width:min(520px,92vw);margin:6px auto 0;border:1px solid #5a3a10;border-radius:4px;overflow:hidden;font-size:0.72rem;letter-spacing:1px}
 #ranking-header{display:flex;background:#2a1608;padding:5px 8px;color:var(--smoke);text-transform:uppercase;border-bottom:1px solid #5a3a10}
@@ -2181,14 +2192,21 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
     <button class="diff-btn" data-diff="hard">💀 HARD</button>
   </div>
   <div id="title-ranking" style="display:none"></div>
+  <div id="title-rank-tabs">
+    <button class="title-rank-tab active" data-mode="survival">🤠 サバイバル</button>
+    <button class="title-rank-tab" data-mode="endless">♾️ エンドレス</button>
+    <button class="title-rank-tab" data-mode="duel">⚔️ デュエル</button>
+    <button class="title-rank-tab" data-mode="ta">⏱ タイムアタック</button>
+  </div>
   <div id="title-ranking-full">
-    <div id="ranking-header" style="font-size:0.65rem;">
+    <div id="title-ranking-header" style="font-size:0.65rem;">
       <span class="rk-col rk-no">RANK</span>
       <span class="rk-name">NAME</span>
       <span class="rk-col rk-score">SCORE</span>
       <span class="rk-col rk-meta">LV / ACC</span>
     </div>
     <div id="title-ranking-list"></div>
+    <div id="title-ranking-note" style="display:none;"></div>
   </div>
   <div style="display:flex;gap:8px;justify-content:center;margin-top:2px;">
     <button class="btn" id="btn-start">DRAW!</button>
@@ -2205,6 +2223,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   <div id="result-score">0 pts</div>
   <div id="result-rank-badge"></div>
   <div id="result-detail"></div>
+  <div id="result-ranking-label" class="rk-mode-label"></div>
   <div id="ranking-wrap">
     <div id="ranking-header">
       <span class="rk-col rk-no">RANK</span>
@@ -2242,6 +2261,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   <h1 id="duel-result-title">YOU WIN!</h1>
   <div id="duel-result-streak"></div>
   <div id="duel-result-detail"></div>
+  <div class="rk-mode-label">⚔️ デュエル ランキング（連勝記録）</div>
   <div id="duel-ranking-wrap">
     <div id="duel-ranking-header">
       <span class="rk-col rk-no">RANK</span>
@@ -2419,6 +2439,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   <div id="ta-result-time">0.00s</div>
   <div id="ta-rank-badge"></div>
   <div id="ta-result-detail"></div>
+  <div id="ta-result-ranking-label" class="rk-mode-label">⏱ タイムアタック ランキング</div>
   <div id="ta-ranking-wrap">
     <div id="ta-ranking-header">
       <span class="rk-col rk-no">RANK</span>
@@ -3585,6 +3606,7 @@ function endGame(){
       else if(rank>0){badge.textContent='#'+rank+' PLACE';badge.style.color='var(--sand)';}
       else{badge.textContent='OUT OF TOP 10';badge.style.color='var(--smoke)';}
       renderEndlessRanking(list,entry,'ranking-list');
+      const rl1=document.getElementById('result-ranking-label'); if(rl1) rl1.textContent='♾️ エンドレス ランキング TOP10';
       scResult.classList.remove('hidden');
     });
     return;
@@ -3624,6 +3646,7 @@ function endGame(){
       congratsEl.classList.remove('show');
     }
     renderRankingFull(list, entry, 'ranking-list');
+    const rl2=document.getElementById('result-ranking-label'); if(rl2) rl2.textContent='🤠 サバイバル ランキング TOP10';
     scResult.classList.remove('hidden');
   });
 }
@@ -3786,7 +3809,7 @@ function sfxKanaConfirm(){
 function loadDuelRanking(){try{return JSON.parse(localStorage.getItem(LS_DUEL))||[];}catch(e){return[];}}
 function saveDuelRanking(l){try{localStorage.setItem(LS_DUEL,JSON.stringify(l));}catch(e){}}
 function addDuelScore(entry){const l=loadDuelRanking();l.push(entry);l.sort((a,b)=>b.streak-a.streak);const t=l.slice(0,10);const rank=t.findIndex(e=>e===entry)+1;saveDuelRanking(t);return{rank,list:t};}
-function renderDuelRanking(list,my){const el=document.getElementById('duel-ranking-list');if(!list.length){el.innerHTML='<div style="padding:8px;text-align:center;color:#555">NO DATA YET</div>';return;}const md=['🥇','🥈','🥉'];el.innerHTML=list.map((e,i)=>{const me=e===my;const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${me?' rk-new':''}`;const d=new Date(e.ts);const dt=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return`<div class="${cls}"><span class="rk-col rk-no">${md[i]||('#'+(i+1))}${me?' ◀':''}</span><span class="rk-col rk-score">${e.streak}連勝</span><span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} LV${e.level||1}</span><span class="rk-col rk-date">${dt}</span></div>`;}).join('');}
+function renderDuelRanking(list,my,containerId='duel-ranking-list'){const el=document.getElementById(containerId);if(!list.length){el.innerHTML='<div style="padding:8px;text-align:center;color:#555">NO DATA YET</div>';return;}const md=['🥇','🥈','🥉'];el.innerHTML=list.map((e,i)=>{const me=e===my;const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${me?' rk-new':''}`;const d=new Date(e.ts);const dt=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return`<div class="${cls}"><span class="rk-col rk-no">${md[i]||('#'+(i+1))}${me?' ◀':''}</span><span class="rk-col rk-score">${e.streak}連勝</span><span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} LV${e.level||1}</span><span class="rk-col rk-date">${dt}</span></div>`;}).join('');}
 function getDuelWord(){const lv=D.level-1;if(D.lang==='jp'){const p=getJPPool(D.level);const e=p[Math.floor(Math.random()*p.length)];return{word:e.r,kana:e.k};}const p=DUEL_WORDS_BY_LV[Math.min(lv,DUEL_WORDS_BY_LV.length-1)];return{word:p[Math.floor(Math.random()*p.length)],kana:''};}
 function startDuel(){D.diff=G.diff;D.lang=G.lang;D.streak=0;D.level=1;D.keyCount=0;scTitle.classList.add('hidden');scResult.classList.add('hidden');scDuel.classList.remove('hidden');duelEnemyFig.style.animation='';duelPlayerFig.style.animation='';duelEnemyFig.style.opacity=duelPlayerFig.style.opacity='1';duelEnemyFig.textContent=['🕵️','🤖','👹','💀','🧟'][Math.floor(Math.random()*5)];duelStreakDisp.textContent='';showQuitBtn('DUELを中断します');startBGM('G');startDuelCountdown();}
 function startDuelCountdown(){D.phase='countdown';duelWordBox.classList.add('hidden');duelStatusMsg.style.color='#fff';let n=3;const tick=()=>{duelStatusMsg.textContent=n;sfxCountBeep(false);if(--n>=0)setTimeout(tick,700);else{sfxCountBeep(true);setTimeout(startStaredown,500);}};tick();}
@@ -4612,28 +4635,44 @@ function renderRankingFull(list, myEntry, containerId) {
   }).join('');
 }
 
-// ── タイトル画面ランキング（名前付きTOP5） ──
-function renderTitleRanking() {
-  const list = loadRanking();
-  // 旧表示（非表示のまま）
-  // 新しい全ランキング
-  const el = document.getElementById('title-ranking-list');
-  if (!el) return;
-  if (!list.length) {
-    el.innerHTML = '<div style="padding:8px;text-align:center;color:#555;font-size:0.72rem">— NO RECORDS YET —</div>';
-    return;
+// ── タイトル画面ランキング（モード切替タブ対応） ──
+let titleRankMode = 'survival';
+
+function renderTitleRankTab(mode){
+  titleRankMode = mode;
+  document.querySelectorAll('.title-rank-tab').forEach(t=>t.classList.toggle('active', t.dataset.mode===mode));
+  const header = document.getElementById('title-ranking-header');
+  const note   = document.getElementById('title-ranking-note');
+  if(!header) return;
+  if(note){ note.style.display='none'; note.textContent=''; }
+
+  if(mode==='endless'){
+    header.innerHTML = `<span class="rk-col rk-no">RANK</span><span class="rk-name">NAME</span><span class="rk-col rk-score">TIME</span><span class="rk-col rk-meta">LV / ACC / 撃破</span>`;
+    renderEndlessRanking(loadEndlessRanking(), null, 'title-ranking-list');
+  } else if(mode==='duel'){
+    header.innerHTML = `<span class="rk-col rk-no">RANK</span><span class="rk-col rk-score">STREAK</span><span class="rk-col rk-meta">DIFF / LEVEL</span><span class="rk-col rk-date">DATE</span>`;
+    renderDuelRanking(loadDuelRanking(), null, 'title-ranking-list');
+  } else if(mode==='ta'){
+    header.innerHTML = `<span class="rk-col rk-no">RANK</span><span class="rk-name">NAME</span><span class="rk-col rk-score">TIME</span><span class="rk-col rk-meta">DIFF / ACC</span>`;
+    const key = `${LS_TA_KEY}_${TA.count}_${TA.diff}_${TA.lang}`;
+    let list; try{ list = JSON.parse(localStorage.getItem(key))||[]; }catch(e){ list=[]; }
+    renderTARanking(list, null, 'title-ranking-list');
+    if(note){
+      note.style.display='block';
+      note.textContent = `表示中の設定： ${TA.lang==='jp'?'🇯🇵 日本語':'🔤 English'} / ${TA.diff.toUpperCase()} / ${TA.count}問（設定を変えるとランキングも変わります）`;
+    }
+  } else { // survival
+    header.innerHTML = `<span class="rk-col rk-no">RANK</span><span class="rk-name">NAME</span><span class="rk-col rk-score">SCORE</span><span class="rk-col rk-meta">LV / ACC</span>`;
+    renderRankingFull(loadRanking(), null, 'title-ranking-list');
   }
-  const md = ['🥇','🥈','🥉'];
-  el.innerHTML = list.slice(0,5).map((e,i) => {
-    const name = (e.name || 'ANON').slice(0,8);
-    const cls  = `rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}`;
-    return `<div class="${cls}" style="padding:3px 8px;">
-      <span class="rk-col rk-no">${md[i]||('#'+(i+1))}</span>
-      <span class="rk-name">${name}</span>
-      <span class="rk-col rk-score">${e.score.toLocaleString()}</span>
-      <span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} LV${e.level} ${e.acc||0}%</span>
-    </div>`;
-  }).join('');
+}
+
+document.querySelectorAll('.title-rank-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>renderTitleRankTab(tab.dataset.mode));
+});
+
+function renderTitleRanking() {
+  renderTitleRankTab(titleRankMode);
   renderDailyGoal();
 }
 
@@ -5899,12 +5938,14 @@ function finishTimeAttack(){
       `${TA.lang==='jp'?'🇯🇵':'🔤'} ${TA.diff.toUpperCase()} &nbsp;|&nbsp; `+
       `${TA.count}問 &nbsp; MISS: ${TA.miss} &nbsp; ACC: ${acc}%`;
     renderTARanking(list,entry);
+    const trl=document.getElementById('ta-result-ranking-label');
+    if(trl) trl.textContent=`⏱ タイムアタック ランキング（${TA.lang==='jp'?'🇯🇵':'🔤'} ${TA.diff.toUpperCase()} / ${TA.count}問）`;
     scTAResult.classList.remove('hidden');
   });
 }
 
-function renderTARanking(list,myEntry){
-  const c=document.getElementById('ta-ranking-list');
+function renderTARanking(list,myEntry,containerId='ta-ranking-list'){
+  const c=document.getElementById(containerId);
   if(!c) return;
   const md=['🥇','🥈','🥉'];
   if(!list.length){c.innerHTML='<div style="padding:8px;text-align:center;color:#555">NO DATA YET</div>';return;}
