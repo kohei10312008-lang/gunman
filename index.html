@@ -998,6 +998,11 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
   border-color: var(--gold);
   background: linear-gradient(160deg,#2a1808,#160a02);
   box-shadow: 0 0 12px rgba(212,162,39,0.15);
+  cursor: pointer;
+}
+.ach-card.got:active { transform: scale(0.96); }
+@media (hover:hover) {
+  .ach-card.got:hover { transform: translateY(-2px); border-color: #fff060; }
 }
 /* レア度別カラー（獲得済みカードの枠・光彩） */
 .ach-card.got.rarity-common {
@@ -4914,6 +4919,15 @@ function loadAchTimestamps(){
 function saveAchTimestamps(obj){
   try{ localStorage.setItem(LS_ACH_TS_KEY, JSON.stringify(obj)); }catch(e){}
 }
+// ── バッジ「既読」管理（詳細表示済みのNEW!バッジを記録）──
+const LS_ACH_SEEN_KEY = 'gunman_ach_seen_v1';
+function loadAchSeen(){
+  try{ return new Set(JSON.parse(localStorage.getItem(LS_ACH_SEEN_KEY))||[]); }
+  catch(e){ return new Set(); }
+}
+function saveAchSeen(set){
+  try{ localStorage.setItem(LS_ACH_SEEN_KEY, JSON.stringify([...set])); }catch(e){}
+}
 function formatAchDate(ts){
   const d = new Date(ts);
   return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
@@ -5103,6 +5117,7 @@ let achFilter = 'all'; // 'all' | 'unlocked' | 'locked'
 function renderAchScreen(){
   const unlocked  = loadUnlockedAch();
   const timestamps = loadAchTimestamps();
+  const seen = loadAchSeen();
   const snapshot  = getAchProgressSnapshot();
   const now = Date.now();
   const wrap = document.getElementById('ach-sections');
@@ -5130,9 +5145,9 @@ function renderAchScreen(){
         const rarityTag = `<div class="ach-card-rarity rarity-${rarity}">${rmeta.medal} ${rmeta.label}</div>`;
         if(got){
           const ts = timestamps[a.id];
-          const isNew = ts && (now-ts < 86400000);
+          const isNew = ts && (now-ts < 86400000) && !seen.has(a.id);
           const dateStr = ts ? formatAchDate(ts) : '';
-          return `<div class="ach-card got rarity-${rarity}">`+
+          return `<div class="ach-card got rarity-${rarity}" data-id="${a.id}">`+
             (isNew ? `<div class="ach-new-tag">NEW!</div>` : '')+
             rarityTag+
             `<div class="ach-card-icon">${a.icon}</div>`+
@@ -5180,6 +5195,51 @@ function renderAchScreen(){
   document.getElementById('ach-progress').textContent = `${unlocked.size} / ${ACHIEVEMENTS.length} 解除`;
 }
 
+// ── バッジ詳細の拡大表示（獲得済みバッジをタップした時）──
+let achDetailShowing = false;
+function showAchDetail(a, wasNew){
+  if(achToastShowing || achDetailShowing) return;
+  const overlay = document.getElementById('ach-reveal-overlay');
+  const card    = document.getElementById('ach-reveal-card');
+  if(!overlay || !card) return;
+  achDetailShowing = true;
+  const rarity = getRarity(a);
+  const rmeta  = ACH_RARITY[rarity];
+  const ts = loadAchTimestamps()[a.id];
+
+  card.className = 'rarity-' + rarity;
+  document.getElementById('ach-reveal-rarity').textContent = `${rmeta.medal} ${rmeta.label}`;
+  document.getElementById('ach-reveal-icon').textContent = a.icon;
+  document.getElementById('ach-reveal-label').textContent = ts ? `🗓 ${formatAchDate(ts)} 解除` : '🏆 解除済み実績';
+  document.getElementById('ach-reveal-name').textContent = a.name;
+  document.getElementById('ach-reveal-desc').textContent = a.desc;
+  document.getElementById('ach-reveal-tap-hint').textContent = 'タップでとじる';
+
+  overlay.classList.remove('hidden');
+  void overlay.offsetWidth;
+  overlay.classList.add('show');
+
+  const dismiss = ()=>{
+    if(!achDetailShowing) return;
+    overlay.classList.remove('show');
+    overlay.removeEventListener('click', dismiss);
+    setTimeout(()=>{
+      overlay.classList.add('hidden');
+      achDetailShowing = false;
+      // 通常のジャジャーン演出用の表示に戻しておく
+      document.getElementById('ach-reveal-label').textContent = '🎉 実績解除！ 🎉';
+      document.getElementById('ach-reveal-tap-hint').textContent = 'タップで次へ';
+      if(wasNew){
+        const seen = loadAchSeen();
+        seen.add(a.id);
+        saveAchSeen(seen);
+        renderAchScreen();
+      }
+    }, 300);
+  };
+  overlay.addEventListener('click', dismiss);
+}
+
 // ── フィルタータブ ──
 document.querySelectorAll('.ach-filter-tab').forEach(tab=>{
   tab.addEventListener('click', ()=>{
@@ -5189,17 +5249,28 @@ document.querySelectorAll('.ach-filter-tab').forEach(tab=>{
   });
 });
 
-// ── ヒントボタン（イベント委譲）──
+// ── ヒントボタン／獲得済みバッジの拡大表示（イベント委譲）──
 (function(){
   const wrap = document.getElementById('ach-sections');
   if(!wrap) return;
   wrap.addEventListener('click', e=>{
     const btn = e.target.closest('.ach-hint-btn');
-    if(!btn) return;
-    const card = btn.closest('.ach-card');
-    if(!card) return;
-    card.classList.toggle('hint-shown');
-    btn.textContent = card.classList.contains('hint-shown') ? '💡 とじる' : '💡 ヒント';
+    if(btn){
+      const card = btn.closest('.ach-card');
+      if(!card) return;
+      card.classList.toggle('hint-shown');
+      btn.textContent = card.classList.contains('hint-shown') ? '💡 とじる' : '💡 ヒント';
+      return;
+    }
+    const gotCard = e.target.closest('.ach-card.got');
+    if(gotCard){
+      const id = gotCard.dataset.id;
+      const a = ACHIEVEMENTS.find(x=>x.id===id);
+      if(!a) return;
+      const isNew = !!gotCard.querySelector('.ach-new-tag');
+      showAchDetail(a, isNew);
+      return;
+    }
   });
 })();
 
