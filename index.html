@@ -116,6 +116,8 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 .profile-card .pc-avatar{width:34px;height:34px;border-radius:50%;background:#3a2408;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
 .profile-card .pc-del{color:var(--smoke);font-size:0.7rem;padding:5px 10px;border-radius:50px;background:rgba(255,255,255,0.06);letter-spacing:1px}
 .profile-card .pc-del:hover{color:#ff6050;background:rgba(255,80,60,0.15)}
+.profile-card .pc-edit{color:var(--smoke);font-size:0.7rem;padding:5px 10px;border-radius:50px;background:rgba(255,255,255,0.06);letter-spacing:1px;white-space:nowrap}
+.profile-card .pc-edit:hover{color:var(--gold);background:rgba(212,162,39,0.15)}
 .screen.hidden{display:none !important}
 .screen h1{font-family:'Rye',serif;font-size:clamp(2rem,6vw,4rem);color:var(--gold);text-shadow:3px 3px 0 #5a3000,6px 6px 14px rgba(0,0,0,0.8);letter-spacing:4px;margin-bottom:0.3em}
 .screen .sub{color:var(--smoke);font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:1.8rem}
@@ -3374,8 +3376,26 @@ function renderProfileList(){
   list.innerHTML=profiles.map(p=>`
     <button class="profile-card" onclick="selectProfile('${p.id}')">
       <span class="pc-name"><span class="pc-avatar">${avatarForName(p.name)}</span>${p.name}${p.id===activeProfileId?' <span style="color:var(--gold);font-size:0.7rem;">(使用中)</span>':''}</span>
-      <span class="pc-del" onclick="event.stopPropagation();deleteProfileById('${p.id}')">削除</span>
+      <span style="display:flex;gap:6px;flex-shrink:0;">
+        <span class="pc-edit" onclick="event.stopPropagation();renameProfile('${p.id}')">✏️ 名前変更</span>
+        <span class="pc-del" onclick="event.stopPropagation();deleteProfileById('${p.id}')">削除</span>
+      </span>
     </button>`).join('');
+}
+function renameProfile(id){
+  const profiles=loadProfiles();
+  const p=profiles.find(x=>x.id===id);
+  if(!p)return;
+  const input=prompt('新しい名前を入力してください（10文字まで）', p.name);
+  if(input===null)return; // キャンセル
+  const newName=input.trim().slice(0,10);
+  if(!newName){ alert('名前を入力してください。'); return; }
+  if(newName===p.name)return;
+  if(profiles.some(x=>x.id!==id && x.name===newName)){ alert('同じ名前のプロフィールがすでにあります。'); return; }
+  p.name=newName;
+  saveProfiles(profiles);
+  renderProfileList();
+  if(id===activeProfileId) updateProfileLabel();
 }
 function goProfileScreen(isFirstRun){
   document.getElementById('profile-back-row').style.display=isFirstRun?'none':'flex';
