@@ -4042,7 +4042,26 @@ function loadDuelRanking(){try{return JSON.parse(localStorage.getItem(profileKey
 function saveDuelRanking(l){try{localStorage.setItem(profileKey(LS_DUEL),JSON.stringify(l));}catch(e){}}
 function addDuelScore(entry){const l=loadDuelRanking();l.push(entry);l.sort((a,b)=>b.streak-a.streak);const t=l.slice(0,10);const rank=t.findIndex(e=>e===entry)+1;saveDuelRanking(t);return{rank,list:t};}
 function renderDuelRanking(list,my,containerId='duel-ranking-list'){const el=document.getElementById(containerId);if(!list.length){el.innerHTML='<div style="padding:8px;text-align:center;color:#555">NO DATA YET</div>';return;}const md=['🥇','🥈','🥉'];el.innerHTML=list.map((e,i)=>{const me=e===my;const cls=`rk-row${i===0?' rk-top1':i===1?' rk-top2':i===2?' rk-top3':''}${me?' rk-new':''}`;const d=new Date(e.ts);const dt=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return`<div class="${cls}"><span class="rk-col rk-no">${md[i]||('#'+(i+1))}${me?' ◀':''}</span><span class="rk-col rk-score">${e.streak}連勝</span><span class="rk-col rk-meta">${e.lang==='jp'?'🇯🇵':'🔤'} ${e.diff.toUpperCase()} LV${e.level||1}</span><span class="rk-col rk-date">${dt}</span></div>`;}).join('');}
-function getDuelWord(){const lv=D.level-1;if(D.lang==='jp'){const p=getJPPool(D.level);const e=p[Math.floor(Math.random()*p.length)];return{word:e.r,kana:e.k};}const p=DUEL_WORDS_BY_LV[Math.min(lv,DUEL_WORDS_BY_LV.length-1)];return{word:p[Math.floor(Math.random()*p.length)],kana:''};}
+// ── 決闘モード: 難易度で「単語の長さ（ティア）」自体を変える ──
+// これまではEASY/NORMAL/HARDで出題単語プールが同じで、制限時間の差しか
+// 体感できなかった。ここでは難易度ごとにティアをずらし、
+// EASYは易しい単語に長く留まり、HARDは早い段階で長い単語へ到達するようにする。
+const DUEL_TIER_OFFSET={easy:0,normal:1,hard:3};
+function duelTierIndex(level,diff,maxTier){
+  const off=DUEL_TIER_OFFSET[diff]??0;
+  return Math.max(0,Math.min(maxTier,(level-1)+off));
+}
+function getDuelWord(){
+  if(D.lang==='jp'){
+    const idx=duelTierIndex(D.level,D.diff,JP_BY_LEVEL.length-1);
+    const p=JP_BY_LEVEL[idx];
+    const e=p[Math.floor(Math.random()*p.length)];
+    return{word:e.r,kana:e.k};
+  }
+  const idx=duelTierIndex(D.level,D.diff,DUEL_WORDS_BY_LV.length-1);
+  const p=DUEL_WORDS_BY_LV[idx];
+  return{word:p[Math.floor(Math.random()*p.length)],kana:''};
+}
 function startDuel(){D.diff=G.diff;D.lang=G.lang;D.streak=0;D.level=1;D.keyCount=0;scTitle.classList.add('hidden');scResult.classList.add('hidden');scDuel.classList.remove('hidden');duelEnemyFig.style.animation='';duelPlayerFig.style.animation='';duelEnemyFig.style.opacity=duelPlayerFig.style.opacity='1';duelEnemyFig.textContent=['🕵️','🤖','👹','💀','🧟'][Math.floor(Math.random()*5)];duelStreakDisp.textContent='';showQuitBtn('DUELを中断します');startBGM('G');startDuelCountdown();}
 function startDuelCountdown(){D.phase='countdown';duelWordBox.classList.add('hidden');duelStatusMsg.style.color='#fff';let n=3;const tick=()=>{duelStatusMsg.textContent=n;sfxCountBeep(false);if(--n>=0)setTimeout(tick,700);else{sfxCountBeep(true);setTimeout(startStaredown,500);}};tick();}
 function startStaredown(){D.phase='staredown';duelStatusMsg.textContent='…';duelWordBox.classList.add('hidden');D.rafId=setTimeout(startDraw,800+Math.random()*1400);}
