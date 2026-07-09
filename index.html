@@ -2392,6 +2392,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
     <button class="prac-cat" data-cat="lv3">Lv3<span>3文字</span></button>
     <button class="prac-cat" data-cat="lv4">Lv4-5<span>4〜5文字</span></button>
     <button class="prac-cat" data-cat="lv5">Lv6+<span>長単語</span></button>
+    <button class="prac-cat" data-cat="lv6">Lv14+<span>超難語</span></button>
     <button class="prac-cat" data-cat="kana50">五十音<span>清音全部</span></button>
     <button class="prac-cat" data-cat="dakuten">濁音<span>が・ざ・だ行</span></button>
     <button class="prac-cat" data-cat="handakuten">半濁音<span>ぱ行</span></button>
@@ -3136,7 +3137,8 @@ const WORDS_BY_LEVEL = [
    'COW','PIG','HEN','FOX','OWL','EGG','ICE','JAM','LOG','NUT',
    'OAK','PAN','RAT','SAP','TAR','VAN','WAX','YAM','ZAP','FLY',
    'SKY','DRY','CRY','TRY','BUY','GUY','SPY','BOY','TOY','JOY',
-   'ARC','BOW','DIG','FIG','GIG','JIG','RIG','WIG','BIG','GIG'],
+   'ARC','BOW','DIG','FIG','GIG','JIG','RIG','WIG','BIG','GIG',
+   'ELK','JET','LOT','MAT','NET','ODE','PIT','ROD','TAB','WAG','ORB','VET','LAP','MOB','NIP'],
   // Lv4-5: 4〜5文字
   ['SHOT','FIRE','GOLD','DRAW','DUEL','WILD','DARK','FAST','KICK','GRIT',
    'HAWK','DUST','IRON','OATH','RUST','SCAR','TOAD','WOLF','BONE','CAVE',
@@ -3145,7 +3147,9 @@ const WORDS_BY_LEVEL = [
    'SHOOT','QUICK','HORSE','BADGE','SMOKE','STEEL','BRAVE','FLAME','GHOST','KNIFE',
    'ARROW','BLADE','CLOAK','DEPOT','EAGLE','FEAST','GLEAM','HAVEN','IGLOO','JEWEL',
    'KNOLL','LANCE','MANOR','NOBLE','OASIS','PLUME','QUEST','RIDGE','SCOUT','TOWER',
-   'UDDER','VENOM','WHEAT','XYLEM','YEARN','ZEBRA','COYOT','BISON','TROUT','SNIPE'],
+   'UDDER','VENOM','WHEAT','XYLEM','YEARN','ZEBRA','COYOT','BISON','TROUT','SNIPE',
+   'GRIM','LOOT','MESA','PECK','RUIN','SILT','TRAP','VAST','WARY','YARN',
+   'BRINK','CLIFF','DODGE','FENCE','GORGE','HITCH','LEDGE','MOUND','PRIDE','ROBIN'],
   // Lv6-8: 5〜7文字
   ['LASSO','MERCY','NIGHT','POSSE','RANGE','TEXAS','VALOR','BANDIT','CANYON','DESERT',
    'OUTLAW','COWBOY','SALOON','WANTED','BOUNTY','SADDLE','PISTOL','PATROL','RANGER','RODEO',
@@ -3153,14 +3157,21 @@ const WORDS_BY_LEVEL = [
    'KINDLE','LEGEND','MAYHEM','NARROW','ORDEAL','PARDON','QUARRY','RAIDER','SAVAGE','TANGLE',
    'UPLIFT','VANDAL','WARDEN','ZENITH','AMBUSH','BEACON','CAVALRY','DROUGHT','EMPIRE','FALCON',
    'GALLOP','HARBOR','INFERNO','JUNGLE','KETTLE','LUMBER','MAROON','NECTAR','ORPHAN','POWDER',
-   'QUARTZ','RATTLE','SIERRA','TUNDRA','UPHEAVAL','VORTEX','WHISTLE','YELP','BONFIRE','CINDER'],
+   'QUARTZ','RATTLE','SIERRA','TUNDRA','UPHEAVAL','VORTEX','WHISTLE','YELP','BONFIRE','CINDER',
+   'MUSTANG','PRAIRIE','THICKET','GUNSHOT','LANTERN','CANTEEN','WRANGLE','SPARROW','THISTLE','GAZELLE'],
   // Lv9+: 長単語・難語
   ['REVOLVER','FRONTIER','STAMPEDE','HOLSTER','SHOWDOWN','WRANGLER','DESPERADO','CROSSFIRE','VIGILANTE','WINCHESTER',
    'BANDOLIER','BUCKBOARD','STAGECOACH','RATTLESNAKE','PINKERTON','ARMADILLO','SANDSTORM','QUICKDRAW',
    'ALLEGIANCE','BLACKSMITH','CENTENNIAL','DEMOLITION','ELOQUENCE','FAHRENHEIT','GENERATION','HEMISPHERE',
    'ILLUMINATE','JUBILATION','KALEIDOSCOPE','LABYRINTH','MAGNIFICENT','NAVIGATION','OBSERVATION','PHENOMENON',
    'QUARANTINE','RESURRECTION','SOVEREIGNTY','THUNDERSTORM','UNFORTUNATE','VACCINATION','WILDERNESS','EXQUISITE',
-   'JURISDICTION','MELANCHOLY','ORCHESTRATE','PERCEPTION','RADIOACTIVE','SYSTEMATIZE','TERRITORIAL','UNDISCOVERED'],
+   'JURISDICTION','MELANCHOLY','ORCHESTRATE','PERCEPTION','RADIOACTIVE','SYSTEMATIZE','TERRITORIAL','UNDISCOVERED',
+   'HOMESTEAD','GUNSLINGER','TERRITORY','EXPEDITION','CARTRIDGE','TELEGRAPH','BLIZZARD','CHUCKWAGON','LOCOMOTIVE','SETTLEMENT'],
+  // Lv14+: 超難語・長単語
+  ['CONSTELLATION','ENTREPRENEUR','METAMORPHOSIS','PHILOSOPHICAL','RECONCILIATION','TRANSCENDENCE','UNPRECEDENTED','ARCHAEOLOGIST',
+   'CHOREOGRAPHER','ELECTROMAGNETIC','FRAGMENTATION','GRAVITATIONAL','HALLUCINATION','INCOMPREHENSIBLE','JUXTAPOSITION','KLEPTOMANIAC',
+   'LEGISLATION','MISCELLANEOUS','NOSTALGIC','OBFUSCATION','PARAPHERNALIA','QUINTESSENTIAL','RECONNAISSANCE','SUSTAINABILITY',
+   'TRANSFORMATION','UNDERESTIMATE','VENTRILOQUIST','WHOLEHEARTED','EXTRAORDINARY','CIRCUMNAVIGATE'],
 ];
 
 // カテゴリ別単語（プラクティス用・SURVIVAL強化用）
@@ -3234,7 +3245,8 @@ function getWordPool(lv){
   if(lv<=3)return WORDS_BY_LEVEL[2];
   if(lv<=5)return WORDS_BY_LEVEL[3];
   if(lv<=8)return WORDS_BY_LEVEL[4];
-  return WORDS_BY_LEVEL[5];
+  if(lv<=13)return WORDS_BY_LEVEL[5];
+  return WORDS_BY_LEVEL[6];                        // Lv14+: 超難語帯（新規追加）
 }
 // カテゴリをランダムに混ぜて返す
 function getWordPoolMixed(lv){
@@ -3278,7 +3290,8 @@ const JP_BY_LEVEL=[
    {k:'いちご',r:'ITIGO'},{k:'ぶどう',r:'BUDOU'},{k:'なし',r:'NASI'},
    {k:'にんじん',r:'NINZIN'},{k:'たまねぎ',r:'TAMANEGI'},{k:'きゅうり',r:'KYUURI'},
    {k:'とまと',r:'TOMATO'},{k:'じゃがいも',r:'ZYAGAIMO'},{k:'かぼちゃ',r:'KABOTYA'},
-   {k:'ほうれん',r:'HOUREN'},{k:'はくさい',r:'HAKUSAI'},{k:'けむり',r:'KEMURI'},{k:'たいこ',r:'TAIKO'},{k:'みなと',r:'MINATO'},{k:'ふくろ',r:'HUKURO'},{k:'たまご',r:'TAMAGO'},{k:'すいか',r:'SUIKA'},{k:'めだか',r:'MEDAKA'},{k:'こおり',r:'KOORI'},{k:'とけい',r:'TOKEI'},{k:'さんぽ',r:'SANPO'}],
+   {k:'ほうれん',r:'HOUREN'},{k:'はくさい',r:'HAKUSAI'},{k:'けむり',r:'KEMURI'},{k:'たいこ',r:'TAIKO'},{k:'みなと',r:'MINATO'},{k:'ふくろ',r:'HUKURO'},{k:'たまご',r:'TAMAGO'},{k:'すいか',r:'SUIKA'},{k:'めだか',r:'MEDAKA'},{k:'こおり',r:'KOORI'},{k:'とけい',r:'TOKEI'},{k:'さんぽ',r:'SANPO'},
+   {k:'かめ',r:'KAME'},{k:'えび',r:'EBI'},{k:'くり',r:'KURI'},{k:'つた',r:'TUTA'},{k:'まめ',r:'MAME'},{k:'こま',r:'KOMA'},{k:'たこやき',r:'TAKOYAKI'},{k:'おにぎり',r:'ONIGIRI'},{k:'からあげ',r:'KARAAGE'},{k:'てんぷら',r:'TENPURA'}],
   // Lv4-5: 4〜5文字（文化・生活）
   [{k:'かたな',r:'KATANA'},{k:'さむらい',r:'SAMURAI'},{k:'にんじゃ',r:'NINZYA'},
    {k:'まつり',r:'MATURI'},{k:'さくら',r:'SAKURA'},{k:'こころ',r:'KOKORO'},
@@ -3290,7 +3303,8 @@ const JP_BY_LEVEL=[
    {k:'がっこう',r:'GAKKOU'},{k:'せんせい',r:'SENSEI'},{k:'しごと',r:'SIGOTO'},
    {k:'たべもの',r:'TABEMONO'},{k:'のみもの',r:'NOMIMONO'},{k:'あさごはん',r:'ASAGOHAN'},
    {k:'ひるごはん',r:'HIRUGOHAN'},{k:'ばんごはん',r:'BANGOHAN'},{k:'おちゃ',r:'OTYA'},
-   {k:'おかし',r:'OKASI'},{k:'おすし',r:'OSUSI'},{k:'ラーメン',r:'RAAMEN'},{k:'げんかん',r:'GENKAN'},{k:'おべんとう',r:'OBENTOU'},{k:'れいぞうこ',r:'REIZOUKO'},{k:'せんたくき',r:'SENTAKUKI'},{k:'じてんしゃ',r:'ZITENSYA'},{k:'えんぴつ',r:'ENPITSU'},{k:'けしごむ',r:'KESIGOMU'},{k:'らんどせる',r:'RANDOSERU'},{k:'ほいくえん',r:'HOIKUEN'},{k:'すべりだい',r:'SUBERIDAI'}],
+   {k:'おかし',r:'OKASI'},{k:'おすし',r:'OSUSI'},{k:'ラーメン',r:'RAAMEN'},{k:'げんかん',r:'GENKAN'},{k:'おべんとう',r:'OBENTOU'},{k:'れいぞうこ',r:'REIZOUKO'},{k:'せんたくき',r:'SENTAKUKI'},{k:'じてんしゃ',r:'ZITENSYA'},{k:'えんぴつ',r:'ENPITSU'},{k:'けしごむ',r:'KESIGOMU'},{k:'らんどせる',r:'RANDOSERU'},{k:'ほいくえん',r:'HOIKUEN'},{k:'すべりだい',r:'SUBERIDAI'},
+   {k:'ゆうびん',r:'YUUBIN'},{k:'かいだん',r:'KAIDAN'},{k:'おんせん',r:'ONSEN'},{k:'たいふう',r:'TAIFUU'},{k:'はなたば',r:'HANATABA'},{k:'おりがみ',r:'ORIGAMI'},{k:'すいえい',r:'SUIEI'},{k:'えんそく',r:'ENSOKU'},{k:'たからばこ',r:'TAKARABAKO'},{k:'ゆめのくに',r:'YUMENOKUNI'}],
   // Lv6-8: 長め（自然・文化・抽象語）
   [{k:'たいよう',r:'TAIYOU'},{k:'かみなり',r:'KAMINARI'},{k:'しぜん',r:'SIZEN'},
    {k:'たびびと',r:'TABIBITO'},{k:'むらさき',r:'MURASAKI'},{k:'うずまき',r:'UZUMAKI'},
@@ -3301,7 +3315,8 @@ const JP_BY_LEVEL=[
    {k:'むずかしい',r:'MUZUKASII'},{k:'やさしい',r:'YASASII'},{k:'たのしい',r:'TANOSII'},
    {k:'さびしい',r:'SABISII'},{k:'あたらしい',r:'ATARASII'},{k:'ふるさと',r:'HURUSATO'},
    {k:'おまつり',r:'OMATURI'},{k:'はなび',r:'HANABI'},{k:'おみこし',r:'OMIKOSI'},
-   {k:'かぶきざ',r:'KABUKIZA'},{k:'にほんご',r:'NIHONGO'},{k:'ひらがな',r:'HIRAGANA'},{k:'つきあかり',r:'TSUKIAKARI'},{k:'ほしぞら',r:'HOSIZORA'},{k:'あまのがわ',r:'AMANOGAWA'},{k:'しゃぼんだま',r:'SYABONDAMA'},{k:'たんぽぽ',r:'TANPOPO'},{k:'かたつむり',r:'KATATSUMURI'},{k:'てんとうむし',r:'TENTOUMUSI'},{k:'かまきり',r:'KAMAKIRI'},{k:'くわがた',r:'KUWAGATA'},{k:'かぶとむし',r:'KABUTOMUSI'}],
+   {k:'かぶきざ',r:'KABUKIZA'},{k:'にほんご',r:'NIHONGO'},{k:'ひらがな',r:'HIRAGANA'},{k:'つきあかり',r:'TSUKIAKARI'},{k:'ほしぞら',r:'HOSIZORA'},{k:'あまのがわ',r:'AMANOGAWA'},{k:'しゃぼんだま',r:'SYABONDAMA'},{k:'たんぽぽ',r:'TANPOPO'},{k:'かたつむり',r:'KATATSUMURI'},{k:'てんとうむし',r:'TENTOUMUSI'},{k:'かまきり',r:'KAMAKIRI'},{k:'くわがた',r:'KUWAGATA'},{k:'かぶとむし',r:'KABUTOMUSI'},
+   {k:'おおぞら',r:'OOZORA'},{k:'ゆうやけ',r:'YUUYAKE'},{k:'あさひ',r:'ASAHI'},{k:'ゆうひ',r:'YUUHI'},{k:'いなずま',r:'INAZUMA'},{k:'たいかい',r:'TAIKAI'},{k:'なつやすみ',r:'NATUYASUMI'},{k:'ふゆやすみ',r:'HUYUYASUMI'},{k:'はるやすみ',r:'HARUYASUMI'}],
   // Lv9+: 長単語・難語
   [{k:'しんかんせん',r:'SINKANSEN'},{k:'かくめいてき',r:'KAKUMEITEKI'},
    {k:'でんこうせっか',r:'DENKOUSEKKA'},{k:'ちょうこうそく',r:'TYOUKOUSOKU'},
@@ -3312,7 +3327,13 @@ const JP_BY_LEVEL=[
    {k:'びじゅつかん',r:'BIZYUTSUKAN'},{k:'えいがかん',r:'EIGAKAN'},
    {k:'やきゅうじょう',r:'YAKYUUZYOU'},{k:'かんらんしゃ',r:'KANRANSYA'},
    {k:'ジェットコースター',r:'ZYETTOKOUSUTAA'},{k:'ゆうえんち',r:'YUUENTI'},
-   {k:'うんどうかい',r:'UNDOUKAI'},{k:'しんりがく',r:'SINRIGAKU'},{k:'たいいくかん',r:'TAIIKUKAN'},{k:'ほけんしつ',r:'HOKENSITSU'},{k:'しょくいんしつ',r:'SYOKUINSITSU'},{k:'うんどうじょう',r:'UNDOUZYOU'},{k:'すいぞくかん',r:'SUIZOKUKAN'},{k:'どうぶつえん',r:'DOUBUTSUEN'},{k:'しょうぼうしゃ',r:'SYOUBOUSYA'},{k:'きゅうきゅうしゃ',r:'KYUUKYUUSYA'},{k:'ゆうびんきょく',r:'YUUBINKYOKU'}],
+   {k:'うんどうかい',r:'UNDOUKAI'},{k:'しんりがく',r:'SINRIGAKU'},{k:'たいいくかん',r:'TAIIKUKAN'},{k:'ほけんしつ',r:'HOKENSITSU'},{k:'しょくいんしつ',r:'SYOKUINSITSU'},{k:'うんどうじょう',r:'UNDOUZYOU'},{k:'すいぞくかん',r:'SUIZOKUKAN'},{k:'どうぶつえん',r:'DOUBUTSUEN'},{k:'しょうぼうしゃ',r:'SYOUBOUSYA'},{k:'きゅうきゅうしゃ',r:'KYUUKYUUSYA'},{k:'ゆうびんきょく',r:'YUUBINKYOKU'},
+   {k:'ちきゅうおんだんか',r:'TIKYUUONDANKA'},{k:'こくさいこうりゅう',r:'KOKUSAIKOURYUU'},{k:'かんきょうほご',r:'KANKYOUHOGO'},{k:'せいめいかがく',r:'SEIMEIKAGAKU'},{k:'てんたいかんそく',r:'TENTAIKANSOKU'},{k:'こうつうあんぜん',r:'KOUTUUANZEN'},{k:'ぼうさいくんれん',r:'BOUSAIKUNREN'},{k:'ちいきしゃかい',r:'TIIKISYAKAI'},{k:'こくさいかいぎ',r:'KOKUSAIKAIGI'}],
+  // Lv14+: 超長単語・専門語
+  [{k:'せかいいさん',r:'SEKAIISAN'},{k:'かがくじっけん',r:'KAGAKUZIKKEN'},{k:'てんもんがく',r:'TENMONGAKU'},
+   {k:'こうそくどうろ',r:'KOUSOKUDOURO'},{k:'じんこうえいせい',r:'ZINKOUEISEI'},{k:'せいぶつたようせい',r:'SEIBUTUTAYOUSEI'},
+   {k:'かんきょうもんだい',r:'KANKYOUMONDAI'},{k:'こくさいれんごう',r:'KOKUSAIRENGOU'},{k:'たいようこうはつでん',r:'TAIYOUKOUHATUDEN'},
+   {k:'じぞくかのうせい',r:'ZIZOKUKANOUSEI'},{k:'じょうほうしゃかい',r:'ZYOUHOUSYAKAI'},{k:'こくさいきょうりょく',r:'KOKUSAIKYOURYOKU'}],
 ];
 function getJPPool(lv){
   // EASYはLv9まで1〜2文字、Lv10以降3文字以上解禁
@@ -3322,7 +3343,7 @@ function getJPPool(lv){
     if(lv<=13) return JP_BY_LEVEL[2];// Lv10-13: 3文字
     return JP_BY_LEVEL[3];           // Lv14+: 4〜5文字
   }
-  return JP_BY_LEVEL[Math.min(lv<=1?0:lv<=2?1:lv<=3?2:lv<=5?3:lv<=8?4:5,JP_BY_LEVEL.length-1)];
+  return JP_BY_LEVEL[Math.min(lv<=1?0:lv<=2?1:lv<=3?2:lv<=5?3:lv<=8?4:lv<=13?5:6,JP_BY_LEVEL.length-1)];
 }
 
 // ═══ CONFIG ═══
@@ -3687,7 +3708,7 @@ function fxCasing(){if(!fxCtx||!player||!scene)return;const r=player.getBounding
 // 星空を一度だけ生成（box-shadowで70個の星）
 (function(){const st=document.getElementById('stars');if(!st)return;const d=document.createElement('div');const sh=[];for(let i=0;i<70;i++){sh.push(`${Math.round(Math.random()*100)}vw ${Math.round(Math.random()*58)}vh 0 ${Math.random()<0.25?'0.6px':'0'} rgba(255,255,240,${(0.3+Math.random()*0.6).toFixed(2)})`);}d.style.cssText='position:absolute;top:0;left:0;width:1.6px;height:1.6px;border-radius:50%;box-shadow:'+sh.join(',');st.appendChild(d);})();
 // レベル連動の空フェーズ: Lv1-3=夕暮れ(基本), Lv4-6=深い茜, Lv7+=夜(星と月)
-function updateSky(lv){if(!scene)return;scene.classList.toggle('sky-night',lv>=7);scene.classList.toggle('sky-dusk',lv>=4&&lv<7);}
+function updateSky(lv){if(!scene)return;scene.classList.toggle('sky-night',lv>=14);scene.classList.toggle('sky-dusk',lv>=9&&lv<14);}
 // タンブルウィード: ランダム間隔で地平線を転がる
 function spawnTumbleweed(){scheduleTumbleweed();if(document.hidden||!scene)return;
   const tw=document.createElement('div');tw.className='tumbleweed';
@@ -4557,6 +4578,11 @@ const PRAC_CATS = {
     jp: JP_BY_LEVEL[5].map(e=>({word:e.r,kana:e.k})),
     label:'Lv6+ / 長単語'
   },
+  lv6: {
+    en: WORDS_BY_LEVEL[6].map(w=>({word:w,kana:null})),
+    jp: JP_BY_LEVEL[6].map(e=>({word:e.r,kana:e.k})),
+    label:'Lv14+ / 超難語'
+  },
   kana50: {
     en: [
       // ア行（母音）
@@ -4662,7 +4688,7 @@ const P = {
   total: 0,
   hit: 0,
   miss: 0,
-  catOrder: ['lv1','lv2','lv3','lv4','lv5','kana50','dakuten','handakuten','youon','animals','foods','nature','western','school','space'],
+  catOrder: ['lv1','lv2','lv3','lv4','lv5','lv6','kana50','dakuten','handakuten','youon','animals','foods','nature','western','school','space'],
 };
 
 const scPrac = document.getElementById('screen-practice');
@@ -5347,11 +5373,13 @@ const ACHIEVEMENTS = [
   {id:'score_50000', icon:'🥇', name:'伝説のガンマン',       desc:'1ゲームで50,000点以上を獲得する',         check:c=>c.score>=50000, cat:'core', rarity:'rare', progress:s=>({current:s.score,target:50000})},
   {id:'score_100000',icon:'👑', name:'ゴーストタウンの覇者', desc:'1ゲームで100,000点以上を獲得する',        check:c=>c.score>=100000, cat:'core', rarity:'rare', progress:s=>({current:s.score,target:100000})},
   {id:'score_200000',icon:'☀️', name:'西部の太陽',           desc:'1ゲームで200,000点以上を獲得する',        check:c=>c.score>=200000, cat:'core', rarity:'epic', progress:s=>({current:s.score,target:200000})},
+  {id:'score_500000',icon:'💫', name:'西部の伝説を超えて',   desc:'1ゲームで500,000点以上を獲得する',        check:c=>c.score>=500000, cat:'core', rarity:'legendary', progress:s=>({current:s.score,target:500000})},
 
   {id:'combo_5',     icon:'🔥', name:'コンボ入門',           desc:'5コンボを達成する',                       check:c=>c.bestCombo>=5, cat:'core', rarity:'common', progress:s=>({current:s.bestCombo,target:5})},
   {id:'combo_10',    icon:'🔥', name:'連続射撃',             desc:'10コンボを達成する',                      check:c=>c.bestCombo>=10, cat:'core', rarity:'common', progress:s=>({current:s.bestCombo,target:10})},
   {id:'combo_20',    icon:'💥', name:'弾丸ライダー',         desc:'20コンボを達成する',                      check:c=>c.bestCombo>=20, cat:'core', rarity:'rare', progress:s=>({current:s.bestCombo,target:20})},
   {id:'combo_30',    icon:'⚡', name:'マシンガンフィンガー', desc:'30コンボを達成する',                      check:c=>c.bestCombo>=30, cat:'core', rarity:'epic', progress:s=>({current:s.bestCombo,target:30})},
+  {id:'combo_50',    icon:'💫', name:'弾丸の嵐',             desc:'50コンボを達成する',                      check:c=>c.bestCombo>=50, cat:'core', rarity:'legendary', progress:s=>({current:s.bestCombo,target:50})},
 
   {id:'acc_95',      icon:'🎯', name:'凄腕の狙撃手',         desc:'20発以上撃って正確率95%以上でクリアする', check:c=>c.acc!=null&&c.shots>=20&&c.acc>=95, cat:'common', rarity:'rare'},
 
@@ -5359,6 +5387,7 @@ const ACHIEVEMENTS = [
   {id:'plays_10',    icon:'🤠', name:'常連ガンマン',         desc:'累計10プレイする',                        check:c=>c.totalPlays>=10, cat:'common', rarity:'common', progress:s=>({current:s.totalPlays,target:10})},
   {id:'plays_50',    icon:'🌵', name:'西部の住人',           desc:'累計50プレイする',                        check:c=>c.totalPlays>=50, cat:'common', rarity:'rare', progress:s=>({current:s.totalPlays,target:50})},
   {id:'plays_100',   icon:'🏜️', name:'ガンスリンガーの魂',   desc:'累計100プレイする',                       check:c=>c.totalPlays>=100, cat:'common', rarity:'epic', progress:s=>({current:s.totalPlays,target:100})},
+  {id:'plays_300',   icon:'🏜️', name:'荒野に生きる者',       desc:'累計300プレイする',                       check:c=>c.totalPlays>=300, cat:'common', rarity:'legendary', progress:s=>({current:s.totalPlays,target:300})},
 
   {id:'keys_1000',   icon:'⌨️', name:'千本ノック',           desc:'累計1,000打鍵する',                       check:c=>c.totalKeys>=1000, cat:'common', rarity:'common', progress:s=>({current:s.totalKeys,target:1000})},
   {id:'keys_5000',   icon:'⌨️', name:'指慣らし完了',         desc:'累計5,000打鍵する',                       check:c=>c.totalKeys>=5000, cat:'common', rarity:'common', progress:s=>({current:s.totalKeys,target:5000})},
@@ -5368,9 +5397,12 @@ const ACHIEVEMENTS = [
   {id:'keys_100000', icon:'🦾', name:'十万打鍵の証',         desc:'累計100,000打鍵する',                     check:c=>c.totalKeys>=100000, cat:'common', rarity:'rare', progress:s=>({current:s.totalKeys,target:100000})},
   {id:'keys_300000', icon:'🏆', name:'打鍵マスター',         desc:'累計300,000打鍵する',                     check:c=>c.totalKeys>=300000, cat:'common', rarity:'epic', progress:s=>({current:s.totalKeys,target:300000})},
   {id:'keys_500000', icon:'👑', name:'伝説の早撃ち指',       desc:'累計500,000打鍵する',                     check:c=>c.totalKeys>=500000, cat:'common', rarity:'epic', progress:s=>({current:s.totalKeys,target:500000})},
+  {id:'keys_1000000',icon:'🦾', name:'百万打鍵の勇者',       desc:'累計1,000,000打鍵する',                   check:c=>c.totalKeys>=1000000, cat:'common', rarity:'legendary', progress:s=>({current:s.totalKeys,target:1000000})},
 
   {id:'level_10',    icon:'⭐', name:'レベル10到達',         desc:'1ゲームでレベル10に到達する',             check:c=>c.level>=10, cat:'core', rarity:'common', progress:s=>({current:s.level,target:10})},
   {id:'level_20',    icon:'🌟', name:'レベル20到達',         desc:'1ゲームでレベル20に到達する',             check:c=>c.level>=20, cat:'core', rarity:'rare', progress:s=>({current:s.level,target:20})},
+  {id:'level_14_night',icon:'🌙',name:'宵闇のガンマン',       desc:'1ゲームでレベル14に到達する（夜空・超難語帯突入）',check:c=>c.level>=14, cat:'core', rarity:'rare', progress:s=>({current:s.level,target:14})},
+  {id:'level_25',    icon:'🌌', name:'漆黒の荒野の支配者',   desc:'1ゲームでレベル25に到達する',             check:c=>c.level>=25, cat:'core', rarity:'epic', progress:s=>({current:s.level,target:25})},
 
   // ── 🤠 サバイバルモード ──
   {id:'easy_clear',  icon:'🤠', name:'最初の一歩',           desc:'サバイバル・EASYでゲームをクリアする',    check:c=>c.mode==='survival'&&c.diff==='easy'&&c.hit>=1, cat:'survival', rarity:'common'},
@@ -5386,11 +5418,13 @@ const ACHIEVEMENTS = [
   {id:'endless_10min',icon:'⏳', name:'荒野の生存者',         desc:'エンドレスモードで10分以上生存する',      check:c=>c.endlessSec>=600, cat:'endless', rarity:'rare', progress:s=>({current:s.endlessSec,target:600})},
   {id:'endless_15min',icon:'🌵', name:'不死身のガンマン',     desc:'エンドレスモードで15分以上生存する',      check:c=>c.endlessSec>=900, cat:'endless', rarity:'rare', progress:s=>({current:s.endlessSec,target:900})},
   {id:'endless_20min',icon:'👑', name:'荒野の王者',           desc:'エンドレスモードで20分以上生存する',      check:c=>c.endlessSec>=1200, cat:'endless', rarity:'epic', progress:s=>({current:s.endlessSec,target:1200})},
+  {id:'endless_30min',icon:'🌵', name:'終わりなき荒野',       desc:'エンドレスモードで30分以上生存する',      check:c=>c.endlessSec>=1800, cat:'endless', rarity:'legendary', progress:s=>({current:s.endlessSec,target:1800})},
 
   // ── ⚡ タイムアタックモード ──
   {id:'ta_clear_1',  icon:'⚡', name:'早撃ちデビュー',        desc:'タイムアタックを1回クリアする',           check:c=>c.taClears>=1, cat:'timeattack', rarity:'common', progress:s=>({current:s.taClears,target:1})},
   {id:'ta_clear_10', icon:'⚡', name:'早撃ちの常連',          desc:'タイムアタックを累計10回クリアする',      check:c=>c.taClears>=10, cat:'timeattack', rarity:'common', progress:s=>({current:s.taClears,target:10})},
   {id:'ta_clear_30', icon:'🏆', name:'早撃ち王',              desc:'タイムアタックを累計30回クリアする',      check:c=>c.taClears>=30, cat:'timeattack', rarity:'rare', progress:s=>({current:s.taClears,target:30})},
+  {id:'ta_clear_50', icon:'⚡', name:'早撃ちの伝説',          desc:'タイムアタックを累計50回クリアする',      check:c=>c.taClears>=50, cat:'timeattack', rarity:'epic', progress:s=>({current:s.taClears,target:50})},
 
   {id:'ta_count5',   icon:'🔫', name:'5問チャレンジ制覇',     desc:'タイムアタック「5問」モードをクリアする', check:c=>c.mode==='timeattack'&&c.taCount===5, cat:'timeattack', rarity:'common'},
   {id:'ta_count10',  icon:'🔫', name:'10問チャレンジ制覇',    desc:'タイムアタック「10問」モードをクリアする',check:c=>c.mode==='timeattack'&&c.taCount===10, cat:'timeattack', rarity:'common'},
@@ -5412,6 +5446,7 @@ const ACHIEVEMENTS = [
   {id:'duel_streak15',icon:'🏆',name:'無双の早撃ち',         desc:'決闘モードで15連勝する',                  check:c=>c.duelStreak>=15, cat:'duel', rarity:'rare', progress:s=>({current:s.duelStreak,target:15})},
   {id:'duel_streak20',icon:'🌟',name:'西部の伝説',           desc:'決闘モードで20連勝する',                  check:c=>c.duelStreak>=20, cat:'duel', rarity:'epic', progress:s=>({current:s.duelStreak,target:20})},
   {id:'duel_streak30',icon:'👑',name:'決闘神話',             desc:'決闘モードで30連勝する',                  check:c=>c.duelStreak>=30, cat:'duel', rarity:'epic', progress:s=>({current:s.duelStreak,target:30})},
+  {id:'duel_streak50',icon:'👑',name:'決闘の頂点',           desc:'決闘モードで50連勝する',                  check:c=>c.duelStreak>=50, cat:'duel', rarity:'legendary', progress:s=>({current:s.duelStreak,target:50})},
 
   // ── 📚 練習モード ──
   {id:'prac_typing_1', icon:'📚', name:'練習の第一歩',         desc:'タイピング練習を1回クリアする',           check:c=>c.typingClears>=1, cat:'practice', rarity:'common', progress:s=>({current:s.typingClears,target:1})},
@@ -5419,6 +5454,7 @@ const ACHIEVEMENTS = [
   {id:'prac_typing_15',icon:'📖', name:'練習マニア',           desc:'タイピング練習を累計15回クリアする',      check:c=>c.typingClears>=15, cat:'practice', rarity:'rare', progress:s=>({current:s.typingClears,target:15})},
   {id:'prac_typing_30',icon:'🥋', name:'タイピング修行僧',     desc:'タイピング練習を累計30回クリアする',      check:c=>c.typingClears>=30, cat:'practice', rarity:'rare', progress:s=>({current:s.typingClears,target:30})},
   {id:'prac_typing_50',icon:'🏆', name:'タイピング道場主',     desc:'タイピング練習を累計50回クリアする',      check:c=>c.typingClears>=50, cat:'practice', rarity:'epic', progress:s=>({current:s.typingClears,target:50})},
+  {id:'prac_typing_100',icon:'🏆',name:'タイピングの求道者',   desc:'タイピング練習を累計100回クリアする',     check:c=>c.typingClears>=100, cat:'practice', rarity:'legendary', progress:s=>({current:s.typingClears,target:100})},
 
   {id:'prac_sentence_1', icon:'📝', name:'文章練習デビュー', desc:'文章練習を1回クリアする',                 check:c=>c.sentenceClears>=1, cat:'practice', rarity:'common', progress:s=>({current:s.sentenceClears,target:1})},
   {id:'prac_sentence_10',icon:'✏️', name:'文章マスター',     desc:'文章練習を累計10回クリアする',            check:c=>c.sentenceClears>=10, cat:'practice', rarity:'rare', progress:s=>({current:s.sentenceClears,target:10})},
