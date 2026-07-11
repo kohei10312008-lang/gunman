@@ -3674,19 +3674,32 @@ function fxResize(){if(!fxCanvas||!scene)return;FX.dpr=Math.min(2,window.deviceP
 window.addEventListener('resize',fxResize);fxResize();
 function fxClear(){FX.list.length=0;if(fxCtx)fxCtx.clearRect(0,0,FX.w,FX.h);}
 function fxAdd(p){if(!fxCtx||FX.list.length>320)return;FX.list.push(p);if(!FX.raf){FX.last=performance.now();FX.raf=requestAnimationFrame(fxTick);}}
-function fxTick(now){const c=fxCtx;const dt=Math.min(0.05,(now-FX.last)/1000);FX.last=now;c.clearRect(0,0,FX.w,FX.h);const GRAV=1500;
-  FX.list=FX.list.filter(p=>{p.life-=dt;if(p.life<=0)return false;
-    p.vy+=(p.g!==undefined?p.g:GRAV)*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.rot+=p.vr*dt;
-    if(p.bounce&&p.y>p.floor){p.y=p.floor;p.vy*=-0.45;p.vx*=0.7;p.vr*=0.6;if(Math.abs(p.vy)<50)p.bounce=false;}
-    const a=Math.max(0,Math.min(1,p.life/p.fade));c.save();c.globalAlpha=a;c.translate(p.x,p.y);c.rotate(p.rot);
-    if(p.kind==='spark'){c.strokeStyle=p.col;c.lineWidth=Math.max(1,p.s*0.45);c.beginPath();c.moveTo(-p.s,0);c.lineTo(p.s,0);c.stroke();}
-    else if(p.kind==='casing'){c.fillStyle=p.col;c.fillRect(-p.s*0.35,-p.s*0.9,p.s*0.7,p.s*1.8);c.fillStyle='#8a6410';c.fillRect(-p.s*0.35,p.s*0.5,p.s*0.7,p.s*0.4);}
-    else if(p.kind==='muzzle'){const rad=p.s*(0.55+0.85*(p.life/p.total));const rg=c.createRadialGradient(0,0,0,0,0,rad);rg.addColorStop(0,'#fff');rg.addColorStop(0.35,'#ffd040');rg.addColorStop(1,'rgba(255,120,20,0)');c.fillStyle=rg;c.beginPath();c.arc(0,0,rad,0,Math.PI*2);c.fill();}
-    else if(p.kind==='tracer'){const lg=c.createLinearGradient(0,0,p.len,0);lg.addColorStop(0,'rgba(255,220,120,0)');lg.addColorStop(0.65,'rgba(255,235,170,0.9)');lg.addColorStop(1,'#fff');c.strokeStyle=lg;c.lineWidth=p.s;c.lineCap='round';c.beginPath();c.moveTo(0,0);c.lineTo(p.len,0);c.stroke();}
-    else if(p.kind==='ring'){const tt=1-p.life/p.total;const rad=p.r0+p.grow*tt;c.strokeStyle=p.col;c.lineWidth=Math.max(1,p.s*(1-tt));c.beginPath();c.arc(0,0,rad,0,Math.PI*2);c.stroke();}
-    else{c.fillStyle=p.col;c.fillRect(-p.s*0.5,-p.s*0.4,p.s,p.s*0.8);}
-    c.restore();return true;});
-  if(FX.list.length){FX.raf=requestAnimationFrame(fxTick);}else{FX.raf=0;c.clearRect(0,0,FX.w,FX.h);}}
+function fxTick(now){const c=fxCtx;
+  // dtが負にならないようガード（連続ヒット時のrAFタイムスタンプ逆転対策。これが無いとparticleのlifeがtotalを超え、
+  // ringの半径が負になってcanvas.arc()が例外を投げ、以降ずっとFX.rafが再スケジュールされずエフェクトが完全停止する）
+  const dt=Math.max(0,Math.min(0.05,(now-FX.last)/1000));FX.last=now;
+  try{
+    c.clearRect(0,0,FX.w,FX.h);const GRAV=1500;
+    FX.list=FX.list.filter(p=>{
+      try{
+        p.life-=dt;if(p.life<=0)return false;
+        p.vy+=(p.g!==undefined?p.g:GRAV)*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.rot+=p.vr*dt;
+        if(p.bounce&&p.y>p.floor){p.y=p.floor;p.vy*=-0.45;p.vx*=0.7;p.vr*=0.6;if(Math.abs(p.vy)<50)p.bounce=false;}
+        const a=Math.max(0,Math.min(1,p.life/p.fade));c.save();c.globalAlpha=a;c.translate(p.x,p.y);c.rotate(p.rot);
+        if(p.kind==='spark'){c.strokeStyle=p.col;c.lineWidth=Math.max(1,p.s*0.45);c.beginPath();c.moveTo(-p.s,0);c.lineTo(p.s,0);c.stroke();}
+        else if(p.kind==='casing'){c.fillStyle=p.col;c.fillRect(-p.s*0.35,-p.s*0.9,p.s*0.7,p.s*1.8);c.fillStyle='#8a6410';c.fillRect(-p.s*0.35,p.s*0.5,p.s*0.7,p.s*0.4);}
+        else if(p.kind==='muzzle'){const rad=Math.max(0,p.s*(0.55+0.85*(p.life/p.total)));const rg=c.createRadialGradient(0,0,0,0,0,rad);rg.addColorStop(0,'#fff');rg.addColorStop(0.35,'#ffd040');rg.addColorStop(1,'rgba(255,120,20,0)');c.fillStyle=rg;c.beginPath();c.arc(0,0,rad,0,Math.PI*2);c.fill();}
+        else if(p.kind==='tracer'){const lg=c.createLinearGradient(0,0,p.len,0);lg.addColorStop(0,'rgba(255,220,120,0)');lg.addColorStop(0.65,'rgba(255,235,170,0.9)');lg.addColorStop(1,'#fff');c.strokeStyle=lg;c.lineWidth=p.s;c.lineCap='round';c.beginPath();c.moveTo(0,0);c.lineTo(p.len,0);c.stroke();}
+        else if(p.kind==='ring'){const tt=1-p.life/p.total;const rad=Math.max(0,p.r0+p.grow*tt);c.strokeStyle=p.col;c.lineWidth=Math.max(1,p.s*(1-tt));c.beginPath();c.arc(0,0,rad,0,Math.PI*2);c.stroke();}
+        else{c.fillStyle=p.col;c.fillRect(-p.s*0.5,-p.s*0.4,p.s,p.s*0.8);}
+        c.restore();
+      }catch(e){ try{c.restore();}catch(e2){} return false; } // 想定外の例外が起きてもそのパーティクルだけ捨てて描画ループ自体は継続する
+      return true;});
+  }catch(e){ /* clearRect等で予期せぬ例外が出てもfinallyでループ状態は必ず正しく解消される */ }
+  finally{
+    if(FX.list.length){FX.raf=requestAnimationFrame(fxTick);}else{FX.raf=0;try{c.clearRect(0,0,FX.w,FX.h);}catch(e){}}
+  }
+}
 function fxBurst(x,y,combo=0){if(!fxCtx)return;const n=Math.min(26,10+combo*2);
   for(let i=0;i<n;i++){const ang=Math.random()*Math.PI*2,sp=140+Math.random()*260+combo*10;
     const spark=Math.random()<0.45;
