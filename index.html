@@ -2708,7 +2708,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
           <div class="m-table">
             <div class="m-row"><span class="m-badge easy">EASY</span><span>ゆっくり・短い単語のみ。HP8。日本語はローマ字常時表示。</span></div>
             <div class="m-row"><span class="m-badge normal">NORMAL</span><span>標準スピード。HP7。日本語はLv10でうっすら→Lv11かなのみ。</span></div>
-            <div class="m-row"><span class="m-badge hard">HARD</span><span>高速。HP4。日本語は<span class="m-hl">最初からかなのみ</span>。</span></div>
+            <div class="m-row"><span class="m-badge hard">HARD</span><span>高速。HP4。日本語表示は<span class="m-hl">NORMALと同じ</span>（Lv10でうっすら）。</span></div>
           </div>
         </div>
       </div>
@@ -2914,11 +2914,9 @@ body{background:var(--bg);color:var(--text);font-family:'Courier Prime',monospac
 // ═══ 日本語かな表示レベル制御 ═══
 // 0=通常表示, 1=薄表示(fading), 2=非表示(hidden)
 function romaVisibility(level){
-  // HARDは最初からかなのみ
-  if(G.diff==='hard') return 2;
-  // EASY/NORMAL: うっすらのみ維持（かなのみにしない）
+  // EASY/NORMAL/HARD共通: うっすらのみ維持（かなのみにしない）
   if(level<=9)  return 0;
-  return 1; // Lv10以降うっすら維持（EASY/NORMAL共通）
+  return 1; // Lv10以降うっすら維持（全難易度共通）
 }
 function applyRomaVisibility(el, level){
   const w=el.querySelector('.target-word');
@@ -2933,11 +2931,10 @@ function applyRomaVisibility(el, level){
 function showKanaNotify(level){
   const el=document.getElementById('kana-notify');
   if(!el) return;
-  if(level===10 && G.diff!=='hard'){
-    el.innerHTML= G.diff==='easy' ? '🇯🇵 Lv10 ローマ字がうっすら…' : '🇯🇵 Lv10 ローマ字がうっすら…';
-  } else if(false){ // NORMAL/EASYはかなのみ通知なし
+  if(level===10){
+    el.innerHTML='🇯🇵 Lv10 ローマ字がうっすら…';
   } else {
-    return; // Lv7以降は通知なし
+    return; // Lv10以外は通知なし
   }
   el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'), 2800);
@@ -3631,11 +3628,6 @@ function startGame(){
   });
   lane.innerHTML='';fxClear();fxResize();updateSky(1);resetFlame();resetAccDisplay();resetWPM();
   updateHUD();renderHP();hiddenInput.focus();startBGM(G.endless?'E':'B');checkInGameRecord();
-  // HARDの日本語モード: 開始時にかなのみ通知
-  if(G.lang==='jp'&&G.diff==='hard'){
-    const el=document.getElementById('kana-notify');
-    if(el){el.innerHTML='💀 HARD: 最初からかなのみ！';el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
-  }
   spawnTarget();
   G.spawnTimer=setInterval(()=>{
     const c=DIFF[G.diff];
@@ -3774,11 +3766,6 @@ const lvSpeedup=G.diff==='easy'?60:G.diff==='normal'?100:200;
 const advanceMs=Math.max(G.diff==='easy'?7000:G.diff==='normal'?5000:3500,cfg.advanceSec*1000-(G.level-1)*lvSpeedup)+wordTimeBonusMs(word);const baseH=360;const baseW=Math.round(baseH*0.6);const el=document.createElement('div');el.className='target-wrap walking';el.dataset.id=id;el.style.position='absolute';el.style.top='0px';el.style.left='0px';el.style.transformOrigin='center bottom';const wHTML=isJP?`<div class="target-kana">${kana}</div><div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`:`<div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`;el.innerHTML=`<div class="target-svg">${TARGET_SVGS[svgIdx](baseH)}</div><div class="target-timer"><div class="target-timer-bar"></div></div>${wHTML}`;lane.appendChild(el);// JP: ローマ字表示レベル適用
 if(isJP){
   applyRomaVisibility(el, G.level);
-  // HARDのJP: ローマ字エリアを最初から非表示
-  if(G.diff==='hard'){
-    const wEl=el.querySelector('.target-word');
-    if(wEl) wEl.style.display='none';
-  }
 }
 const t={id,word,typed:'',kana,el,advanceMs,startTime:Date.now(),expired:false,laneX,laneIdx,baseH,baseW};G.activeTargets.push(t);
 // JP: かな初期表示（白で初期化）
@@ -3874,19 +3861,12 @@ function updateWordDisplay(t){
   const w=t.el.querySelector('.target-word');
   if(!w)return;
 
-  // HARDの日本語モード: ローマ字エリアは完全非表示
-  if(G.lang==='jp' && G.diff==='hard'){
-    w.style.display='none';
-    updateKanaProgress(t); // かな色変化のみ
-    return;
-  }
-
-  // 通常のローマ字表示更新
+  // 通常のローマ字表示更新（EASY/NORMAL/HARD共通）
   const r=t.word.slice(t.typed.length);
   w.innerHTML=`<span class="typed">${t.typed}</span><span class="cursor"></span><span class="remain">${r}</span>`;
 
-  // JP: かな色変化（NORMAL有効・EASYは無効）
-  if(G.lang==='jp' && t.kana && G.diff==='normal'){
+  // JP: かな色変化（NORMAL・HARDで有効・EASYは無効）
+  if(G.lang==='jp' && t.kana && (G.diff==='normal'||G.diff==='hard')){
     updateKanaProgress(t);
   }
 
@@ -3916,8 +3896,8 @@ function getAccMult(accRatio, diff){
 let _lastWordCompleteTs = 0;
 function onWordComplete(t){
   _lastWordCompleteTs = Date.now();
-  // 完了時かな全文字を金色に（HARDのJP用）
-  if(G.lang==='jp' && t.kana && G.diff==='hard'){
+  // 完了時かな全文字を金色に（NORMAL/HARDのJP用）
+  if(G.lang==='jp' && t.kana && (G.diff==='normal'||G.diff==='hard')){
     t.typed=t.word; // 全打鍵済みに
     updateKanaProgress(t);
     t.typed=''; // 元に戻す（以降の処理に影響しないよう）
@@ -4259,19 +4239,6 @@ function handleDuelChar(ch){
   sfxMiss(); flashScreen();
 }
 function renderDuelWord(){
-  if(D.lang==='jp' && D.diff==='hard'){
-    // HARDのJP: ローマ字非表示・かな色変化のみ
-    duelWordDisp.style.display='none';
-    // かな色変化（duel用）
-    const duelKanaEl=document.getElementById('duel-kana');
-    if(duelKanaEl && D.kana){
-      // 簡易: typed割合でかな文字を色変化
-      const t_tmp={word:D.word,typed:D.typed,kana:D.kana,el:{querySelector:()=>duelKanaEl}};
-      // duel-kanaを直接更新
-      updateDuelKanaProgress(D.typed,D.word,D.kana,duelKanaEl);
-    }
-    return;
-  }
   duelWordDisp.style.display='';
   duelWordDisp.innerHTML=`<span class="typed">${D.typed}</span><span class="cursor"></span><span>${D.word.slice(D.typed.length)}</span>`;
 }
@@ -6846,12 +6813,8 @@ spawnTarget = function() {
   el.dataset.id = id;
   el.style.cssText = 'position:absolute;top:0px;left:0px;transform-origin:center bottom;';
 
-  // HARDの日本語: ローマ字エリアを最初から非表示
-  const hideRoma = isJP && G.diff==='hard';
-  const wordStyle = hideRoma ? ' style="display:none"' : '';
-
   const wHTML = isJP
-    ? `<div class="target-kana">${kana}</div><div class="target-word"${wordStyle}><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`
+    ? `<div class="target-kana">${kana}</div><div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`
     : `<div class="target-word"><span class="typed"></span><span class="cursor"></span><span class="remain">${word}</span></div>`;
 
   el.innerHTML = `
@@ -6861,8 +6824,8 @@ spawnTarget = function() {
   `;
   lane.appendChild(el);
 
-  // JP: ローマ字表示クラス適用（EASY/NORMAL）
-  if(isJP && !hideRoma) applyRomaVisibility(el, G.level);
+  // JP: ローマ字表示クラス適用（EASY/NORMAL/HARD共通）
+  if(isJP) applyRomaVisibility(el, G.level);
 
   const t = {
     id, word, typed:'', kana, el, advanceMs,
